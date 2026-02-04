@@ -19,6 +19,7 @@ import header_img1 from './header-images/header-img1.webp'
 import header_img2 from './header-images/header-img2.jpg'
 import header_img3 from './header-images/header-img3.webp'
 import header_img4 from './header-images/header-img4.jpg'
+import drone_img from './drone-image.png'
 
 export const assets = {
     arrow_icon,
@@ -40,5 +41,6 @@ export const assets = {
         generic: svc_generic
     },
     header_images: [header_img1, header_img2, header_img3, header_img4],
-    company_members_img
+    company_members_img,
+    drone_img
 }

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom"
 import { assets } from "../assets/assets"
 import { AppContext } from "../context/AppContext"
 
+
+
 const Header = () => {
 
   const {userData} = useContext(AppContext)
@@ -16,14 +18,15 @@ const Header = () => {
     }, 6000)
     return ()=> clearInterval(id)
   }, [headerImages.length])
+  
 
   const services = [
     { title: 'Soil Testing', desc: 'Know your soil health',url:'/soil-crop-analysis' },
-    { title: 'Fertilizer Advice', desc: 'Right inputs, right time',url:'/fertilizer-advice' },
+    { title: 'Fertilizers', desc: 'Right inputs, right time',url:'/fertilizers' },
     { title: 'Crop Selection', desc: 'Pick crops for your soil',url:'/crop-selection' },
     { title: 'Market Prices', desc: 'Track market trends',url:'/market-prices' },
     { title: 'Equipments', desc: 'Expert agronomy guidance',url:'/equipments' },
-    { title: 'Insights', desc: 'Weather and risk alerts',url:'/insights' },
+    { title: 'Insights', desc: 'Weather and risk alerts',url:'/whether-insights' },
   ]
 
   return (
@@ -115,6 +118,35 @@ const Header = () => {
             )
           })}
         </div>
+      </div>
+    </section>
+
+    <section
+      className="relative w-full h-screen flex items-center justify-center text-center bg-cover bg-center"
+      style={{
+         backgroundImage: `url(${assets.drone_img})`,
+      }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-white/60"></div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-4xl px-6">
+        <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
+          Discover Modern <br />
+          Farming Solutions with <br />
+          Drone Technology!
+        </h1>
+
+        <p className="text-gray-700 text-base md:text-lg max-w-2xl mx-auto mb-8">
+          We're revolutionizing agriculture with cutting-edge drone technology.
+          Our mission is to provide efficient and eco-friendly pest control
+          services to enhance your crop yields.
+        </p>
+
+        <button className="bg-black text-white px-8 py-3 rounded-full text-lg hover:bg-gray-800 transition duration-300">
+          Get Started
+        </button>
       </div>
     </section>
     </>

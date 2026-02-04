@@ -7,11 +7,11 @@ const FloatingSupport = () => {
   const navigate = useNavigate()
 
   // Hide on customer care page
-  if (location.pathname === '/help') return null
+  if (location.pathname === '/contact') return null
 
   return (
     <button
-      onClick={() => navigate('/help')}
+      onClick={() => navigate('/contact')}
       className="fixed bottom-8 right-8 z-50 group"
       aria-label="Customer Care"
     >
