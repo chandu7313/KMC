@@ -70,10 +70,11 @@ export const verifyOtp = async (req, res) => {
         await user.save();
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
@@ -98,10 +99,11 @@ export const register = async (req, res) => {
         await user.save();
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+        const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
@@ -123,10 +125,11 @@ export const login = async (req, res) => {
         if (!isMatch) return res.json({ success: false, message: "Invalid password" });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+        const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
@@ -138,10 +141,11 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
+        const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
         res.clearCookie('token', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "strict",
         })
         return res.json({ success: true, message: "Logged Out" });
     } catch (error) {
