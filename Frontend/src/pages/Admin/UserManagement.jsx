@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { AppContext } from "../../context/AppContext";
 import { toast } from "react-toastify";
-import { UserPlus, Edit2, Trash2, Key, MapPin, Shield, CheckCircle, X } from "lucide-react";
+import { UserPlus, Edit2, Trash2, Key, MapPin, Shield, CheckCircle, X, Phone } from "lucide-react";
 
 const UserManagement = () => {
     const { backendUrl } = useContext(AppContext);
@@ -17,6 +17,7 @@ const UserManagement = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        phone: '',
         password: '',
         role: 'user',
         district: ''
@@ -45,7 +46,7 @@ const UserManagement = () => {
 
     const handleOpenAdd = () => {
         setModalMode('add');
-        setFormData({ name: '', email: '', password: '', role: 'user', district: '' });
+        setFormData({ name: '', email: '', phone: '', password: '', role: 'user', district: '' });
         setShowModal(true);
     };
 
@@ -55,6 +56,7 @@ const UserManagement = () => {
         setFormData({ 
             name: user.name, 
             email: user.email, 
+            phone: user.phone || '',
             password: '', 
             role: user.role, 
             district: user.district || '' 
@@ -138,6 +140,12 @@ const UserManagement = () => {
                                     <td className="px-6 py-4">
                                         <div className="font-bold text-slate-900">{user.name}</div>
                                         <div className="text-xs text-slate-500">{user.email}</div>
+                                        {user.phone && (
+                                            <div className="flex items-center gap-1 text-[10px] text-green-600 mt-0.5 font-medium">
+                                                <Phone size={10} />
+                                                {user.phone}
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2 mb-1">
@@ -195,7 +203,7 @@ const UserManagement = () => {
                                 <X size={24} />
                             </button>
                         </div>
-                        <form onSubmit={handleSave} className="p-6 space-y-4">
+                        <form onSubmit={handleSave} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Full Name</label>
@@ -206,14 +214,26 @@ const UserManagement = () => {
                                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Email Address</label>
-                                    <input 
-                                        type="email" required
-                                        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Email Address</label>
+                                        <input 
+                                            type="email" required
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Mobile Number</label>
+                                        <input 
+                                            type="tel"
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                                            value={formData.phone}
+                                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                            placeholder="e.g. 9988776655"
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <div className="flex items-center justify-between mb-1">

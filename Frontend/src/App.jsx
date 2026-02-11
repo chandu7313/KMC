@@ -4,7 +4,6 @@ import Login from './pages/Auth/Login'
 import EmailVerify from './pages/Auth/EmailVerify'
 import ResetPassword from './pages/Auth/ResetPassword'
 import SoilTestAndCropAdvice from './pages/Farming/SoilTestAndCropAdvice'
-import Equipments from './pages/Farming/Equipments'
 import Advisor from './pages/Farming/Advisor'
 import NotFoundPage from './pages/General/NotFoundPage'
 import CustomerCare from './pages/Information/CustomerCare'
@@ -13,8 +12,8 @@ import { ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css"; 
 import Packages from './pages/Information/Packages'
 import Blogs from './pages/Information/Blogs'
+import BlogDetail from './pages/Information/BlogDetail'
 import About from './pages/Information/About'
-import Fertilizers from './pages/Farming/Fertilizers'
 import OrchardPlanning from './pages/Farming/OrchardPlanning'
 import SuccessStories from './pages/Information/SuccessStories'
 import Contact from './pages/Information/ContactUs'
@@ -30,6 +29,14 @@ import MarketPriceManagement from './pages/Admin/MarketPriceManagement'
 import BookingManagement from './pages/Admin/BookingManagement'
 import NotificationManagement from './pages/Admin/NotificationManagement'
 import Analytics from './pages/Admin/Analytics'
+import SuccessStoriesManagement from './pages/Admin/SuccessStoriesManagement'
+import BlogsManagement from './pages/Admin/BlogsManagement'
+import FertilizerManagement from './pages/Admin/FertilizerManagement'
+import EquipmentManagement from './pages/Admin/EquipmentManagement'
+import Fertilizers from './pages/Farming/Fertilizers'
+import Equipments from './pages/Farming/Equipments'
+import MyOrders from './pages/Farming/MyOrders'
+import MyEquipmentOrders from './pages/Farming/MyEquipmentOrders'
 
 const App = () => {
   return (
@@ -44,8 +51,11 @@ const App = () => {
         <Route path="/equipments" element={<Equipments/>}/>
         <Route path="/packages" element={<Packages/>}/>
         <Route path="/blogs" element={<Blogs/>}/>
+        <Route path="/blog/:slug" element={<BlogDetail/>}/>
         <Route path="/about" element={<About/>}/>
         <Route path="/fertilizers" element={<Fertilizers/>}/>
+        <Route path="/my-orders" element={<MyOrders/>}/>
+        <Route path="/my-equipment-orders" element={<MyEquipmentOrders/>}/>
         <Route path="/orchard-planning" element={<OrchardPlanning/>}/>
         <Route path="/success-stories" element={<SuccessStories/>}/>
         <Route path="/book-farm-visit" element={<BookFarmVisit/>}/>
@@ -62,6 +72,10 @@ const App = () => {
            <Route path="farmers" element={<FarmerManagement />} />
            <Route path="market" element={<MarketPriceManagement />} />
            <Route path="bookings" element={<BookingManagement />} />
+           <Route path="success-stories" element={<SuccessStoriesManagement />} />
+           <Route path="blogs" element={<BlogsManagement />} />
+           <Route path="fertilizers" element={<FertilizerManagement />} />
+           <Route path="equipments" element={<EquipmentManagement />} />
            <Route path="notifications" element={<NotificationManagement />} />
            <Route path="analytics" element={<Analytics />} />
         </Route>

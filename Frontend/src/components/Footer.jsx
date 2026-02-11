@@ -1,75 +1,129 @@
 import React from 'react'
 import { assets } from "../assets/assets"
+import { 
+    Facebook, 
+    Instagram, 
+    Twitter, 
+    Linkedin, 
+    Mail, 
+    Phone, 
+    MapPin, 
+    ArrowRight,
+    Send,
+    ShieldCheck,
+    Globe
+} from 'lucide-react'
 
 const Footer = () => {
   return (
-    <footer className="mt-12 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 ring-1 ring-black/5">
-      <div className="mx-auto w-[90%] px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2">
-              <img src={assets.agridust_logo} alt="AgriDust" className="w-9 h-9"/>
-              <span className="text-xl font-bold bg-gradient-to-r from-green-700 via-emerald-600 to-lime-500 bg-clip-text text-transparent">AgriDust</span>
+    <footer className="bg-[#1f2d1f] text-white overflow-hidden relative border-t border-white/5">
+      {/* Decorative background element */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-green-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+      
+      <div className="mx-auto w-[90%] px-4 sm:px-6 lg:px-8 py-16 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
+          
+          {/* Brand & Mission Area */}
+          <div className="lg:col-span-4 space-y-8">
+            <div className="flex flex-col items-start leading-none group cursor-pointer">
+                <div className="flex items-center gap-2.5 mb-2">
+                    <img src={assets.agridust_logo || null} alt="Kissan Mithar" className="w-10 h-10 object-contain" />
+                    <span className="text-2xl font-black tracking-tighter text-white">KISSAN</span>
+                </div>
+                <span className="text-[10px] font-black tracking-[0.4em] text-green-500 uppercase ml-12">Mithar</span>
             </div>
-            <p className="mt-3 text-sm text-slate-600 max-w-xs">
-              Empowering farmers with soil insights, market analytics, and expert advisory for sustainable growth.
+            
+            <p className="text-white/50 text-sm leading-relaxed max-w-sm font-medium">
+                Revolutionizing Indian agriculture through precision data, laboratory insights, and a farmer-first ecosystem. Empowering 10k+ growers across 15 states.
             </p>
-          </div>
 
-          {/* Company */}
-          <div>
-            <h4 className="text-sm font-semibold text-slate-900">Company</h4>
-            <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li><a href="#about" className="hover:text-green-700">About Us</a></li>
-              <li><a href="#careers" className="hover:text-green-700">Careers</a></li>
-              <li><a href="#blog" className="hover:text-green-700">Blog</a></li>
-              <li><a href="#contact" className="hover:text-green-700">Contact</a></li>
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 className="text-sm font-semibold text-slate-900">Services</h4>
-            <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li><a href="#soil" className="hover:text-green-700">Soil Testing</a></li>
-              <li><a href="#advisory" className="hover:text-green-700">Crop Advisory</a></li>
-              <li><a href="#market" className="hover:text-green-700">Market Insights</a></li>
-              <li><a href="#weather" className="hover:text-green-700">Weather Alerts</a></li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="text-sm font-semibold text-slate-900">Contact</h4>
-            <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li><span className="font-medium text-slate-800">Email:</span> support@agridust.com</li>
-              <li><span className="font-medium text-slate-800">Phone:</span> +91 90000 00000</li>
-              <li><span className="font-medium text-slate-800">Address:</span> Pune, MH, India</li>
-            </ul>
-
-            {/* Socials */}
-            <div className="mt-4 flex items-center gap-3 text-slate-600">
-              <a href="https://twitter.com" className="hover:text-green-700" aria-label="Twitter">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5"><path d="M19.633 7.997c.013.18.013.36.013.54 0 5.49-4.18 11.81-11.81 11.81-2.35 0-4.53-.69-6.36-1.87.33.04.65.05.99.05 1.95 0 3.75-.66 5.18-1.77a4.167 4.167 0 0 1-3.89-2.88c.26.04.52.07.79.07.38 0 .76-.05 1.11-.15a4.16 4.16 0 0 1-3.34-4.08v-.05c.56.31 1.2.5 1.88.53a4.15 4.15 0 0 1-1.85-3.45c0-.76.2-1.46.56-2.07a11.82 11.82 0 0 0 8.58 4.35c-.06-.31-.09-.64-.09-.97a4.15 4.15 0 0 1 7.18-2.84 8.23 8.23 0 0 0 2.63-1 4.16 4.16 0 0 1-1.83 2.29 8.34 8.34 0 0 0 2.39-.65 8.92 8.92 0 0 1-2.08 2.15z"/></svg>
-              </a>
-              <a href="https://facebook.com" className="hover:text-green-700" aria-label="Facebook">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5"><path d="M13 3h4a1 1 0 0 1 1 1v4h-3a1 1 0 0 0-1 1v3h4l-1 4h-3v6h-4v-6H7v-4h3V9a4 4 0 0 1 4-4z"/></svg>
-              </a>
-              <a href="https://instagram.com" className="hover:text-green-700" aria-label="Instagram">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6-1.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
-              </a>
+            <div className="flex items-center gap-4">
+                {[
+                    { icon: Facebook, url: '#' },
+                    { icon: Instagram, url: '#' },
+                    { icon: Twitter, url: '#' },
+                    { icon: Linkedin, url: '#' }
+                ].map((social, i) => (
+                    <a 
+                        key={i} 
+                        href={social.url} 
+                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:bg-green-600 hover:text-white hover:scale-110 transition-all duration-300"
+                    >
+                        <social.icon size={18} />
+                    </a>
+                ))}
             </div>
           </div>
+
+          {/* Quick Links */}
+          <div className="lg:col-span-2 space-y-6">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-green-500">Platform</h4>
+            <ul className="space-y-4 text-sm font-medium text-white/60">
+              <li><a href="/soil-crop-analysis" className="hover:text-white transition-colors">Soil Analytics</a></li>
+              <li><a href="/fertilizers" className="hover:text-white transition-colors">Digital Store</a></li>
+              <li><a href="/market-prices" className="hover:text-white transition-colors">Market Pulse</a></li>
+              <li><a href="/equipments" className="hover:text-white transition-colors">Machinery</a></li>
+            </ul>
+          </div>
+
+          {/* Support Links */}
+          <div className="lg:col-span-2 space-y-6">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-green-500">Company</h4>
+            <ul className="space-y-4 text-sm font-medium text-white/60">
+              <li><a href="/about" className="hover:text-white transition-colors">Our Story</a></li>
+              <li><a href="/blogs" className="hover:text-white transition-colors">Knowledge Hub</a></li>
+              <li><a href="/success-stories" className="hover:text-white transition-colors">Impact Stories</a></li>
+              <li><a href="/contact" className="hover:text-white transition-colors">Get Help</a></li>
+            </ul>
+          </div>
+
+          {/* Newsletter / CTA */}
+          <div className="lg:col-span-4 space-y-8">
+            <div className="bg-white/5 rounded-3xl p-8 border border-white/10 space-y-6">
+                <div className="space-y-2">
+                    <h4 className="text-xl font-bold text-white tracking-tight">Stay in the Loop</h4>
+                    <p className="text-white/40 text-xs font-medium">Get the latest crop insights and market trends delivered weekly.</p>
+                </div>
+                
+                <div className="relative">
+                    <input 
+                        type="email" 
+                        placeholder="Your email address" 
+                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-5 text-sm outline-none focus:border-green-600 transition-colors"
+                    />
+                    <button className="absolute right-2 top-2 bottom-2 bg-green-600 hover:bg-green-500 text-white px-4 rounded-lg transition-colors flex items-center justify-center">
+                        <ArrowRight size={18} />
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-6 px-4">
+                <div className="flex items-center gap-2.5">
+                    <ShieldCheck size={20} className="text-green-500" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40 leading-none">Safe & Secure Payment</span>
+                </div>
+                <div className="w-px h-4 bg-white/10"></div>
+                <div className="flex items-center gap-2.5">
+                    <Globe size={20} className="text-green-500" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40 leading-none">PAN India Availability</span>
+                </div>
+            </div>
+          </div>
+
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 pt-5">
-          <p className="text-xs text-slate-600">© {new Date().getFullYear()} AgriDust. All rights reserved.</p>
-          <div className="flex items-center gap-4 text-xs text-slate-600">
-            <a href="#privacy" className="hover:text-green-700">Privacy Policy</a>
-            <span className="text-slate-300">|</span>
-            <a href="#terms" className="hover:text-green-700">Terms of Service</a>
+        {/* Bottom Bar */}
+        <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-xs font-medium text-white/30 tracking-wide text-center">
+            © {new Date().getFullYear()} KISSAN Mithar (KMC). Designed for Indian Farmers. 
+            <span className="mx-2 text-white/10">|</span> 
+            Proudly "Made in India" 🇮🇳
+          </p>
+          
+          <div className="flex items-center gap-8">
+            <a href="/privacy" className="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-colors">Privacy</a>
+            <a href="/terms" className="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-colors">Terms</a>
+            <a href="/security" className="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-colors">Security</a>
           </div>
         </div>
       </div>

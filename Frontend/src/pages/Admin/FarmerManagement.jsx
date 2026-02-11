@@ -2,6 +2,7 @@ import { useContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { AppContext } from "../../context/AppContext";
 import { toast } from "react-toastify";
+import { Phone } from "lucide-react";
 
 const FarmerManagement = () => {
     const { backendUrl } = useContext(AppContext);
@@ -19,7 +20,7 @@ const FarmerManagement = () => {
     const [selectedFarmer, setSelectedFarmer] = useState(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editData, setEditData] = useState({ name: '', email: '', district: '', crops: '', fieldOfficer: '' });
+    const [editData, setEditData] = useState({ name: '', email: '', phone: '', district: '', crops: '', fieldOfficer: '' });
 
     const fetchFarmers = useCallback(async () => {
         try {
@@ -103,6 +104,7 @@ const FarmerManagement = () => {
         setEditData({
             name: farmer.name,
             email: farmer.email,
+            phone: farmer.phone || '',
             district: farmer.district,
             crops: farmer.crops.join(', '),
             fieldOfficer: farmer.fieldOfficer?._id || ''
@@ -161,7 +163,15 @@ const FarmerManagement = () => {
                                 <tr><td colSpan="6" className="text-center py-10">No farmers found</td></tr>
                             ) : farmers.map((farmer) => (
                                 <tr key={farmer._id} className="hover:bg-slate-50 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-slate-900">{farmer.name}</td>
+                                    <td className="px-6 py-4">
+                                        <div className="font-medium text-slate-900">{farmer.name}</div>
+                                        {farmer.phone && (
+                                            <div className="flex items-center gap-1 text-[10px] text-green-600 mt-0.5">
+                                                <Phone size={10} />
+                                                {farmer.phone}
+                                            </div>
+                                        )}
+                                    </td>
                                     <td className="px-6 py-4">{farmer.district}</td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-wrap gap-1">
@@ -252,6 +262,10 @@ const FarmerManagement = () => {
                                 <span className="col-span-2 font-medium">{selectedFarmer.name}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
+                                <span className="text-slate-500">Mobile:</span>
+                                <span className="col-span-2 font-medium text-green-600">{selectedFarmer.phone || 'N/A'}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
                                 <span className="text-slate-500">Email:</span>
                                 <span className="col-span-2 font-medium">{selectedFarmer.email}</span>
                             </div>
@@ -290,7 +304,7 @@ const FarmerManagement = () => {
                     <div className="bg-white rounded-2xl w-full max-w-md p-6 relative">
                         <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">✕</button>
                         <h3 className="text-xl font-bold mb-4">Edit Farmer Info</h3>
-                        <div className="space-y-4">
+                        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
                             <div>
                                 <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Name</label>
                                 <input 
@@ -300,14 +314,26 @@ const FarmerManagement = () => {
                                     onChange={(e) => setEditData({...editData, name: e.target.value})}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Email</label>
-                                <input 
-                                    type="email" 
-                                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
-                                    value={editData.email}
-                                    onChange={(e) => setEditData({...editData, email: e.target.value})}
-                                />
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Email</label>
+                                    <input 
+                                        type="email" 
+                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+                                        value={editData.email}
+                                        onChange={(e) => setEditData({...editData, email: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Mobile</label>
+                                    <input 
+                                        type="tel" 
+                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+                                        value={editData.phone}
+                                        onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                                        placeholder="Mobile Number"
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">District</label>

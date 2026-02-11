@@ -2,11 +2,19 @@ import { useContext, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { assets } from "../assets/assets"
 import { AppContext } from "../context/AppContext"
-
-
+import { 
+  FlaskConical, 
+  Sprout, 
+  Map, 
+  BarChart3, 
+  Wrench, 
+  CloudSun,
+  ChevronRight,
+  Zap,
+  TrendingUp
+} from "lucide-react"
 
 const Header = () => {
-
   const {userData} = useContext(AppContext)
   const navigate = useNavigate()
   const [headerIndex, setHeaderIndex] = useState(0)
@@ -19,99 +27,114 @@ const Header = () => {
     return ()=> clearInterval(id)
   }, [headerImages.length])
   
-
   const services = [
-    { title: 'Soil Testing', desc: 'Know your soil health',url:'/soil-crop-analysis' },
-    { title: 'Fertilizers', desc: 'Right inputs, right time',url:'/fertilizers' },
-    { title: 'Crop Selection', desc: 'Pick crops for your soil',url:'/crop-selection' },
-    { title: 'Market Prices', desc: 'Track market trends',url:'/market-prices' },
-    { title: 'Equipments', desc: 'Expert agronomy guidance',url:'/equipments' },
-    { title: 'Insights', desc: 'Weather and risk alerts',url:'/whether-insights' },
+    { title: 'Soil Testing', desc: 'Know your soil health', url: '/soil-crop-analysis', icon: FlaskConical, color: 'emerald' },
+    { title: 'Fertilizers', desc: 'Right inputs, right time', url: '/fertilizers', icon: Sprout, color: 'green' },
+    { title: 'Crop Selection', desc: 'Pick crops for your soil', url: '/crop-selection', icon: Map, color: 'lime' },
+    { title: 'Market Prices', desc: 'Track market trends', url: '/market-prices', icon: BarChart3, color: 'amber' },
+    { title: 'Equipments', desc: 'Expert machinery guidance', url: '/equipments', icon: Wrench, color: 'slate' },
+    { title: 'Insights', desc: 'Weather and risk alerts', url: '/whether-insights', icon: CloudSun, color: 'sky' },
   ]
 
   return (
     <>
-    <section className="mx-auto w-[90%] px-4 sm:px-6 lg:px-8 mt-28">
-      <div className="relative overflow-hidden rounded-2xl ring-1 ring-black/10 shadow-sm">
+    <section className="mx-auto w-[90%] px-4 sm:px-6 lg:px-8 mt-24">
+      <div className="relative overflow-hidden rounded-[32px] shadow-2xl shadow-green-900/10 border border-black/5">
         {/* Background image with gradient overlay */}
         <div className="absolute inset-0">
-          <img src={headerImages[headerIndex]} alt="Fields" className="h-full w-full object-cover transition-opacity duration-700"/>
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"/>
+          <img src={headerImages[headerIndex] || null} alt="Fields" className="h-full w-full object-cover transition-opacity duration-1000 scale-105 animate-slow-pan"/>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"/>
         </div>
 
         {/* Content */}
-        <div className="relative p-6 sm:p-10 lg:p-14">
-          <div className="max-w-xl">
-            <div className="mb-3 inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80 ring-1 ring-white/20 backdrop-blur">
-              Hey {userData ? userData.name : 'Farmer'} <img src={assets.hand_wave} alt="" className="ml-2 w-4 h-4"/>
+        <div className="relative p-8 sm:p-12 lg:p-16">
+          <div className="max-w-2xl space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-white/90 ring-1 ring-white/20 backdrop-blur-md">
+              <Zap size={12} className="text-yellow-400" /> Hey {userData ? userData.name : 'Farmer'} <img src={assets.hand_wave || null} alt="" className="ml-1 w-3.5 h-3.5"/>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold leading-tight text-white">
-              Data-Driven Farming for a Prosperous Future
+            <h1 className="text-3xl sm:text-5xl font-serif font-bold leading-[1.1] text-white tracking-tight">
+              Data-Driven Farming for a <span className="text-green-400 italic">Prosperous Future.</span>
             </h1>
-            <p className="mt-3 sm:mt-4 text-sm sm:text-base text-white/90 max-w-lg">
-              Unlock your field potential with smart advisory, market insights, and soil health.
+            <p className="text-base text-white/70 max-w-lg font-medium leading-relaxed">
+              Unlock your field potential with smart advisory, real-time market insights, and precision soil health mapping.
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button className="inline-flex items-center justify-center rounded-full bg-green-600 px-6 py-2.5 text-white shadow-sm hover:bg-green-700">
-                Get Started
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <button onClick={()=>navigate('/soil-crop-analysis')} className="bg-green-600 hover:bg-green-500 text-white px-7 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-green-900/40 transition-all active:scale-95">
+                Start Analysis
               </button>
-              <button className="inline-flex items-center justify-center rounded-full px-6 py-2.5 text-white ring-1 ring-white/60 hover:bg-white/10">
+              <button onClick={()=>navigate('/about')} className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-7 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all backdrop-blur-md">
                 Learn More
               </button>
             </div>
           </div>
 
           {/* Decorative slider dots */}
-          <div className="mt-10 flex items-center gap-2">
-            <span className="h-1.5 w-6 rounded-full bg-white/90"/>
-            <span className="h-1.5 w-1.5 rounded-full bg-white/60"/>
-            <span className="h-1.5 w-1.5 rounded-full bg-white/60"/>
-            <span className="h-1.5 w-1.5 rounded-full bg-white/60"/>
+          <div className="mt-12 flex items-center gap-2.5">
+            {headerImages.map((_, i) => (
+              <span key={i} className={`h-1 rounded-full transition-all duration-500 ${i === headerIndex ? 'w-8 bg-green-400' : 'w-1.5 bg-white/20'}`}/>
+            ))}
           </div>
         </div>
       </div>
     </section>
 
-    {/* Our Services */}
-    
-    
-    <section className="mx-auto w-[90%] px-4 sm:px-6 lg:px-8 mt-8">
-      <div className="rounded-2xl bg-white ring-1 ring-black/10 shadow-sm p-6 sm:p-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">Our Services</h2>
-          <button className="text-sm font-medium text-green-700 hover:text-green-800">Learn More</button>
+    {/* --- OUR SERVICES --- */}
+    <section className="mx-auto w-[90%] px-4 sm:px-6 lg:px-8 mt-10 mb-16">
+      <div className="space-y-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-100 pb-6">
+            <div className="space-y-1">
+                <div className="text-[9px] font-black text-green-700 uppercase tracking-[0.3em]">Excellence in Agriculture</div>
+                <h2 className="text-3xl font-serif font-bold text-[#1f2d1f]">Our Core Services</h2>
+            </div>
+            <p className="text-slate-400 font-medium max-w-sm text-xs">
+                A complete ecosystem of precision tools designed to maximize your yield and simplify your operations.
+            </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((s, idx) => {
             const imgSrc =
               s.title === 'Soil Testing' ? assets.services_images.soil :
-              s.title === 'Fertilizer Advice' ? assets.services_images.fertilizers :
+              s.title === 'Fertilizers' ? assets.services_images.fertilizers :
               s.title === 'Crop Selection' ? assets.services_images.crop_selection :
               s.title === 'Market Prices' ? assets.services_images.market :
               s.title === 'Insights' ? assets.services_images.weather :
               assets.services_images.generic
+
             return (
-              <div key={idx} className="rounded-xl ring-1 ring-slate-200 bg-white p-0 hover:shadow-md transition-shadow">
-                <div className="flex items-stretch justify-between gap-0">
-                  <div className="min-w-0 p-5">
-                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 text-green-700 ring-1 ring-green-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
-                        <path d="M12 13a5 5 0 0 1-5-5V7a1 1 0 0 1 1-1h1a5 5 0 0 1 5 5v7a1 1 0 1 1-2 0v-5Z"/>
-                        <path d="M19 5c-3.866 0-7 3.134-7 7 3.866 0 7-3.134 7-7Z"/>
-                      </svg>
+              <div 
+                key={idx} 
+                onClick={() => navigate(s.url)}
+                className="group relative bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer"
+              >
+                <div className="flex flex-col h-full">
+                  {/* Top Image Part */}
+                  <div className="relative h-40 overflow-hidden">
+                    <img src={imgSrc || null} alt={s.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-white/5 to-transparent" />
+                    
+                    {/* Floating Icon Badge */}
+                    <div className="absolute bottom-3 left-6">
+                        <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center text-green-700 shadow-lg shadow-green-900/5 border border-slate-50 group-hover:bg-green-700 group-hover:text-white transition-colors duration-500">
+                            <s.icon size={22} strokeWidth={1.5} />
+                        </div>
                     </div>
-                    <h3 className="mt-2 text-base font-semibold text-slate-900">{s.title}</h3>
-                    <p className="mt-1 text-sm text-slate-600">{s.desc}</p>
-                    <button onClick={()=>navigate(s.url)} className="cursor-pointer mt-3 inline-flex items-center text-sm font-medium text-green-700 hover:text-green-800">
-                      Explore
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="ml-1 h-4 w-4">
-                        <path fillRule="evenodd" d="M4.5 12a.75.75 0 0 1 .75-.75h11.69l-3.72-3.72a.75.75 0 1 1 1.06-1.06l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06l3.72-3.72H5.25A.75.75 0 0 1 4.5 12z" clipRule="evenodd" />
-                      </svg>
-                    </button>
                   </div>
-                  <div className="relative shrink-0 w-40 sm:w-52 self-stretch overflow-hidden rounded-r-xl">
-                    <img src={imgSrc} alt="" className="h-full w-full object-cover"/>
-                    <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-white to-transparent opacity-70"/>
+
+                  {/* Content Part */}
+                  <div className="p-6 pt-4 space-y-3">
+                    <div className="space-y-0.5">
+                        <h3 className="text-xl font-black text-[#1f2d1f] group-hover:text-green-700 transition-colors">
+                            {s.title}
+                        </h3>
+                        <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                            {s.desc}
+                        </p>
+                    </div>
+
+                    <div className="pt-2 flex items-center gap-2 text-green-700 font-black text-[9px] uppercase tracking-widest group-hover:gap-3 transition-all">
+                      Explore Service <ChevronRight size={12} strokeWidth={3} />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -121,34 +144,85 @@ const Header = () => {
       </div>
     </section>
 
-    <section
-      className="relative w-full h-screen flex items-center justify-center text-center bg-cover bg-center"
-      style={{
-         backgroundImage: `url(${assets.drone_img})`,
-      }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-white/60"></div>
+    {/* --- DRONE TECHNOLOGY SECTION --- */}
+    <section className="relative w-full min-h-[80vh] flex items-center justify-center overflow-hidden">
+        {/* Full screen background */}
+        <div className="absolute inset-0">
+            <img src={assets.drone_img || null} className="w-full h-full object-cover scale-105 animate-slow-pan" alt="Drone Agri" />
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
+        </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-4xl px-6">
-        <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
-          Discover Modern <br />
-          Farming Solutions with <br />
-          Drone Technology!
-        </h1>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center py-16">
+            <div className="space-y-8">
+                <div className="space-y-4">
+                    <div className="inline-flex items-center gap-2 text-green-700 font-black text-[9px] uppercase tracking-[0.3em]">
+                        <Zap size={12} /> Precision Agriculture
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-serif font-bold text-[#1f2d1f] tracking-tight leading-[1.1]">
+                        Modern Problems. <br/>
+                        <span className="text-green-700 italic">Drone Solutions.</span>
+                    </h2>
+                    <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-lg">
+                        KMC is revolutionizing crop protection through autonomous aerial systems, delivering 3x faster pest control with 90% water saving.
+                    </p>
+                </div>
 
-        <p className="text-gray-700 text-base md:text-lg max-w-2xl mx-auto mb-8">
-          We're revolutionizing agriculture with cutting-edge drone technology.
-          Our mission is to provide efficient and eco-friendly pest control
-          services to enhance your crop yields.
-        </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <button className="bg-[#1f2d1f] hover:bg-black text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95">
+                        Get Demo
+                    </button>
+                    <button className="bg-white border border-slate-200 hover:bg-slate-50 px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all">
+                        View Pricing
+                    </button>
+                </div>
 
-        <button className="bg-black text-white px-8 py-3 rounded-full text-lg hover:bg-gray-800 transition duration-300">
-          Get Started
-        </button>
-      </div>
+                <div className="grid grid-cols-2 gap-8 pt-8 border-t border-slate-200/50">
+                    <div>
+                        <div className="text-2xl font-black text-[#1f2d1f]">2000+</div>
+                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Acres Covered</div>
+                    </div>
+                    <div>
+                        <div className="text-2xl font-black text-[#1f2d1f]">90%</div>
+                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Water Saved</div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="relative group">
+                <div className="aspect-square rounded-[64px] overflow-hidden shadow-2xl border-[12px] border-white/50 relative">
+                    <img src={assets.drone_img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2s]" alt="Drone Tech" />
+                    <div className="absolute inset-0 bg-green-900/10 mix-blend-overlay"></div>
+                </div>
+                {/* Floating Badge */}
+                <div className="absolute -bottom-8 -left-8 bg-white p-6 rounded-[32px] shadow-2xl border border-slate-50 animate-bounce-slow max-w-[200px]">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700">
+                            <TrendingUp size={16}/>
+                        </div>
+                        <span className="font-black text-[#1f2d1f] text-xs uppercase">Smart Spraying</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium">Precision nozzles ensure 0% wastage of expensive nutrients.</p>
+                </div>
+            </div>
+        </div>
     </section>
+
+    <style jsx="true">{`
+        @keyframes slow-pan {
+            0% { transform: scale(1.05) translate(0, 0); }
+            100% { transform: scale(1.15) translate(-1%, -1%); }
+        }
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .animate-slow-pan {
+            animation: slow-pan 30s infinite alternate linear;
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 5s infinite ease-in-out;
+        }
+    `}</style>
     </>
   )
 }

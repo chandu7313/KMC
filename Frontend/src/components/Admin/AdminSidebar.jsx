@@ -8,8 +8,13 @@ const AdminSidebar = () => {
     { to: "/admin/farmers", label: "Farmer Management", icon: "🚜" },
     { to: "/admin/market", label: "Market Prices", icon: "📈" },
     { to: "/admin/bookings", label: "Bookings", icon: "📅" },
+    { to: "/admin/success-stories", label: "Success Stories", icon: "🌟" },
+    { to: "/admin/blogs", label: "Blog Articles", icon: "📝" },
+    { to: "/admin/fertilizers", label: "Fertilizer Mgmt", icon: "🌱" },
+    { to: "/admin/equipments", label: "Equipment Mgmt", icon: "🚜" },
     { to: "/admin/notifications", label: "Notifications", icon: "🔔" },
     { to: "/admin/analytics", label: "Analytics", icon: "📈" },
+    { to: "/", label: "Go to Home", icon: "🏠" },
     // Add more admin links here
   ];
 
