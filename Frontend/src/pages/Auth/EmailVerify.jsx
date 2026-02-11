@@ -2,10 +2,10 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import React, { useContext, useEffect } from "react"
-import { assets } from "../assets/assets"
+import { assets } from "../../assets/assets"
 import {useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import { AppContext } from "../context/AppContext"
+import { AppContext } from "../../context/AppContext"
 import axios from "axios"
 
 

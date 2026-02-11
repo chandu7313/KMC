@@ -1,6 +1,6 @@
 import React from 'react'
-import Navbar from '../components/Navbar'
-import { assets } from '../assets/assets'
+import Navbar from '../../components/Navbar'
+import { assets } from '../../assets/assets'
 import { useNavigate } from 'react-router-dom'
 
 const NotFoundPage = () => {

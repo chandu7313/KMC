@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom"
-import { assets } from "../assets/assets"
+import { assets } from "../../assets/assets"
 import React, {useContext, useState } from "react"
-import { AppContext } from "../context/AppContext"
+import { AppContext } from "../../context/AppContext"
 import axios from "axios"
 import { toast } from "react-toastify"
 

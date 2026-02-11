@@ -1,28 +1,46 @@
 import { RefreshCcw, ArrowUp, ArrowDown } from "lucide-react";
-import { useState } from "react";
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
-
-const marketData = [
-  { crop: "Cotton", variety: "J-34", district: "Rajkot", unit: "Quintal", price: 6200, change: 3.8 },
-  { crop: "Cotton", variety: "Shankar-6", district: "Nagpur", unit: "Quintal", price: 6050, change: 2.1 },
-  { crop: "Groundnut", variety: "TG-37A", district: "Junagadh", unit: "Quintal", price: 5800, change: 2.1 },
-  { crop: "Maize", variety: "Yellow", district: "Davangere", unit: "Quintal", price: 2100, change: -0.8 },
-  { crop: "Mustard", variety: "RH-30", district: "Alwar", unit: "Quintal", price: 5200, change: 4.2 },
-  { crop: "Pulses", variety: "Chana", district: "Latur", unit: "Quintal", price: 4800, change: 1.2 },
-  { crop: "Rice", variety: "Sona Masoori", district: "Guntur", unit: "Quintal", price: 3200, change: 0.5 },
-  { crop: "Rice", variety: "Basmati", district: "Karnal", unit: "Quintal", price: 3800, change: -1.2 },
-  { crop: "Soybean", variety: "JS-9560", district: "Dewas", unit: "Quintal", price: 4100, change: 0 },
-  { crop: "Sugarcane", variety: "Co-0238", district: "Muzaffarnagar", unit: "Quintal", price: 350, change: 1.5 },
-  { crop: "Wheat", variety: "Sharbati", district: "Indore", unit: "Quintal", price: 2450, change: 2.5 },
-];
+import { useState, useEffect, useContext, useCallback } from "react";
+import axios from "axios";
+import { AppContext } from "../../context/AppContext";
+import Footer from "../../components/Footer";
+import Navbar from "../../components/Navbar";
+import { toast } from "react-toastify";
 
 const MarketPrices = () => {
+  const { backendUrl } = useContext(AppContext);
+  const [prices, setPrices] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [districtFilter, setDistrictFilter] = useState("");
+  const [districts, setDistricts] = useState([]);
 
-  const filtered = marketData.filter((item) =>
-    item.crop.toLowerCase().includes(search.toLowerCase())
-  );
+  const fetchPrices = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = {
+        crop: search,
+        district: districtFilter === "All Districts" ? "" : districtFilter
+      };
+      const { data } = await axios.get(`${backendUrl}/api/market`, { params });
+      if (data.success) {
+        setPrices(data.prices);
+        
+        // Extract unique districts for the filter if not already set
+        if (districts.length === 0) {
+            const uniqueDistricts = [...new Set(data.prices.map(p => p.district))];
+            setDistricts(uniqueDistricts);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching market prices", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [backendUrl, search, districtFilter, districts.length]);
+
+  useEffect(() => {
+    fetchPrices();
+  }, [fetchPrices]);
 
   return (
     <>
@@ -49,16 +67,20 @@ const MarketPrices = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <select className="border border-slate-200 rounded-xl px-4 py-3 outline-none">
-          <option>All Crops</option>
-        </select>
-
-        <select className="border border-slate-200 rounded-xl px-4 py-3 outline-none">
+        <select 
+            className="border border-slate-200 rounded-xl px-4 py-3 outline-none"
+            value={districtFilter}
+            onChange={(e) => setDistrictFilter(e.target.value)}
+        >
           <option>All Districts</option>
+          {districts.map(d => <option key={d} value={d}>{d}</option>)}
         </select>
 
-        <button className="flex items-center gap-2 border-2 border-green-700 text-green-700 px-6 py-3 rounded-xl font-semibold hover:bg-green-700 hover:text-white transition">
-          <RefreshCcw size={18} />
+        <button 
+            onClick={fetchPrices}
+            className="flex items-center gap-2 border-2 border-green-700 text-green-700 px-6 py-3 rounded-xl font-semibold hover:bg-green-700 hover:text-white transition"
+        >
+          <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />
           Refresh
         </button>
       </div>
@@ -80,8 +102,12 @@ const MarketPrices = () => {
           </thead>
 
           <tbody className="divide-y divide-slate-100">
-            {filtered.map((item, index) => (
-              <tr key={index} className="hover:bg-[#faf9f3] transition">
+            {loading ? (
+                <tr><td colSpan="7" className="text-center py-20 text-slate-400">Fetching latest prices...</td></tr>
+            ) : prices.length === 0 ? (
+                <tr><td colSpan="7" className="text-center py-20 text-slate-400">No market data available</td></tr>
+            ) : prices.map((item, index) => (
+              <tr key={item._id} className="hover:bg-[#faf9f3] transition">
                 <td className="px-6 py-4 font-medium">{item.crop}</td>
                 <td className="px-6 py-4">{item.variety}</td>
                 <td className="px-6 py-4">{item.district}</td>
@@ -105,7 +131,7 @@ const MarketPrices = () => {
                   )}
                 </td>
                 <td className="px-6 py-4 text-slate-600">
-                  3/2/2026
+                  {new Date(item.lastUpdated).toLocaleDateString()}
                 </td>
               </tr>
             ))}
