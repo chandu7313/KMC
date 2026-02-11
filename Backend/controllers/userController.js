@@ -1,29 +1,31 @@
 import userModel from '../models/userModel.js'
 
 
-export const getUserData=async (req,res)=>{
+export const getUserData = async (req, res) => {
 
-    try{
+    try {
 
-        const {userId} =req.body
+        const { userId } = req.body
 
-        const user=await userModel.findById(userId)
+        const user = await userModel.findById(userId)
 
-        if (!user){
-            return res.json({success:false,message:"User not found"})
+        if (!user) {
+            return res.json({ success: false, message: "User not found" })
         }
 
         res.json({
-            success:true,
-            userData:{
-                name:user.name,
-                isAccountVerified:user.isAccountVerified
+            success: true,
+            userData: {
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                isAccountVerified: user.isAccountVerified
             }
         })
 
 
-    }catch(error){
-        res.json({success:false,message:error.message})
+    } catch (error) {
+        res.json({ success: false, message: error.message })
     }
 
 }

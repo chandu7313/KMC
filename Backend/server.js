@@ -4,14 +4,20 @@ import 'dotenv/config';
 import cookieParser from "cookie-parser";
 
 import connectDB from './config/mongodb.js'
+import connectCloudinary from "./config/cloudinary.js";
 import authRouter from './routes/authRoutes.js'
 import userRouter from "./routes/userRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
 import marketRouter from "./routes/marketRoutes.js";
+import blogRouter from "./routes/blogRoutes.js";
+import successRouter from "./routes/successRoutes.js";
+import fertilizerRouter from "./routes/fertilizerRoutes.js";
+import equipmentRouter from "./routes/equipmentRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
 connectDB();
+connectCloudinary();
 
 const allowedOrigins = ['http://localhost:5173']
 
@@ -26,5 +32,9 @@ app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/market', marketRouter)
+app.use('/api/blog', blogRouter)
+app.use('/api/success', successRouter)
+app.use('/api/fertilizer', fertilizerRouter)
+app.use('/api/equipment', equipmentRouter)
 
 app.listen(port, () => console.log(`Server started on PORT:${port}`));

@@ -3,7 +3,10 @@ import mongoose from 'mongoose'
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String }, // Optional for mobile-only users, but required for email users
+    phone: { type: String, unique: true, sparse: true }, // sparse allows multiple nulls if unique is true
+    otp: { type: String, default: '' },
+    otpExpireAt: { type: Number, default: 0 },
     verifyOtp: { type: String, default: '' },
     verifyOtpExpireAt: { type: Number, default: 0 },
     isAccountVerified: { type: Boolean, default: false },

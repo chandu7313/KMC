@@ -88,7 +88,7 @@ export const getAllUsers = async (req, res) => {
     }
 }
 
-// Update User Role
+// Update User Role - Keep for compatibility if needed, but updateUser is more complete
 export const updateUserRole = async (req, res) => {
     try {
         const { userId, role } = req.body;
@@ -181,11 +181,12 @@ export const updateFarmerStatus = async (req, res) => {
 export const updateFarmerInfo = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, email, district, crops, fieldOfficer } = req.body;
+        const { name, email, phone, district, crops, fieldOfficer } = req.body;
 
         const updateData = {};
         if (name) updateData.name = name;
         if (email) updateData.email = email;
+        if (phone) updateData.phone = phone;
         if (district) updateData.district = district;
         if (crops) updateData.crops = crops;
         if (fieldOfficer !== undefined) updateData.fieldOfficer = fieldOfficer || null;
@@ -208,7 +209,7 @@ export const updateFarmerInfo = async (req, res) => {
 export const getBookings = async (req, res) => {
     try {
         const bookings = await bookingModel.find({})
-            .populate('farmerId', 'name email district')
+            .populate('farmerId', 'name email district phone')
             .populate('assignedOfficer', 'name email')
             .sort({ createdAt: -1 });
 
@@ -230,7 +231,7 @@ export const updateBooking = async (req, res) => {
         if (paymentStatus) updateData.paymentStatus = paymentStatus;
 
         const booking = await bookingModel.findByIdAndUpdate(id, updateData, { new: true })
-            .populate('farmerId', 'name email')
+            .populate('farmerId', 'name email phone')
             .populate('assignedOfficer', 'name email');
 
         if (!booking) {
@@ -365,7 +366,7 @@ export const getAnalytics = async (req, res) => {
 // Add New User (Admin/Field Officer)
 export const addUser = async (req, res) => {
     try {
-        const { name, email, password, role, district } = req.body;
+        const { name, email, phone, password, role, district } = req.body;
 
         if (!name || !email || !password || !role) {
             return res.json({ success: false, message: "Missing Details" });
@@ -373,7 +374,12 @@ export const addUser = async (req, res) => {
 
         const existingUser = await userModel.findOne({ email });
         if (existingUser) {
-            return res.json({ success: false, message: "User already exists" });
+            return res.json({ success: false, message: "User with this email already exists" });
+        }
+
+        const existingPhone = await userModel.findOne({ phone });
+        if (phone && existingPhone) {
+            return res.json({ success: false, message: "User with this phone number already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -381,6 +387,7 @@ export const addUser = async (req, res) => {
         const newUser = new userModel({
             name,
             email,
+            phone: phone || '',
             password: hashedPassword,
             role,
             district: district || '',
@@ -399,11 +406,12 @@ export const addUser = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, email, role, district, password } = req.body;
+        const { name, email, phone, role, district, password } = req.body;
 
         const updateData = {};
         if (name) updateData.name = name;
         if (email) updateData.email = email;
+        if (phone !== undefined) updateData.phone = phone;
         if (role) updateData.role = role;
         if (district !== undefined) updateData.district = district;
 
