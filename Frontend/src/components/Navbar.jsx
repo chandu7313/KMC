@@ -1,7 +1,10 @@
-import { useNavigate, NavLink } from "react-router-dom";
-import { assets } from "../assets/assets";
 import { useContext, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { assets } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
+import { LanguageContext } from "../context/LanguageContext";
+import { FarmerModeContext } from "../context/FarmerModeContext";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { 
@@ -20,13 +23,17 @@ import {
   Wrench,
   Map,
   TreeDeciduous,
-  Zap
+  Zap,
+  Tractor
 } from "lucide-react";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { userData, backendUrl, setUserData, setIsLoggedin } =
     useContext(AppContext);
+  const { language, changeLanguage } = useContext(LanguageContext);
+  const { isFarmerMode, toggleFarmerMode } = useContext(FarmerModeContext);
+  const { t } = useTranslation();
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -64,23 +71,23 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { to: "/", label: "Home" },
-    { label: "About", to: "/about" },
+    { label: t('home', 'Home'), to: "/" },
+    { label: t('about', 'About'), to: "/about" },
     {
-      label: "Services",
+      label: t('services', 'Services'),
       to: "/services",
       hasDropdown: true,
       dropDownOptions: [
-        { label: "Soil Test", to: "/soil-crop-analysis", icon: FlaskConical },
-        { label: "Fertilizers", to: "/fertilizers", icon: Sprout },
-        { label: "Equipments", to: "/equipments", icon: Wrench },
-        { label: "Crop Selection", to: "/crop-selection", icon: Map },
-        { label: "Orchard", to: "/orchard-planning", icon: TreeDeciduous },
+        { label: t('soil_test', 'Soil Test'), to: "/soil-crop-analysis", icon: FlaskConical },
+        { label: t('fertilizers', 'Fertilizers'), to: "/fertilizers", icon: Sprout },
+        { label: t('equipments', 'Equipments'), to: "/equipments", icon: Wrench },
+        { label: t('crop_selection', 'Crop Selection'), to: "/crop-selection", icon: Map },
+        { label: t('orchard', 'Orchard'), to: "/orchard-planning", icon: TreeDeciduous },
       ],
     },
-    { label: "Market Prices", to: "/market-prices" },
-    { label: "Success Stories", to: "/success-stories" },
-    { label: "Blogs", to: "/blogs" },
+    { label: t('market_prices', 'Market Prices'), to: "/market-prices" },
+    { label: t('success_stories', 'Success Stories'), to: "/success-stories" },
+    { label: t('blogs', 'Blogs'), to: "/blogs" },
   ];
 
   const linkBase =
@@ -177,7 +184,42 @@ const Navbar = () => {
 
           {/* Right Side */}
           <div className="hidden md:flex items-center gap-4">
+            <div className="relative group/lang">
+                <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-all border border-slate-100">
+                    <Zap size={14} className="text-green-600" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">{language === 'en' ? 'Eng' : language === 'hi' ? 'Hin' : 'Tel'}</span>
+                    <ChevronDown size={10} className="text-slate-400 group-hover/lang:rotate-180 transition-transform" />
+                </button>
+                <div className="absolute right-0 mt-2 w-32 opacity-0 translate-y-2 invisible group-hover/lang:opacity-100 group-hover/lang:translate-y-0 group-hover/lang:visible transition-all duration-300">
+                    <div className="bg-white shadow-2xl rounded-xl border border-slate-100 p-1 overflow-hidden">
+                        {[
+                            { code: 'en', label: 'English' },
+                            { code: 'hi', label: 'Hindi' },
+                            { code: 'te', label: 'Telugu' }
+                        ].map(lang => (
+                            <button
+                                key={lang.code}
+                                onClick={() => changeLanguage(lang.code)}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${language === lang.code ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-green-700'}`}
+                            >
+                                {lang.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
             <button 
+                onClick={toggleFarmerMode}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all border ${isFarmerMode ? 'bg-green-600 text-white border-green-700 shadow-inner' : 'hover:bg-slate-50 border-slate-100 text-slate-600'}`}
+                title="Toggle Farmer Simple Mode"
+            >
+                <Tractor size={14} className={isFarmerMode ? 'animate-bounce' : ''} />
+                <span className="text-[10px] font-black uppercase tracking-widest hidden lg:block">Simple Mode</span>
+            </button>
+
+            <button 
+                id="contact-button"
                 onClick={() => navigate("/book-farm-visit")} 
                 className="group flex items-center gap-2 bg-[#1f2d1f] hover:bg-green-700 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg shadow-green-900/10"
             >
@@ -236,6 +278,7 @@ const Navbar = () => {
               </div>
             ) : (
               <button
+                id="login-button"
                 onClick={() => navigate("/login")}
                 className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
               >
@@ -311,6 +354,14 @@ const Navbar = () => {
             </div>
 
             <div className="mt-8 space-y-3 pt-6 border-t border-slate-100">
+                <button 
+                    onClick={() => {
+                        toggleFarmerMode();
+                    }}
+                    className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all ${isFarmerMode ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600'}`}
+                >
+                    <Tractor size={14} /> {isFarmerMode ? 'Disable Simple Mode' : 'Enable Simple Mode'}
+                </button>
                 <button 
                     onClick={() => {setIsMobileOpen(false); navigate("/book-farm-visit")}}
                     className="w-full bg-[#1f2d1f] text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"

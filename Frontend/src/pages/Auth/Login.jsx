@@ -1,18 +1,18 @@
-/* eslint-disable no-unused-vars */
 import { useContext, useState } from "react"
 import { assets } from "../../assets/assets"
 import { useNavigate } from "react-router-dom"
 import { AppContext } from "../../context/AppContext"
+import { useTranslation } from "react-i18next"
 import axios from "axios"
 import { toast } from "react-toastify"
 
 const Login = () => {
-
+    const { t } = useTranslation()
     const navigate = useNavigate()
     const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext)
 
     const [state, setState] = useState('Login')
-    const [authMethod, setAuthMethod] = useState('mobile') // 'mobile' or 'email'
+    const [authMethod, setAuthMethod] = useState('mobile')
     const [name, setName] = useState('')
     const [phone, setPhone] = useState('')
     const [email, setEmail] = useState('')
@@ -20,6 +20,22 @@ const Login = () => {
     const [otp, setOtp] = useState('')
     const [showOtpInput, setShowOtpInput] = useState(false)
     const [loading, setLoading] = useState(false)
+
+    const syncPreferencesToBackend = async () => {
+        try {
+            const preferredLanguage = localStorage.getItem('i18nextLng') || 'en';
+            const hasCompletedTour = localStorage.getItem('kmc_tour_completed') === 'true' || localStorage.getItem('tourCompleted') === 'true';
+            const simpleMode = localStorage.getItem('kmc_farmer_mode') === 'true';
+
+            await axios.post(backendUrl + "/api/user/preferences", {
+                preferredLanguage,
+                hasCompletedTour,
+                simpleMode
+            }, { withCredentials: true });
+        } catch (error) {
+            console.error("Failed to sync preferences to backend:", error);
+        }
+    }
 
     const onSendOtp = async (e) => {
         try {
@@ -52,6 +68,7 @@ const Login = () => {
             if (data.success) {
                 setIsLoggedin(true)
                 getUserData()
+                await syncPreferencesToBackend()
                 navigate("/")
             } else {
                 toast.error(data.message)
@@ -74,6 +91,7 @@ const Login = () => {
                 if (data.success) {
                     setIsLoggedin(true)
                     getUserData()
+                    await syncPreferencesToBackend()
                     navigate("/")
                 } else {
                     toast.error(data.message)
@@ -83,6 +101,7 @@ const Login = () => {
                 if (data.success) {
                     setIsLoggedin(true)
                     getUserData()
+                    await syncPreferencesToBackend()
                     navigate("/")
                 } else {
                     toast.error(data.message)
@@ -102,11 +121,11 @@ const Login = () => {
             <div className="bg-white/95 backdrop-blur p-10 rounded-3xl shadow-2xl w-full sm:w-[400px] text-slate-700 text-sm border border-emerald-100 animate-in fade-in zoom-in duration-300">
                 
                 <h2 className="text-3xl font-bold text-slate-900 text-center mb-2">
-                    {showOtpInput ? "Verify OTP" : (state === 'Login' ? "Welcome Back" : "Create Account")}
+                    {showOtpInput ? t('verify_otp_title') : (state === 'Login' ? t('welcome_back') : t('create_account'))}
                 </h2>
                 
                 <p className="text-center text-slate-500 mb-6 px-4">
-                    {showOtpInput ? `Code sent to +91 ${phone}` : `Sign ${state === 'Login' ? 'in' : 'up'} to continue to AgriDust.`}
+                    {showOtpInput ? `${t('verify_otp_title')} sent to +91 ${phone}` : (state === 'Login' ? t('sign_in_to_continue') : t('sign_up_to_continue'))}
                 </p>
 
                 {/* Auth Method Toggle */}
@@ -116,13 +135,13 @@ const Login = () => {
                             onClick={() => {setAuthMethod('mobile'); setState('Login')}}
                             className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${authMethod === 'mobile' ? 'bg-white shadow-sm text-emerald-700' : 'text-slate-400'}`}
                         >
-                            Mobile OTP
+                            {t('mobile_otp')}
                         </button>
                         <button 
                             onClick={() => setAuthMethod('email')}
                             className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${authMethod === 'email' ? 'bg-white shadow-sm text-emerald-700' : 'text-slate-400'}`}
                         >
-                            Email
+                            {t('email')}
                         </button>
                     </div>
                 )}
@@ -132,7 +151,7 @@ const Login = () => {
                     {authMethod === 'email' && state === "Sign Up" && !showOtpInput && (
                         <div className='flex items-center gap-3 w-full px-5 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-emerald-500 focus-within:bg-white transition-all'>
                             <img src={assets.person_icon} alt="" className="w-5 h-5 opacity-40" />
-                            <input value={name} onChange={e => setName(e.target.value)} className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium" type="text" placeholder="Full Name" required />
+                            <input value={name} onChange={e => setName(e.target.value)} className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium" type="text" placeholder={t('full_name')} required />
                         </div>
                     )}
 
@@ -141,7 +160,7 @@ const Login = () => {
                             {!showOtpInput ? (
                                 <div className='flex items-center gap-3 w-full px-5 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-emerald-500 focus-within:bg-white transition-all'>
                                     <span className="text-slate-400 font-bold border-r pr-3 border-slate-200">+91</span>
-                                    <input value={phone} onChange={e => setPhone(e.target.value)} className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium" type="tel" placeholder="Mobile Number" required pattern="[0-9]{10}" />
+                                    <input value={phone} onChange={e => setPhone(e.target.value)} className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium" type="tel" placeholder={t('mobile_number')} required pattern="[0-9]{10}" />
                                 </div>
                             ) : (
                                 <div className='flex items-center gap-3 w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-emerald-500 focus-within:bg-white transition-all'>
@@ -154,14 +173,14 @@ const Login = () => {
                         <>
                             <div className='flex items-center gap-3 w-full px-5 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-emerald-500 focus-within:bg-white transition-all'>
                                 <img src={assets.mail_icon} alt="" className="w-5 h-5 opacity-40" />
-                                <input value={email} onChange={e => setEmail(e.target.value)} className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium" type="email" placeholder="Email address" required />
+                                <input value={email} onChange={e => setEmail(e.target.value)} className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium" type="email" placeholder={t('email')} required />
                             </div>
                             <div className='flex items-center gap-3 w-full px-5 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-emerald-500 focus-within:bg-white transition-all'>
                                 <img src={assets.lock_icon} alt="" className="w-5 h-5 opacity-40" />
-                                <input value={password} onChange={e => setPassword(e.target.value)} className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium" type="password" placeholder="Password" required />
+                                <input value={password} onChange={e => setPassword(e.target.value)} className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium" type="password" placeholder={t('password')} required />
                             </div>
                             {state === "Login" && (
-                                <p className="text-right text-emerald-700 hover:text-emerald-800 cursor-pointer text-[10px] font-bold uppercase tracking-wider" onClick={() => navigate("/reset-password")}>Forgot Password?</p>
+                                <p className="text-right text-emerald-700 hover:text-emerald-800 cursor-pointer text-[10px] font-bold uppercase tracking-wider" onClick={() => navigate("/reset-password")}>{t('forgot_password')}</p>
                             )}
                         </>
                     )}
@@ -174,7 +193,7 @@ const Login = () => {
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                         ) : (
                             <>
-                                {showOtpInput ? "Verify & Login" : (authMethod === 'mobile' ? "Send OTP" : (state === "Sign Up" ? "Create Account" : "Login"))}
+                                {showOtpInput ? t('verify_and_login') : (authMethod === 'mobile' ? t('send_otp') : (state === "Sign Up" ? t('create_account') : t('login')))}
                                 <span className="group-hover:translate-x-1 transition-transform">→</span>
                             </>
                         )}
@@ -182,20 +201,20 @@ const Login = () => {
                     
                     {showOtpInput && (
                         <button type="button" onClick={() => {setShowOtpInput(false); setOtp("")}} className="w-full text-center text-emerald-700 hover:underline font-bold text-[10px] uppercase tracking-widest mt-2">
-                            Change Phone Number
+                            {t('change_phone')}
                         </button>
                     )}
                 </form>
 
                 {!showOtpInput && (
                     <p className="text-slate-400 text-center text-xs mt-8">
-                        {state === "Sign Up" ? "Already have an account? " : "Don't have an account? "}
+                        {state === "Sign Up" ? t('already_have_account') : t('dont_have_account')}
                         <span className="text-emerald-700 hover:text-emerald-800 cursor-pointer font-bold underline underline-offset-4"
                             onClick={() => {
                                 setState(state === 'Sign Up' ? 'Login' : 'Sign Up');
                                 setAuthMethod('email'); // Toggle automatically to email for sign up flow
                             }}>
-                            {state === 'Sign Up' ? 'Login here' : 'Sign up here'}
+                            {state === 'Sign Up' ? t('login_here') : t('register_here')}
                         </span>
                     </p>
                 )}

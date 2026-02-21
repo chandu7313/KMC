@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
     district: { type: String, default: 'Other' },
     crops: { type: [String], default: [] },
     fieldOfficer: { type: mongoose.Schema.Types.ObjectId, ref: 'user', default: null },
+    language: { type: String, default: 'en' },
+    preferredLanguage: { type: String, default: 'en' },
+    hasCompletedTour: { type: Boolean, default: false },
+    simpleMode: { type: Boolean, default: false },
 }, { timestamps: true })
 
 const userModel = mongoose.models.user || mongoose.model('user', userSchema)

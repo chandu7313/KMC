@@ -1,21 +1,33 @@
 import { NavLink } from "react-router-dom";
 import { assets } from "../../assets/assets";
+import { 
+  LayoutDashboard, 
+  Users, 
+  Tractor, 
+  TrendingUp, 
+  Calendar, 
+  Star, 
+  FileText, 
+  Sprout, 
+  Bell, 
+  Home,
+  LogOut
+} from "lucide-react";
 
 const AdminSidebar = () => {
   const navItems = [
-    { to: "/admin/dashboard", label: "Dashboard", icon: "📊" },
-    { to: "/admin/users", label: "User Management", icon: "👥" },
-    { to: "/admin/farmers", label: "Farmer Management", icon: "🚜" },
-    { to: "/admin/market", label: "Market Prices", icon: "📈" },
-    { to: "/admin/bookings", label: "Bookings", icon: "📅" },
-    { to: "/admin/success-stories", label: "Success Stories", icon: "🌟" },
-    { to: "/admin/blogs", label: "Blog Articles", icon: "📝" },
-    { to: "/admin/fertilizers", label: "Fertilizer Mgmt", icon: "🌱" },
-    { to: "/admin/equipments", label: "Equipment Mgmt", icon: "🚜" },
-    { to: "/admin/notifications", label: "Notifications", icon: "🔔" },
-    { to: "/admin/analytics", label: "Analytics", icon: "📈" },
-    { to: "/", label: "Go to Home", icon: "🏠" },
-    // Add more admin links here
+    { to: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
+    { to: "/admin/users", label: "User Management", icon: <Users size={20} /> },
+    { to: "/admin/farmers", label: "Farmer Management", icon: <Tractor size={20} /> },
+    { to: "/admin/market", label: "Market Prices", icon: <TrendingUp size={20} /> },
+    { to: "/admin/bookings", label: "Bookings", icon: <Calendar size={20} /> },
+    { to: "/admin/success-stories", label: "Success Stories", icon: <Star size={20} /> },
+    { to: "/admin/blogs", label: "Blog Articles", icon: <FileText size={20} /> },
+    { to: "/admin/fertilizers", label: "Fertilizer Mgmt", icon: <Sprout size={20} /> },
+    { to: "/admin/equipments", label: "Equipment Mgmt", icon: <Tractor size={20} /> },
+    { to: "/admin/notifications", label: "Notifications", icon: <Bell size={20} /> },
+    { to: "/admin/analytics", label: "Analytics", icon: <TrendingUp size={20} /> },
+    { to: "/", label: "Go to Home", icon: <Home size={20} /> },
   ];
 
   const linkBase =

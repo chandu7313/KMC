@@ -1,13 +1,16 @@
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { AppContext } from "../../context/AppContext";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
   PieChart, Pie, Cell 
 } from 'recharts';
+import { Users, CheckCircle, Clock, Package, MapPin, IndianRupee } from 'lucide-react';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { backendUrl } = useContext(AppContext);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,7 +36,7 @@ const Dashboard = () => {
   }, [backendUrl]);
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading Dashboard...</div>;
+    return <div className="p-8 text-center text-slate-500">{t('loading_dashboard')}</div>;
   }
   
   const { stats, recentUsers } = data;
@@ -44,12 +47,12 @@ const Dashboard = () => {
       
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard label="Total Farmers" value={stats.totalFarmers} icon="👨‍🌾" color="bg-green-50 text-green-700" />
-        <MetricCard label="Verified Farmers" value={stats.verifiedFarmers} icon="✅" color="bg-blue-50 text-blue-700" />
-        <MetricCard label="Pending Approvals" value={stats.pendingApprovals} icon="⏳" color="bg-yellow-50 text-yellow-700" />
-        <MetricCard label="Active Packages" value={stats.activePackages} icon="📦" color="bg-purple-50 text-purple-700" />
-        <MetricCard label="Total Districts" value={stats.totalDistricts} icon="📍" color="bg-indigo-50 text-indigo-700" />
-        <MetricCard label="Revenue" value={`₹${stats.revenue.toLocaleString()}`} icon="💰" color="bg-emerald-50 text-emerald-700" />
+        <MetricCard label={t('total_farmers')} value={stats.totalFarmers} icon={<Users size={24}/>} color="bg-green-50 text-green-700" />
+        <MetricCard label={t('verified_farmers')} value={stats.verifiedFarmers} icon={<CheckCircle size={24}/>} color="bg-blue-50 text-blue-700" />
+        <MetricCard label={t('pending_approvals')} value={stats.pendingApprovals} icon={<Clock size={24}/>} color="bg-yellow-50 text-yellow-700" />
+        <MetricCard label={t('active_packages')} value={stats.activePackages} icon={<Package size={24}/>} color="bg-purple-50 text-purple-700" />
+        <MetricCard label={t('total_districts')} value={stats.totalDistricts} icon={<MapPin size={24}/>} color="bg-indigo-50 text-indigo-700" />
+        <MetricCard label={t('revenue')} value={`₹${stats.revenue.toLocaleString()}`} icon={<IndianRupee size={24}/>} color="bg-emerald-50 text-emerald-700" />
       </div>
 
       {/* Charts Section */}
@@ -57,7 +60,7 @@ const Dashboard = () => {
         
         {/* Registration Trend */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-           <h3 className="text-lg font-semibold text-slate-800 mb-4">Registration Trend</h3>
+           <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('registration_trend')}</h3>
            <div className="h-64">
              <ResponsiveContainer width="100%" height="100%">
                <BarChart data={stats.monthlyRegistrations}>
@@ -66,7 +69,7 @@ const Dashboard = () => {
                  <YAxis />
                  <Tooltip />
                  <Legend />
-                 <Bar dataKey="count" fill="#10B981" name="Registrations" />
+                 <Bar dataKey="count" fill="#10B981" name={t('registrations')} />
                </BarChart>
              </ResponsiveContainer>
            </div>
@@ -74,7 +77,7 @@ const Dashboard = () => {
 
         {/* District Distribution */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-           <h3 className="text-lg font-semibold text-slate-800 mb-4">District Distribution</h3>
+           <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('district_distribution')}</h3>
            <div className="h-64">
              <ResponsiveContainer width="100%" height="100%">
                <BarChart layout="vertical" data={stats.districtData}>
@@ -83,7 +86,7 @@ const Dashboard = () => {
                  <YAxis dataKey="_id" type="category" width={100}/>
                  <Tooltip />
                  <Legend />
-                 <Bar dataKey="count" fill="#3B82F6" name="Farmers" />
+                 <Bar dataKey="count" fill="#3B82F6" name={t('farmers')} />
                </BarChart>
              </ResponsiveContainer>
            </div>
@@ -91,7 +94,7 @@ const Dashboard = () => {
       
         {/* Crop Distribution */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 lg:col-span-2">
-           <h3 className="text-lg font-semibold text-slate-800 mb-4">Crop Distribution</h3>
+           <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('crop_distribution')}</h3>
            <div className="h-64 flex justify-center">
              <ResponsiveContainer width="100%" height="100%">
                <PieChart>

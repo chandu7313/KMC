@@ -19,7 +19,11 @@ export const getUserData = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                isAccountVerified: user.isAccountVerified
+                isAccountVerified: user.isAccountVerified,
+                language: user.language,
+                preferredLanguage: user.preferredLanguage,
+                hasCompletedTour: user.hasCompletedTour,
+                simpleMode: user.simpleMode
             }
         })
 
@@ -28,4 +32,39 @@ export const getUserData = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 
+}
+
+export const updateLanguage = async (req, res) => {
+    try {
+        const { userId, language } = req.body
+
+        if (!['en', 'hi', 'te'].includes(language)) {
+            return res.json({ success: false, message: "Invalid language" })
+        }
+
+        await userModel.findByIdAndUpdate(userId, { language })
+
+        res.json({ success: true, message: "Language updated successfully" })
+
+    } catch (error) {
+        res.json({ success: false, message: error.message })
+    }
+}
+
+export const updatePreferences = async (req, res) => {
+    try {
+        const { userId, preferredLanguage, hasCompletedTour, simpleMode } = req.body;
+
+        const updateData = {};
+        if (preferredLanguage !== undefined) updateData.preferredLanguage = preferredLanguage;
+        if (hasCompletedTour !== undefined) updateData.hasCompletedTour = hasCompletedTour;
+        if (simpleMode !== undefined) updateData.simpleMode = simpleMode;
+
+        await userModel.findByIdAndUpdate(userId, updateData);
+
+        res.json({ success: true, message: "User preferences updated successfully" });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
 }

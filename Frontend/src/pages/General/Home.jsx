@@ -2,10 +2,15 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
+import { FarmerModeContext } from '../../context/FarmerModeContext';
+import AudioButton from '../../components/AudioButton';
 import { assets } from '../../assets/assets';
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Header from "../../components/Header";
+import LanguageModal from '../../components/LanguageModal';
+import OnboardingTour from '../../components/OnboardingTour';
+import { useTranslation } from 'react-i18next';
 import { 
     ArrowRight, 
     Sprout, 
@@ -29,7 +34,9 @@ import {
 } from 'lucide-react';
 
 const Home = () => {
+    const { t } = useTranslation();
     const { backendUrl, userData, navigate } = useContext(AppContext);
+    const { isFarmerMode } = useContext(FarmerModeContext);
     const [blogs, setBlogs] = useState([]);
     const [stories, setStories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -56,31 +63,34 @@ const Home = () => {
 
     return (
         <div className="bg-white min-h-screen font-sans selection:bg-green-100 selection:text-green-900 overflow-x-hidden">
+            <LanguageModal />
+            <OnboardingTour />
             <Navbar />
 
             <Header />
 
             {/* --- COMPREHENSIVE SERVICES GRID --- */}
-            <section className="py-24 px-6 bg-white">
+            <section id="services-section" className="py-24 px-6 bg-white">
                 <div className="max-w-7xl mx-auto space-y-16">
                     <div className="text-center space-y-3 max-w-3xl mx-auto">
                         <div className="inline-flex items-center gap-2 text-green-700 font-black text-[9px] uppercase tracking-[0.3em]">
-                            <Sprout size={12} /> Ecosystem of Excellence
+                            <Sprout size={12} /> {t('ecosystem_excellence')}
                         </div>
                         <h2 className="text-4xl font-serif font-bold text-[#1f2d1f] tracking-tight">
-                            Everything You Need to <span className="text-green-700 italic">Scale.</span>
+                            {t('hero_title')}
+                            <AudioButton text={t('hero_title')} className="ml-4 align-middle" />
                         </h2>
-                        <p className="text-base text-slate-500 font-medium">
-                            A complete suite of precision farming tools designed to remove guesswork from your daily operations.
+                        <p className="text-base text-slate-500 font-medium farmer-hide">
+                            {t('hero_subtitle')}
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
-                            { title: 'Soil Testing', desc: 'Advanced lab analysis for precise nutrient mapping.', icon: FlaskConical, url: '/soil-crop-analysis' },
-                            { title: 'Market Prices', desc: 'Real-time commodity tracking for maximum profit.', icon: BarChart3, url: '/market-prices' },
-                            { title: 'Weather Insights', desc: 'Hyper-local forecasting for perfect harvest timing.', icon: CloudSun, url: '/whether-insights' },
-                            { title: 'Crop Advisory', desc: 'Personalized AI & Expert guidance for every crop.', icon: HeartHandshake, url: '/crop-selection' }
+                            { title: t('soil_testing'), desc: 'Advanced lab analysis for precise nutrient mapping.', icon: FlaskConical, url: '/soil-crop-analysis' },
+                            { title: t('market_prices'), desc: 'Real-time commodity tracking for maximum profit.', icon: BarChart3, url: '/market-prices' },
+                            { title: t('weather_insights'), desc: 'Hyper-local forecasting for perfect harvest timing.', icon: CloudSun, url: '/whether-insights' },
+                            { title: t('crop_advisory'), desc: 'Personalized AI & Expert guidance for every crop.', icon: HeartHandshake, url: '/crop-selection' }
                         ].map((service, idx) => (
                             <div 
                                 key={idx}
@@ -90,8 +100,11 @@ const Home = () => {
                                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-green-700 mb-5 border border-slate-100 shadow-sm group-hover:scale-110 group-hover:bg-green-700 group-hover:text-white transition-all">
                                     <service.icon size={22} />
                                 </div>
-                                <h3 className="text-lg font-black text-[#1f2d1f] mb-2">{service.title}</h3>
-                                <p className="text-xs text-slate-500 font-medium leading-relaxed">{service.desc}</p>
+                                <h3 className="text-lg font-black text-[#1f2d1f] mb-2">
+                                    {service.title}
+                                    <AudioButton text={service.title} className="ml-2" />
+                                </h3>
+                                <p className="text-xs text-slate-500 font-medium leading-relaxed farmer-hide">{service.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -129,8 +142,11 @@ const Home = () => {
                                     {item.step}
                                 </div>
                                 <div className="space-y-3">
-                                    <h4 className="text-2xl font-black">{item.title}</h4>
-                                    <p className="text-white/40 text-sm font-medium leading-relaxed px-4">{item.desc}</p>
+                                    <h4 className="text-2xl font-black">
+                                        {item.title}
+                                        <AudioButton text={item.title} className="ml-2" />
+                                    </h4>
+                                    <p className="text-white/40 text-sm font-medium leading-relaxed px-4 farmer-hide">{item.desc}</p>
                                 </div>
                             </div>
                         ))}
@@ -139,7 +155,7 @@ const Home = () => {
             </section>
 
             {/* --- MARKETPLACE HUB SECTION --- */}
-            <section className="py-24 px-6 bg-slate-50 relative overflow-hidden">
+            <section id="marketplace-section" className="py-24 px-6 bg-slate-50 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center overflow-hidden">
                     <div className="space-y-8">
                         <div className="space-y-3">
@@ -148,8 +164,9 @@ const Home = () => {
                             </div>
                             <h2 className="text-4xl font-serif font-bold text-[#1f2d1f] tracking-tight leading-tight">
                                 High-Performance <br/>Inputs & Machinery.
+                                <AudioButton text="High-Performance Inputs and Machinery." className="ml-4 align-middle" />
                             </h2>
-                            <p className="text-base text-slate-500 font-medium">
+                            <p className="text-base text-slate-500 font-medium farmer-hide">
                                 Direct access to the highest quality agricultural products, vetted by our agronomy team.
                             </p>
                         </div>
@@ -162,8 +179,11 @@ const Home = () => {
                                 <div className="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center text-green-700 mb-6 border border-green-100 shadow-sm transition-transform group-hover:scale-110">
                                     <Sprout size={28} />
                                 </div>
-                                <h3 className="text-xl font-black text-[#1f2d1f] mb-2">Fertilizers</h3>
-                                <p className="text-xs text-slate-400 font-medium leading-relaxed">Boost soil performance with organic and chemical nutrients.</p>
+                                <h3 className="text-xl font-black text-[#1f2d1f] mb-2">
+                                    Fertilizers
+                                    <AudioButton text="Fertilizers" className="ml-2" />
+                                </h3>
+                                <p className="text-xs text-slate-400 font-medium leading-relaxed farmer-hide">Boost soil performance with organic and chemical nutrients.</p>
                                 <div className="mt-6 flex items-center gap-2 text-green-700 font-black text-[9px] uppercase tracking-widest group-hover:gap-3 transition-all">
                                     Browse Nutrients <ArrowRight size={14}/>
                                 </div>
@@ -176,8 +196,11 @@ const Home = () => {
                                 <div className="w-14 h-14 rounded-2xl bg-green-600 flex items-center justify-center text-white mb-6 shadow-xl shadow-green-900/40 transition-transform group-hover:scale-110">
                                     <Settings size={28} />
                                 </div>
-                                <h3 className="text-xl font-black mb-2">Equipment</h3>
-                                <p className="text-white/40 text-xs font-medium leading-relaxed">Invest in modern tractors, drones, and precision tools.</p>
+                                <h3 className="text-xl font-black mb-2">
+                                    Equipment
+                                    <AudioButton text="Equipment" className="ml-2" />
+                                </h3>
+                                <p className="text-white/40 text-xs font-medium leading-relaxed farmer-hide">Invest in modern tractors, drones, and precision tools.</p>
                                 <div className="mt-6 flex items-center gap-2 text-green-500 font-black text-[9px] uppercase tracking-widest group-hover:gap-3 transition-all">
                                     View Machinery <ArrowRight size={14}/>
                                 </div>
@@ -225,8 +248,9 @@ const Home = () => {
                                 </div>
                                 <h2 className="text-5xl font-serif font-bold text-[#1f2d1f] tracking-tight leading-[1.1]">
                                     A Legacy of <br/><span className="text-green-700 italic">Farmer First.</span>
+                                    <AudioButton text="A Legacy of Farmer First." className="ml-4 align-middle" />
                                 </h2>
-                                <p className="text-lg text-slate-500 font-medium leading-relaxed">
+                                <p className="text-lg text-slate-500 font-medium leading-relaxed farmer-hide">
                                     KMC isn't just a platform; it's a movement. We started with a single lab in Pune and now support thousands across the country.
                                 </p>
                             </div>
@@ -262,6 +286,7 @@ const Home = () => {
                             </div>
                             <h2 className="text-4xl font-serif font-bold text-[#1f2d1f] tracking-tight leading-tight">
                                 Real Impact. <br/><span className="text-green-700 italic text-5xl">Proven Results.</span>
+                                <AudioButton text="Real Impact. Proven Results." className="ml-4 align-middle" />
                             </h2>
                         </div>
                         <button onClick={() => navigate('/success-stories')} className="text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-green-700 transition-colors flex items-center gap-3 pb-2">
@@ -383,7 +408,7 @@ const Home = () => {
             </section>
 
             {/* --- SELECT YOUR SUCCESS (PACKAGES) --- */}
-            <section className="py-24 px-6 bg-white relative">
+            <section id="packages-section" className="py-24 px-6 bg-white relative">
                 <div className="max-w-6xl mx-auto space-y-20">
                     <div className="text-center space-y-4 max-w-3xl mx-auto">
                         <div className="inline-flex items-center gap-2 text-green-700 font-black text-[9px] uppercase tracking-[0.3em]">
@@ -391,8 +416,9 @@ const Home = () => {
                         </div>
                         <h2 className="text-4xl md:text-5xl font-serif font-bold text-[#1f2d1f] tracking-tight">
                             Select Your <span className="text-green-700 italic">Success.</span>
+                            <AudioButton text="Select Your Success." className="ml-4 align-middle" />
                         </h2>
-                        <p className="text-base text-slate-500 font-medium">
+                        <p className="text-base text-slate-500 font-medium farmer-hide">
                             Transparent pricing designed to scale with your farm, from initial soil testing to full-scale digital mastery.
                         </p>
                     </div>
@@ -460,8 +486,11 @@ const Home = () => {
 
                                 <div className="space-y-6 flex-grow">
                                     <div className="space-y-2">
-                                        <h3 className="text-2xl font-black">{pkg.name}</h3>
-                                        <p className={`${pkg.theme === 'dark' ? 'text-white/40' : 'text-slate-400'} text-xs font-medium leading-relaxed`}>
+                                        <h3 className="text-2xl font-black">
+                                            {pkg.name}
+                                            <AudioButton text={pkg.name + " package"} className="ml-2" />
+                                        </h3>
+                                        <p className={`${pkg.theme === 'dark' ? 'text-white/40' : 'text-slate-400'} text-xs font-medium leading-relaxed farmer-hide`}>
                                             {pkg.desc}
                                         </p>
                                     </div>
@@ -498,7 +527,7 @@ const Home = () => {
                                         : 'bg-white border border-slate-200 text-[#1f2d1f] hover:bg-slate-100'
                                     }`}
                                 >
-                                    Get Started Today
+                                    {t('get_started')}
                                 </button>
                             </div>
                         ))}
@@ -527,7 +556,7 @@ const Home = () => {
                                 onClick={() => navigate('/login')}
                                 className="w-full sm:w-auto bg-green-600 hover:bg-green-500 text-white px-10 py-5 rounded-full font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl shadow-green-900 transition-all active:scale-95"
                             >
-                                Get Started Today
+                                {t('get_started')}
                             </button>
                             <button 
                                 onClick={() => navigate('/contact')}

@@ -38,7 +38,7 @@ const Header = () => {
 
   return (
     <>
-    <section className="mx-auto w-[90%] px-4 sm:px-6 lg:px-8 mt-24">
+    <section id="hero-section" className="mx-auto w-[90%] px-4 sm:px-6 lg:px-8 mt-24">
       <div className="relative overflow-hidden rounded-[32px] shadow-2xl shadow-green-900/10 border border-black/5">
         {/* Background image with gradient overlay */}
         <div className="absolute inset-0">

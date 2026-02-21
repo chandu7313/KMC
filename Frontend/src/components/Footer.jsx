@@ -13,8 +13,10 @@ import {
     ShieldCheck,
     Globe
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const Footer = () => {
+  const { t } = useTranslation()
   return (
     <footer className="bg-[#1f2d1f] text-white overflow-hidden relative border-t border-white/5">
       {/* Decorative background element */}
@@ -34,7 +36,7 @@ const Footer = () => {
             </div>
             
             <p className="text-white/50 text-sm leading-relaxed max-w-sm font-medium">
-                Revolutionizing Indian agriculture through precision data, laboratory insights, and a farmer-first ecosystem. Empowering 10k+ growers across 15 states.
+                {t('platform_desc', 'Revolutionizing Indian agriculture through precision data, laboratory insights, and a farmer-first ecosystem. Empowering 10k+ growers across 15 states.')}
             </p>
 
             <div className="flex items-center gap-4">
@@ -47,6 +49,7 @@ const Footer = () => {
                     <a 
                         key={i} 
                         href={social.url} 
+                        aria-label={social.icon.name}
                         className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:bg-green-600 hover:text-white hover:scale-110 transition-all duration-300"
                     >
                         <social.icon size={18} />
@@ -57,23 +60,23 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-green-500">Platform</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-green-500">{t('platform', 'Platform')}</h4>
             <ul className="space-y-4 text-sm font-medium text-white/60">
-              <li><a href="/soil-crop-analysis" className="hover:text-white transition-colors">Soil Analytics</a></li>
-              <li><a href="/fertilizers" className="hover:text-white transition-colors">Digital Store</a></li>
-              <li><a href="/market-prices" className="hover:text-white transition-colors">Market Pulse</a></li>
-              <li><a href="/equipments" className="hover:text-white transition-colors">Machinery</a></li>
+              <li><a href="/soil-crop-analysis" className="hover:text-white transition-colors">{t('soil_test', 'Soil Test')}</a></li>
+              <li><a href="/fertilizers" className="hover:text-white transition-colors">{t('fertilizers', 'Digital Store')}</a></li>
+              <li><a href="/market-prices" className="hover:text-white transition-colors">{t('market_prices', 'Market Pulse')}</a></li>
+              <li><a href="/equipments" className="hover:text-white transition-colors">{t('equipments', 'Machinery')}</a></li>
             </ul>
           </div>
 
           {/* Support Links */}
           <div className="lg:col-span-2 space-y-6">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-green-500">Company</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-green-500">{t('company', 'Company')}</h4>
             <ul className="space-y-4 text-sm font-medium text-white/60">
-              <li><a href="/about" className="hover:text-white transition-colors">Our Story</a></li>
-              <li><a href="/blogs" className="hover:text-white transition-colors">Knowledge Hub</a></li>
-              <li><a href="/success-stories" className="hover:text-white transition-colors">Impact Stories</a></li>
-              <li><a href="/contact" className="hover:text-white transition-colors">Get Help</a></li>
+              <li><a href="/about" className="hover:text-white transition-colors">{t('about', 'Our Story')}</a></li>
+              <li><a href="/blogs" className="hover:text-white transition-colors">{t('blogs', 'Knowledge Hub')}</a></li>
+              <li><a href="/success-stories" className="hover:text-white transition-colors">{t('success_stories', 'Impact Stories')}</a></li>
+              <li><a href="/contact" className="hover:text-white transition-colors">{t('get_help', 'Get Help')}</a></li>
             </ul>
           </div>
 
@@ -81,8 +84,8 @@ const Footer = () => {
           <div className="lg:col-span-4 space-y-8">
             <div className="bg-white/5 rounded-3xl p-8 border border-white/10 space-y-6">
                 <div className="space-y-2">
-                    <h4 className="text-xl font-bold text-white tracking-tight">Stay in the Loop</h4>
-                    <p className="text-white/40 text-xs font-medium">Get the latest crop insights and market trends delivered weekly.</p>
+                    <h4 className="text-xl font-bold text-white tracking-tight">{t('stay_in_loop', 'Stay in the Loop')}</h4>
+                    <p className="text-white/40 text-xs font-medium">{t('newsletter_desc', 'Get the latest crop insights and market trends delivered weekly.')}</p>
                 </div>
                 
                 <div className="relative">
@@ -117,7 +120,7 @@ const Footer = () => {
           <p className="text-xs font-medium text-white/30 tracking-wide text-center">
             © {new Date().getFullYear()} KISSAN Mithar (KMC). Designed for Indian Farmers. 
             <span className="mx-2 text-white/10">|</span> 
-            Proudly "Made in India" 🇮🇳
+            Proudly "Made in India"
           </p>
           
           <div className="flex items-center gap-8">

@@ -1,8 +1,21 @@
-import { Outlet } from "react-router-dom";
+import { useContext } from "react";
+import { Outlet, Navigate } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 import { ToastContainer } from "react-toastify";
+import { AppContext } from "../../context/AppContext";
 
 const AdminLayout = () => {
+
+  const { isLoggedin, userData, loading } = useContext(AppContext);
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
+
+  if (!isLoggedin || userData.role !== 'admin') {
+    return <Navigate to="/" />;
+  }
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Sidebar */}
