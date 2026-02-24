@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
 import { LanguageContext } from "../context/LanguageContext";
@@ -29,6 +29,8 @@ import {
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
   const { userData, backendUrl, setUserData, setIsLoggedin } =
     useContext(AppContext);
   const { language, changeLanguage } = useContext(LanguageContext);
@@ -91,28 +93,28 @@ const Navbar = () => {
   ];
 
   const linkBase =
-    "px-3 py-1.5 text-sm font-extrabold uppercase tracking-widest transition-all duration-300 relative group/link";
+    "px-1 lg:px-2 xl:px-3 h-14 flex flex-col items-center justify-center text-[10px] lg:text-[11px] xl:text-xs font-extrabold uppercase tracking-wide transition-all duration-300 relative group/link text-center leading-tight";
   const linkActive = "text-green-700";
   const linkInactive = "text-slate-600 hover:text-green-700";
 
   return (
-    <div className="fixed top-0 inset-x-0 z-50 px-4 sm:px-6 lg:px-8 pt-4 pointer-events-none">
+    <div className="fixed top-0 inset-x-0 z-50 pointer-events-none">
       {/* Profile Update Prompt Banner */}
       {userData && userData.name === "KMC Farmer" && (
-        <div className="bg-emerald-600 text-white text-[9px] py-1.5 px-4 text-center font-black uppercase tracking-widest rounded-t-2xl pointer-events-auto">
+        <div className="bg-emerald-600 text-white text-[9px] py-1.5 px-4 text-center font-black uppercase tracking-widest pointer-events-auto">
             Welcome! Please <span className="underline cursor-pointer font-bold" onClick={() => navigate('/farmers')}>update your profile</span> with your real name.
         </div>
       )}
       
-      <div className={`bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl shadow-green-900/5 transition-all duration-500 pointer-events-auto ${userData && userData.name === "KMC Farmer" ? 'rounded-b-2xl' : 'rounded-2xl'}`}>
-        <div className="flex h-16 items-center justify-between px-6">
+      <div className={`bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-md transition-all duration-500 pointer-events-auto`}>
+        <div className="flex items-center justify-between lg:justify-start w-full h-14 px-4 sm:h-16 sm:px-6">
           {/* Logo */}
           <button
             onClick={() => {
               navigate("/");
               setIsMobileOpen(false);
             }}
-            className="flex items-center gap-2.5 group"
+            className="flex items-center gap-2.5 group shrink-0"
           >
             <div className="relative">
                 <img
@@ -121,19 +123,19 @@ const Navbar = () => {
                   className="w-10 h-10 object-contain transition-transform group-hover:rotate-12"
                 />
             </div>
-            <div className="flex flex-col items-start leading-none pointer-events-none">
+            <div className={`flex-col items-start leading-none pointer-events-none ${isHome ? 'flex' : 'hidden md:flex'}`}>
                 <span className="text-xl font-black text-[#1f2d1f]">KISSAN</span>
                 <span className="text-xs font-black tracking-[0.4em] text-green-600 uppercase">Mithar</span>
             </div>
           </button>
 
           {/* Desktop Nav */}
-          <nav className="hidden xl:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-0 lg:gap-1 xl:gap-2 lg:ml-2 xl:ml-6 2xl:ml-12 shrink-0">
             {navItems.map((item) => {
               if (item.hasDropdown) {
                 return (
                   <div key={item.to} className="relative group">
-                    <div className={`${linkBase} ${linkInactive} cursor-pointer flex items-center gap-1`}>
+                    <div className={`${linkBase.replace('flex-col', 'flex-row')} ${linkInactive} cursor-pointer gap-1 whitespace-nowrap`}>
                       {item.label}
                       <ChevronDown size={10} className="group-hover:rotate-180 transition-transform" />
                     </div>
@@ -168,13 +170,13 @@ const Navbar = () => {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `${linkBase} ${isActive ? linkActive : linkInactive}`
+                    `${linkBase} max-w-[80px] lg:max-w-[95px] xl:max-w-[110px] ${isActive ? linkActive : linkInactive}`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      {item.label}
-                      <span className={`absolute -bottom-1 left-3 right-3 h-0.5 bg-green-600 rounded-full transition-all duration-300 transform scale-x-0 group-hover/link:scale-x-100 ${isActive ? 'scale-x-100' : ''}`}></span>
+                      <span className="line-clamp-2 md:line-clamp-none leading-snug break-words">{item.label}</span>
+                      <span className={`absolute bottom-0 left-2 xl:left-3 right-2 xl:right-3 h-[3px] bg-green-600 rounded-full transition-all duration-300 transform scale-x-0 group-hover/link:scale-x-100 ${isActive ? 'scale-x-100' : ''}`}></span>
                     </>
                   )}
                 </NavLink>
@@ -183,9 +185,9 @@ const Navbar = () => {
           </nav>
 
           {/* Right Side */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-1.5 xl:gap-3 lg:ml-auto shrink-0">
             <div className="relative group/lang">
-                <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-all border border-slate-100">
+                <button className="flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-all border border-slate-100">
                     <Zap size={14} className="text-green-600" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">{language === 'en' ? 'Eng' : language === 'hi' ? 'Hin' : 'Tel'}</span>
                     <ChevronDown size={10} className="text-slate-400 group-hover/lang:rotate-180 transition-transform" />
@@ -211,7 +213,7 @@ const Navbar = () => {
 
             <button 
                 onClick={toggleFarmerMode}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all border ${isFarmerMode ? 'bg-green-600 text-white border-green-700 shadow-inner' : 'hover:bg-slate-50 border-slate-100 text-slate-600'}`}
+                className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-lg transition-all border ${isFarmerMode ? 'bg-green-600 text-white border-green-700 shadow-inner' : 'hover:bg-slate-50 border-slate-100 text-slate-600'}`}
                 title="Toggle Farmer Simple Mode"
             >
                 <Tractor size={14} className={isFarmerMode ? 'animate-bounce' : ''} />
@@ -221,7 +223,7 @@ const Navbar = () => {
             <button 
                 id="contact-button"
                 onClick={() => navigate("/book-farm-visit")} 
-                className="group flex items-center gap-2 bg-[#1f2d1f] hover:bg-green-700 text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg shadow-green-900/10"
+                className="group flex items-center gap-2 bg-[#1f2d1f] hover:bg-green-700 text-white px-3 xl:px-5 py-2 xl:py-2.5 rounded-xl text-[10px] xl:text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg shadow-green-900/10 shrink-0 whitespace-nowrap"
             >
                 <Calendar size={14} className="group-hover:animate-pulse" />
                 Book Visit
@@ -231,7 +233,7 @@ const Navbar = () => {
 
             {userData ? (
               <div className="relative group">
-                <button className="flex items-center gap-3 p-1 pr-3 rounded-full hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
+                <button className="flex items-center gap-2 p-1 pr-2 xl:pr-3 rounded-full hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 shrink-0">
                   <div className="w-8 h-8 flex justify-center items-center rounded-xl bg-green-700 text-white shadow-lg shadow-green-900/20 font-black text-xs">
                     {userData.name?.[0]?.toUpperCase()}
                   </div>
@@ -247,16 +249,16 @@ const Navbar = () => {
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Hub</p>
                     </div>
                     <button 
+                        onClick={() => navigate("/cart")}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-green-700 transition-all"
+                    >
+                        <ShoppingBag size={14} /> My Cart
+                    </button>
+                    <button 
                         onClick={() => navigate("/my-orders")}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-green-700 transition-all"
                     >
-                        <ShoppingBag size={14} /> My Fertilizers
-                    </button>
-                    <button 
-                        onClick={() => navigate("/my-equipment-orders")}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-green-700 transition-all"
-                    >
-                        <Package size={14} /> My Equipment
+                        <Package size={14} /> My Orders
                     </button>
                     {userData.role === 'admin' && (
                          <button 
@@ -280,7 +282,7 @@ const Navbar = () => {
               <button
                 id="login-button"
                 onClick={() => navigate("/login")}
-                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 xl:px-6 py-2 xl:py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap shrink-0"
               >
                 Login <LogIn size={14} />
               </button>
@@ -289,7 +291,7 @@ const Navbar = () => {
 
           {/* Mobile Toggle */}
           <button
-            className="xl:hidden p-2 text-[#1f2d1f]"
+            className="lg:hidden p-2 text-[#1f2d1f]"
             onClick={() => setIsMobileOpen(!isMobileOpen)}
           >
             {isMobileOpen ? <X size={24}/> : <Menu size={24}/>}
@@ -297,22 +299,22 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`xl:hidden transition-all duration-500 overflow-hidden ${isMobileOpen ? 'max-h-[85vh] opacity-100 p-6 pt-2 border-t border-slate-50' : 'max-h-0 opacity-0 p-0'}`}>
-            <div className="space-y-1">
+        <div className={`lg:hidden transition-all duration-500 overflow-hidden bg-white/95 backdrop-blur-2xl px-4 rounded-b-3xl shadow-2xl ${isMobileOpen ? 'max-h-[85vh] opacity-100 py-3 border-t border-slate-100' : 'max-h-0 opacity-0 py-0'}`}>
+            <div className="space-y-0.5">
                 {navItems.map((item) => {
                   if (item.hasDropdown) {
                     const isOpen = openDropdown === item.label;
 
                     return (
-                      <div key={item.to} className="space-y-1">
+                      <div key={item.to} className="space-y-0.5">
                         <button
                           onClick={() =>
                             setOpenDropdown(isOpen ? null : item.label)
                           }
-                          className={`w-full flex justify-between items-center px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] ${isOpen ? 'bg-slate-50 text-green-700' : 'text-slate-600'}`}
+                          className={`w-full flex justify-between items-center px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] ${isOpen ? 'bg-slate-50 text-green-700' : 'text-slate-600'}`}
                         >
                           {item.label}
-                          <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+                          <ChevronDown size={12} className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                         </button>
 
                         <div className={`overflow-hidden transition-all duration-300 ml-4 ${isOpen ? 'max-h-64' : 'max-h-0'}`}>
@@ -322,8 +324,8 @@ const Navbar = () => {
                                 to={each.to}
                                 onClick={() => setIsMobileOpen(false)}
                                 className={({ isActive }) =>
-                                  `flex items-center gap-3 px-4 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest ${
-                                    isActive ? 'text-green-700 bg-green-50' : 'text-slate-500'
+                                  `flex items-center gap-3 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest ${
+                                    isActive ? 'text-green-700 bg-green-50' : 'text-slate-500 hover:text-green-600 hover:bg-green-50'
                                   }`
                                 }
                               >
@@ -342,7 +344,7 @@ const Navbar = () => {
                       to={item.to}
                       onClick={() => setIsMobileOpen(false)}
                       className={({ isActive }) =>
-                        `block px-4 py-4 rounded-xl text-sm font-black uppercase tracking-[0.2em] ${
+                        `block px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] ${
                           isActive ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50'
                         }`
                       }
@@ -353,39 +355,52 @@ const Navbar = () => {
                 })}
             </div>
 
-            <div className="mt-8 space-y-3 pt-6 border-t border-slate-100">
-                <button 
-                    onClick={() => {
-                        toggleFarmerMode();
-                    }}
-                    className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all ${isFarmerMode ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600'}`}
-                >
-                    <Tractor size={14} /> {isFarmerMode ? 'Disable Simple Mode' : 'Enable Simple Mode'}
-                </button>
+            <div className="mt-2 space-y-1.5 pt-3 border-t border-slate-100">
                 <button 
                     onClick={() => {setIsMobileOpen(false); navigate("/book-farm-visit")}}
-                    className="w-full bg-[#1f2d1f] text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"
+                    className="w-full bg-[#1f2d1f] text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"
                 >
-                    <Calendar size={14} /> Book Farm Visit
+                    <Calendar size={12} /> Book Farm Visit
                 </button>
-                {userData ? (
-                  <button
-                    onClick={logout}
-                    className="w-full bg-red-50 text-red-600 py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"
-                  >
-                    <LogOut size={14} /> Logout Account
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                        setIsMobileOpen(false);
-                        navigate("/login");
-                    }}
-                    className="w-full bg-green-600 text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"
-                  >
-                    <LogIn size={14} /> Member Login
-                  </button>
-                )}
+                <div className="flex gap-1.5">
+                    <button 
+                        onClick={() => {
+                            toggleFarmerMode();
+                        }}
+                        className={`flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2 transition-all ${isFarmerMode ? 'bg-green-600 text-white' : 'bg-slate-100 text-slate-600'}`}
+                    >
+                        <Tractor size={12} /> Simple Mode
+                    </button>
+                    {userData ? (
+                      <>
+                        <button
+                          onClick={() => {
+                              setIsMobileOpen(false);
+                              navigate("/cart");
+                          }}
+                          className="flex-1 bg-slate-100 text-slate-700 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2"
+                        >
+                          <ShoppingBag size={12} /> My Cart
+                        </button>
+                        <button
+                          onClick={logout}
+                          className="flex-1 bg-red-50 text-red-600 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2"
+                        >
+                          <LogOut size={12} /> Logout
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                            setIsMobileOpen(false);
+                            navigate("/login");
+                        }}
+                        className="flex-1 bg-green-600 text-white py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2"
+                      >
+                        <LogIn size={12} /> Login
+                      </button>
+                    )}
+                </div>
             </div>
         </div>
       </div>

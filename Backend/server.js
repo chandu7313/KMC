@@ -13,11 +13,18 @@ import blogRouter from "./routes/blogRoutes.js";
 import successRouter from "./routes/successRoutes.js";
 import fertilizerRouter from "./routes/fertilizerRoutes.js";
 import equipmentRouter from "./routes/equipmentRoutes.js";
+import soilRouter from "./routes/soilRoutes.js"; // Modular 
+import productRouter from "./routes/productRoutes.js";
+import cartRouter from "./routes/cartRoutes.js";
+import orderRouter from "./routes/orderRoutes.js";
+import bookingRouter from "./routes/bookingRoutes.js";
+import startCronJobs from "./config/cron.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
+startCronJobs(); // Start background jobs
 
 const allowedOrigins = [
     'http://localhost:5173',
@@ -39,5 +46,10 @@ app.use('/api/blog', blogRouter)
 app.use('/api/success', successRouter)
 app.use('/api/fertilizer', fertilizerRouter)
 app.use('/api/equipment', equipmentRouter)
+app.use('/api/soil', soilRouter) // Changed from /api/soil-tests to /api/soil as per request
+app.use('/api/product', productRouter);
+app.use('/api/cart', cartRouter);
+app.use('/api/order', orderRouter);
+app.use('/api/booking', bookingRouter);
 
 app.listen(port, () => console.log(`Server started on PORT:${port}`));

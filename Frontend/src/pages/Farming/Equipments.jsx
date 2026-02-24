@@ -1,82 +1,43 @@
-import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
+import axios from 'axios';
 import { toast } from 'react-toastify';
-import { ShoppingCart, Settings, Search, Filter, ArrowRight, ShoppingBag, X, Plus, Info } from 'lucide-react';
 import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
+import { Search, ShoppingCart, Filter, ArrowRight, Package, Sprout, Tractor, Leaf } from 'lucide-react';
 
 const Equipments = () => {
-    const { backendUrl, userData, navigate } = useContext(AppContext);
-    const [equipments, setEquipments] = useState([]);
-    const [cart, setCart] = useState([]);
-    const [showCart, setShowCart] = useState(false);
-    const [address, setAddress] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [filter, setFilter] = useState('All');
-    const [selectedEquipment, setSelectedEquipment] = useState(null); // For detail modal
+    const navigate = useNavigate();
+    const { backendUrl, getCartCount } = useContext(AppContext);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeCategory, setActiveCategory] = useState('All');
+    
+    // Derived categories for equipments
+    const categories = ['All', 'Tractors', 'Plows & Harrows', 'Seed Drills', 'Sprayers', 'Combine Harvesters'];
 
-    const fetchEquipments = async () => {
+    const categoryIcons = {
+        'All': <Package size={18} />,
+        'Tractors': <Tractor size={18} />,
+        'Plows & Harrows': <Tractor size={18} />,
+        'Seed Drills': <Sprout size={18} />,
+        'Sprayers': <Filter size={18} />,
+        'Combine Harvesters': <Tractor size={18} />
+    };
+
+    const fetchProducts = async () => {
         try {
-            const { data } = await axios.get(`${backendUrl}/api/equipment/list`);
+            setLoading(true);
+            const { data } = await axios.get(`${backendUrl}/api/product/list`);
             if (data.success) {
-                setEquipments(data.equipments);
-            }
-        } catch (error) {
-            toast.error(error.message);
-        }
-    };
-
-    useEffect(() => {
-        fetchEquipments();
-    }, []);
-
-    const addToCart = (item) => {
-        const existing = cart.find(i => i._id === item._id);
-        if (existing) {
-            if (existing.quantity >= item.stock) {
-                toast.warning("Maximum stock reached");
-                return;
-            }
-            setCart(cart.map(i => i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i));
-        } else {
-            setCart([...cart, { ...item, quantity: 1 }]);
-        }
-        toast.success(`${item.name} added to cart`);
-    };
-
-    const removeFromCart = (id) => {
-        setCart(cart.filter(i => i._id !== id));
-    };
-
-    const totalAmount = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-    const placeOrder = async () => {
-        if (!userData) {
-            toast.error("Please login to purchase");
-            navigate('/login');
-            return;
-        }
-        if (!address) {
-            toast.error("Please enter a shipping address");
-            return;
-        }
-        setLoading(true);
-        try {
-            axios.defaults.withCredentials = true;
-            const items = cart.map(i => ({ equipmentId: i._id, quantity: i.quantity, price: i.price }));
-            const { data } = await axios.post(`${backendUrl}/api/equipment/place-order`, {
-                userId: userData._id,
-                items,
-                totalAmount,
-                address
-            });
-            if (data.success) {
-                toast.success("Equipment order placed!");
-                setCart([]);
-                setShowCart(false);
-                setAddress('');
-                navigate('/my-equipment-orders');
+                const equipmentCategories = ['Tractors', 'Plows & Harrows', 'Seed Drills', 'Sprayers', 'Combine Harvesters'];
+                const filtered = data.products.filter(p => 
+                    p.category === 'Equipments' || 
+                    equipmentCategories.includes(p.category) || 
+                    equipmentCategories.includes(p.subCategory)
+                );
+                setProducts(filtered);
             } else {
                 toast.error(data.message);
             }
@@ -87,154 +48,183 @@ const Equipments = () => {
         }
     };
 
-    const categories = ['All', ...new Set(equipments.map(e => e.category))];
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const filteredProducts = products.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              p.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = activeCategory === 'All' || p.category === activeCategory || p.subCategory === activeCategory;
+        return matchesSearch && matchesCategory;
+    });
 
     return (
-        <div className="pt-24 pb-20 px-6 sm:px-12 bg-slate-50 min-h-screen">
+        <div className="min-h-screen bg-[#f8fafc] font-sans">
             <Navbar />
-            <div className="max-w-7xl mx-auto space-y-12">
-                
-                {/* Hero / Header */}
-                <div className="flex flex-col md:flex-row justify-between items-end gap-8 bg-white p-10 rounded-[48px] border border-slate-100 shadow-sm">
-                    <div className="space-y-4 max-w-xl">
-                        <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-                            <Settings size={14} className="animate-spin-slow" /> Agricultural Machinery
-                        </div>
-                        <h1 className="text-4xl font-black text-slate-900 leading-tight">Modern Equipments for Modern Farmers</h1>
-                        <p className="text-slate-500 font-medium">Buy high-quality tools and machinery with doorstep delivery and installment options.</p>
+            
+        {/* Hero Section */}
+            <section className="pt-20 md:pt-24 pb-4 md:pb-6 px-4 md:px-6 bg-gradient-to-b from-emerald-900 to-emerald-800 text-white rounded-b-[24px] md:rounded-b-[32px] shadow-md relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                <div className="max-w-4xl mx-auto relative z-10 flex flex-col items-center justify-center text-center gap-2">
+                    <div className="inline-flex items-center gap-1.5 bg-emerald-800/50 border border-emerald-700/50 backdrop-blur-md text-emerald-100 px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] shadow-inner">
+                        <Tractor size={12} className="text-emerald-400" /> KMC Machinery
                     </div>
-                    
-                    <div className="flex items-center gap-4 w-full md:w-auto">
-                        <button onClick={() => setShowCart(true)} className="relative bg-slate-900 text-white p-4 rounded-3xl hover:bg-green-700 transition-all shadow-xl shadow-slate-200 group flex items-center gap-3">
-                            <ShoppingCart size={24} />
-                            <span className="font-bold text-sm">Cart</span>
-                            {cart.length > 0 && <span className="bg-white text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-full">{cart.length}</span>}
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight">
+                        The Direct-to-Farm <span className="text-emerald-400 italic font-black">Equipments.</span>
+                    </h1>
+                    <p className="text-[10px] md:text-sm text-emerald-100/80 font-medium max-w-xl mx-auto">
+                        High-quality heavy machinery and tools, delivered directly to your farm.
+                    </p>
+                </div>
+            </section>
+
+            {/* Main Content */}
+            <main className="max-w-7xl mx-auto px-2 py-16 -mt-10 relative z-20">
+                
+                {/* Category, Search & Cart Wrapper - STICKY */}
+                <div className="sticky top-[56px] sm:top-[64px] z-40 bg-[#f8fafc]/80 backdrop-blur-md -mx-2 px-2 py-4 mb-4 border-b border-slate-200/50">
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+                        {/* Category Navigation */}
+                        <div className="flex items-center justify-start gap-3 overflow-x-auto no-scrollbar w-full lg:w-auto pb-1 lg:pb-0 hide-scrollbar">
+                            {categories.map(cat => (
+                                <button 
+                                    key={cat} 
+                                    onClick={() => setActiveCategory(cat)} 
+                                    className={`flex items-center shrink-0 gap-2 px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all duration-300 shadow-sm
+                                        ${activeCategory === cat 
+                                            ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10 scale-105 border border-slate-800' 
+                                            : 'bg-white text-slate-500 border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 hover:shadow-md'}`}
+                                >
+                                    {categoryIcons[cat] || <Package size={16} />}
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Search & Actions */}
+                        <div className="flex items-center gap-2 w-full lg:w-auto shrink-0 mt-2 lg:mt-0">
+                            <div className="relative group flex-1 lg:w-[240px] xl:w-[320px]">
+                                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                                <input 
+                                    className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-bold text-xs text-slate-800 placeholder:text-slate-400 shadow-sm" 
+                                    placeholder="Search for equipments..." 
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <button 
+                                onClick={() => navigate('/cart')}
+                                className="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-xl shadow-lg shadow-emerald-900/10 transition-all flex items-center justify-center active:scale-95 shrink-0 group relative"
+                                title="Go To Cart"
+                            >
+                                <ShoppingCart size={18} className="group-hover:scale-110 transition-transform" />
+                                {getCartCount() > 0 && (
+                                    <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full border-2 border-[#f8fafc] animate-in zoom-in duration-300">
+                                        {getCartCount()}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Product Status & Loading */}
+                {loading ? (
+                     <div className="flex flex-col items-center justify-center py-32 space-y-4">
+                        <div className="w-12 h-12 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin"></div>
+                        <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Loading Catalog...</p>
+                    </div>
+                ) : filteredProducts.length === 0 ? (
+                    <div className="bg-white rounded-[40px] border border-slate-100 p-20 text-center shadow-sm flex flex-col items-center">
+                        <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-6">
+                            <Search size={40} />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-900 mb-2">No products found</h3>
+                        <p className="text-slate-500 font-medium max-w-md">Try adjusting your filters or search terms to find what you're looking for.</p>
+                        <button 
+                            onClick={() => { setSearchTerm(''); setActiveCategory('All'); }}
+                            className="mt-8 px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors"
+                        >
+                            Clear Filters
                         </button>
                     </div>
-                </div>
+                ) : (
+                    /* Product Grid */
+                    <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                        {filteredProducts.map(product => (
+                            <div 
+                                key={product._id} 
+                                onClick={() => navigate(`/product/${product._id}`)}
+                                className="bg-white rounded-[16px] md:rounded-[24px] p-1.5 md:p-2 shadow-sm border border-slate-100 hover:shadow-xl hover:border-emerald-100 transition-all duration-300 group cursor-pointer flex flex-col h-full"
+                            >
+                                {/* Image Container */}
+                                <div className="relative aspect-square rounded-[12px] md:rounded-[16px] bg-slate-50 overflow-hidden mb-1.5 md:mb-2 flex items-center justify-center">
+                                    <img 
+                                        src={product.images[0]} 
+                                        alt={product.name} 
+                                        className="max-w-full max-h-full object-contain p-2 md:p-4 group-hover:scale-110 transition-transform duration-700 ease-out" 
+                                    />
+                                    
+                                    {/* Badges */}
+                                    {product.isFeatured && (
+                                        <div className="absolute top-2 left-2 flex flex-col gap-1">
+                                            <span className="bg-yellow-400 text-yellow-950 px-2 py-1 flex items-center justify-center rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest shadow-sm">
+                                                Featured
+                                            </span>
+                                        </div>
+                                    )}
 
-                {/* Search & Filter */}
-                <div className="flex flex-col md:flex-row gap-6">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                        <input className="w-full bg-white border border-slate-200 rounded-3xl py-5 pl-16 pr-6 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-600 transition-all font-bold text-slate-700" placeholder="Search for tractors, tillers, or drones..." />
-                    </div>
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-                        {categories.map(cat => (
-                            <button key={cat} onClick={() => setFilter(cat)} className={`px-8 py-4 rounded-3xl text-sm font-black whitespace-nowrap transition-all ${filter === cat ? 'bg-green-700 text-white shadow-lg shadow-green-100' : 'bg-white text-slate-500 border border-slate-100 hover:border-green-200'}`}>
-                                {cat}
-                            </button>
+                                    {/* Stock Status Overlay */}
+                                    {product.stock === 0 && (
+                                        <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+                                            <span className="bg-rose-500 text-white text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-[0.2em] shadow-lg">
+                                                Out of Stock
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Quick action button (appears on hover) */}
+                                    <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
+                                        <button className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center hover:bg-emerald-600 transition-colors shadow-md">
+                                            <ArrowRight size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Product Info */}
+                                <div className="px-2 md:px-3 py-1 md:py-2 flex-1 flex flex-col justify-between">
+                                    <h3 className="font-black text-slate-900 text-[10px] md:text-sm leading-snug line-clamp-2 mb-1 md:mb-1.5">
+                                        {product.name}
+                                    </h3>
+                                    
+                                    <div className="pt-1 border-t border-slate-50 flex items-center justify-between mt-auto">
+                                        <div className="flex items-baseline gap-1 md:gap-1.5">
+                                            <span className="text-xs md:text-lg font-black text-slate-900">
+                                                ₹{product.discountedPrice || product.price}
+                                            </span>
+                                            {product.discountedPrice && (
+                                                <span className="text-[10px] md:text-sm font-bold text-slate-300 line-through">
+                                                    ₹{product.price}
+                                                </span>
+                                            )}
+                                        </div>
+                                        
+                                        {/* Ratings snippet if available */}
+                                        {product.ratings > 0 && (
+                                            <div className="flex items-center">
+                                                <span className="bg-emerald-50 text-emerald-700 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg text-[10px] md:text-xs font-black">
+                                                    ★ {product.ratings.toFixed(1)}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
-                </div>
-
-                {/* Product Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {equipments.filter(e => filter === 'All' || e.category === filter).map(item => (
-                        <div key={item._id} className="bg-white rounded-[40px] p-2 shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all group relative">
-                            <div className="relative aspect-[4/3] rounded-[32px] bg-slate-50 overflow-hidden mb-4">
-                                <img src={item.image} alt={item.name} className="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-700" />
-                                {item.stock === 0 && (
-                                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center">
-                                        <span className="bg-rose-500 text-white text-xs font-black px-5 py-2 rounded-full uppercase tracking-[0.2em]">Out of Stock</span>
-                                    </div>
-                                )}
-                                <div className="absolute top-4 left-4">
-                                    <span className="bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-[10px] font-black text-slate-900 shadow-sm border border-slate-100 uppercase tracking-widest">{item.category}</span>
-                                </div>
-                            </div>
-                            <div className="px-6 py-4 space-y-4">
-                                <div>
-                                    <h3 className="font-black text-slate-900 text-lg leading-tight line-clamp-1">{item.name}</h3>
-                                    <p className="text-slate-400 text-xs font-medium line-clamp-2 mt-2">{item.description}</p>
-                                </div>
-                                <div className="flex items-center justify-between pt-2 border-t border-slate-50">
-                                    <div className="text-2xl font-black text-slate-900">₹{item.price?.toLocaleString() || '0'}</div>
-                                    <button 
-                                        onClick={() => addToCart(item)}
-                                        disabled={item.stock === 0}
-                                        className="bg-green-700 hover:bg-green-800 disabled:bg-slate-200 text-white p-3.5 rounded-2xl transition-all active:scale-90 shadow-xl shadow-green-100"
-                                    >
-                                        <Plus size={24} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Cart Sidebar */}
-            {showCart && (
-                <div className="fixed inset-0 z-[100] flex justify-end">
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-500" onClick={() => setShowCart(false)}></div>
-                    <div className="relative w-full max-w-lg bg-white h-screen shadow-2xl flex flex-col animate-in slide-in-from-right duration-500">
-                        <div className="p-10 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                            <h2 className="text-2xl font-black text-slate-900 flex items-center gap-4">
-                                <ShoppingBag size={32} className="text-green-700" /> Equipment Cart
-                            </h2>
-                            <button onClick={() => setShowCart(false)} className="p-3 hover:bg-white rounded-full transition-colors bg-white shadow-sm border border-slate-100"><X size={24} className="text-slate-400" /></button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-10 space-y-6">
-                            {cart.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
-                                    <div className="w-32 h-32 bg-slate-50 rounded-full flex items-center justify-center">
-                                        <ShoppingCart size={64} className="text-slate-200" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-slate-900 font-black text-xl">Your cart is empty</p>
-                                        <p className="text-slate-400 font-medium">Add some machinery to get started.</p>
-                                    </div>
-                                    <button onClick={() => setShowCart(false)} className="text-green-700 font-black hover:underline uppercase tracking-widest text-sm">Start Browsing</button>
-                                </div>
-                            ) : (
-                                cart.map(item => (
-                                    <div key={item._id} className="flex gap-6 p-6 rounded-[32px] bg-slate-50 border border-slate-100 group transition-all hover:bg-white hover:shadow-xl hover:border-transparent">
-                                        <div className="w-24 h-24 rounded-2xl bg-white p-4 flex-shrink-0 border border-slate-100 shadow-sm">
-                                            <img src={item.image} className="w-full h-full object-contain" />
-                                        </div>
-                                        <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                            <div className="font-black text-slate-900 text-base truncate">{item.name}</div>
-                                            <div className="text-sm text-slate-400 font-bold mt-1">₹{item.price?.toLocaleString() || '0'} × {item.quantity} units</div>
-                                        </div>
-                                        <button onClick={() => removeFromCart(item._id)} className="text-slate-300 hover:text-rose-500 transition-colors self-center p-2"><X size={20}/></button>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
-                        {cart.length > 0 && (
-                            <div className="p-10 bg-slate-50 border-t border-slate-200 rounded-t-[48px] space-y-8 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.1)]">
-                                <div className="flex justify-between items-center px-2">
-                                    <span className="text-slate-400 font-black uppercase tracking-widest text-xs">Total Investment</span>
-                                    <span className="text-4xl font-black text-slate-900">₹{totalAmount?.toLocaleString() || '0'}</span>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Shipping Information</label>
-                                    <textarea 
-                                        value={address} 
-                                        onChange={e => setAddress(e.target.value)}
-                                        className="w-full bg-white border border-slate-200 rounded-[32px] p-6 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-600 transition-all text-sm font-bold shadow-sm" 
-                                        rows="3" 
-                                        placeholder="Full delivery address with pincode..."
-                                    />
-                                </div>
-                                <button 
-                                    onClick={placeOrder}
-                                    disabled={loading}
-                                    className="w-full bg-green-700 hover:bg-green-800 disabled:bg-slate-300 text-white font-black py-6 rounded-[32px] shadow-2xl shadow-green-200 active:scale-95 transition-all flex items-center justify-center gap-4 text-lg"
-                                >
-                                    {loading ? 'Processing...' : (
-                                        <>Proceed to Purchase <ArrowRight size={24}/></>
-                                    )}
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-            <Footer />
+                )}
+            </main>
         </div>
     );
 };

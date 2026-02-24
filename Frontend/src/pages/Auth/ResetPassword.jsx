@@ -1,135 +1,163 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom"
 import { assets } from "../../assets/assets"
-import React, {useContext, useState } from "react"
+import React, { useContext, useState } from "react"
 import { AppContext } from "../../context/AppContext"
 import axios from "axios"
 import { toast } from "react-toastify"
+import { useTranslation } from "react-i18next"
 
 const ResetPassword = () => {
+  const { t } = useTranslation()
+  const { backendUrl } = useContext(AppContext)
+  const navigate = useNavigate()
 
-  const {backendUrl} = useContext(AppContext)
+  const [email, setEmail] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [isEmailSent, setIsEmailSent] = useState(false)
+  const [otp, setOtp] = useState('')
+  const [isOtpSubmited, setIsOtpSubmited] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   axios.defaults.withCredentials = true
 
-  const navigate = useNavigate()
-
-  const [email,setEmail] = useState('')
-  const [newPassword,setNewPassword] = useState('')
-  const [isEmailSent,setIsEmailSent] = useState('')
-  const [otp,setOtp] = useState(0)
-  const [isOtpSubmited,setIsOtpSubmited] = useState(false)
-  
-
-  const inputRefs = React.useRef([])
-  
-
-  const handleInput=(e,index)=>{
-    if(e.target.value.length>0 && index < inputRefs.current.length-1){
-      inputRefs.current[index+1].focus()
-    }
-  }
-
-  const handleKeyDown =(e,index)=>{
-    if (e.key === 'Backspace' && e.target.value==='' && index>0){
-      inputRefs.current[index-1].focus()
-    }
-  }
-
-  const handlePaste = (e)=>{
-    const paste = e.clipboardData.getData("text")
-    const pasteArray = paste.split('')
-    pasteArray.forEach((char,index)=>{
-      if(inputRefs.current[index]){
-        inputRefs.current[index].value=char 
+  const onSubmitEmail = async (e) => {
+    e.preventDefault()
+    try {
+      setLoading(true)
+      const { data } = await axios.post(backendUrl + '/api/auth/send-reset-otp', { email })
+      if (data.success) {
+        toast.success(data.message)
+        setIsEmailSent(true)
+      } else {
+        toast.error(data.message)
       }
-    })
-  }
-
-  const onSubmitEmail = async(e)=>{
-    e.preventDefault()
-    try{
-      const {data} = await axios.post(backendUrl+'/api/auth/send-reset-otp',{email})
-      data.success ? toast.success(data.message) : toast.error(data.message)
-      data.success && setIsEmailSent(true)
-    }catch(error){
+    } catch (error) {
       toast.error(error.message)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const onSubmitOtp = async (e)=>{
+  const onSubmitOtp = async (e) => {
     e.preventDefault()
-    const otpArray = inputRefs.current.map((e)=>e.value)
-    setOtp(otpArray.join(''))
     setIsOtpSubmited(true)
   }
 
-  const onSubmitNewPassword = async(e)=>{
+  const onSubmitNewPassword = async (e) => {
     e.preventDefault()
-    try{
-      const {data} = await axios.post(backendUrl+'/api/auth/reset-password',{email,otp,newPassword})
-      data.success ? toast.success(data.message) : toast.error(data.message)
-      data.success && navigate('/login')
-    }catch(error){
+    try {
+      setLoading(true)
+      const { data } = await axios.post(backendUrl + '/api/auth/reset-password', { email, otp, newPassword })
+      if (data.success) {
+        toast.success(data.message)
+        navigate('/login')
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
       toast.error(error.message)
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <div className=" flex items-center justify-center min-h-screen 
-                    bg-gradient-to-br from-blue-200 to-purple-400 ">
-        <img onClick={()=>navigate("/")} src={assets.logo} alt="" className="absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer"/>
+    <div className="flex items-center justify-center min-h-screen px-4 bg-gradient-to-br from-stone-100 via-emerald-50 to-stone-200">
+      <div className="flex flex-col md:flex-row w-full max-w-[1050px] gap-6 md:gap-14 items-center justify-center animate-in fade-in zoom-in duration-500">
         
-        {/* enter email id */}
-        {!isEmailSent && 
-          <form onSubmit={onSubmitEmail} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
-            <h1 className="text-white text-2xl font-semibold text-center mb-4">Reset Password</h1>
-            <p className="text-center mb-6 text-indigo-300">Enter your registered email address.</p>
-            <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
-              <img src={assets.mail_icon} alt="" className="w-3 h-3"/>
-              <input value={email} type="email" placeholder="Email id" onChange={(e)=>setEmail(e.target.value)}
-                  className="bg-transparent outline-none text-white" required/>
+        {/* Branding & Info Section */}
+        <div className="flex flex-col w-full md:w-[45%] p-4 md:p-8 justify-center items-center md:items-start text-center md:text-left">
+          <div className="relative z-10 flex flex-col items-center md:items-start">
+            <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-10">
+              <img src={assets.agridust_logo} alt="KMC Logo" className="w-8 h-8 md:w-14 md:h-14" />
+              <span className="text-lg md:text-3xl font-black tracking-tighter uppercase italic text-emerald-800">KMC</span>
             </div>
-            <button className="text-white w-full bg-gradient-to-r from-indigo-500
-                     to-indigo-900 py-2.5 rounded-full mt-3">Submit</button>
-          </form>
-        }
-        
+            
+            <h1 className="text-3xl md:text-6xl font-black leading-tight mb-2 md:mb-8 tracking-tight text-slate-900">
+              {t('recover_access').split(' ')[0]} <br className="hidden md:block"/> <span className="text-emerald-600">{t('recover_access').split(' ').slice(1).join(' ')}</span>
+            </h1>
+            <p className="text-slate-500 text-xs md:text-xl font-medium leading-relaxed max-w-[260px] md:max-w-md">
+              {t('recover_access_subtitle')}
+            </p>
+          </div>
 
-        {/* otp input form */}
-        {!isOtpSubmited && isEmailSent && 
-            <form onSubmit={onSubmitOtp} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
-              <h1 className="text-white text-2xl font-semibold text-center mb-4">Reset Password OTP</h1>
-              <p className="text-center mb-6 text-indigo-300">Enter the 6-digit code sent to your email id.</p>
-              <div className="flex justify-between mb-3" onPaste={handlePaste}>
-                {Array(6).fill(0).map((_,index)=>(
-                  <input type="text" maxLength='1' key={index} required 
-                      ref={e=>inputRefs.current[index]=e}
-                      onInput={e=>handleInput(e,index)}
-                      onKeyDown={e=>handleKeyDown(e,index)}
-                      className="w-12 h-12 bg-[#333A5C] text-white text-center text-xl rounded-md"/>
-                ))}
+          <div className="relative z-10 mt-6 md:mt-16 hidden sm:block">
+            <div className="flex items-center gap-3 md:gap-5 p-4 md:p-6 bg-white/40 rounded-3xl md:rounded-[32px] backdrop-blur-sm border border-white/60 shadow-sm w-fit">
+              <div className="w-8 h-8 md:w-12 md:h-12 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-200">
+                  <span className="text-white text-lg md:text-2xl font-bold">↺</span>
               </div>
-              <button className="w-full py-3 bg-gradient-to-r from-indigo-500 to-indigo-900 text-white rounded-full">Submit</button>
-          </form>
-        }
-        
+              <div>
+                  <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-emerald-700 mb-0 md:mb-1">{t('safety_first')}</p>
+                  <p className="font-extrabold text-slate-800 md:text-slate-900 text-xs md:text-lg">{t('multi_factor_verification')}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        {/* Enter new Password   */}
-        {isOtpSubmited && isEmailSent && 
-          <form onSubmit={onSubmitNewPassword} className="bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm">
-              <h1 className="text-white text-2xl font-semibold text-center mb-4">New Password</h1>
-              <p className="text-center mb-6 text-indigo-300">Enter the new password below.</p>
-              <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
-                <img src={assets.lock_icon} alt="" className="w-3 h-3"/>
-                <input value={newPassword} type="password" placeholder="password" onChange={(e)=>setNewPassword(e.target.value)}
-                    className="bg-transparent outline-none text-white" required/>
+        {/* Form Container */}
+        <div className="w-full max-w-[340px] md:max-w-none md:w-[44%] bg-white/95 backdrop-blur-xl p-6 md:p-12 rounded-[32px] md:rounded-[48px] shadow-2xl border border-white/20 relative">
+          <button onClick={() => navigate("/login")} className="hidden md:absolute top-10 right-10 text-slate-400 hover:text-emerald-600 font-bold text-[10px] uppercase tracking-[0.2em] transition-all">
+            {t('back_to_login')}
+          </button>
+
+          {!isEmailSent && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="mb-6 text-center">
+                <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-2">{t('reset_password')}</h2>
+                <p className="text-slate-500 text-xs md:text-sm font-medium">{t('enter_registered_email')}</p>
               </div>
-              <button className="text-white w-full bg-gradient-to-r from-indigo-500
-                      to-indigo-900 py-2.5 rounded-full mt-3">Submit</button>
-          </form>
-        }
-        
+              <form onSubmit={onSubmitEmail} className="space-y-6">
+                <div className='flex items-center gap-3 w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus-within:border-emerald-500 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-emerald-50 transition-all'>
+                  <img src={assets.mail_icon} alt="" className="w-5 h-5 opacity-40" />
+                  <input value={email} type="email" placeholder={t('email')} onChange={(e) => setEmail(e.target.value)}
+                    className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium text-lg" required />
+                </div>
+                <button disabled={loading} className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white font-black text-base shadow-xl shadow-emerald-100 flex items-center justify-center gap-3 group disabled:bg-slate-300 disabled:shadow-none tracking-wider">
+                  {loading ? <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : <>{t('submit')} <span className="group-hover:translate-x-2 transition-transform duration-300">→</span></>}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {isEmailSent && !isOtpSubmited && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="mb-6 text-center">
+                <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-2">{t('verify_otp_title')}</h2>
+                <p className="text-slate-500 text-xs md:text-sm font-medium">{t('enter_otp_email')}</p>
+              </div>
+              <form onSubmit={onSubmitOtp} className="space-y-6">
+                <div className='flex items-center gap-3 w-full px-6 py-5 rounded-2xl bg-slate-50 border border-slate-100 focus-within:border-emerald-500 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-emerald-50 transition-all'>
+                  <img src={assets.lock_icon} alt="" className="w-6 h-6 opacity-40" />
+                  <input value={otp} onChange={e => setOtp(e.target.value)} className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full text-center tracking-[0.6em] text-3xl font-bold" type="text" maxLength="6" placeholder="000000" required autoFocus />
+                </div>
+                <button className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white font-black text-base shadow-xl shadow-emerald-100 flex items-center justify-center gap-3 group tracking-wider">
+                  {t('verify_and_continue')} <span className="group-hover:translate-x-2 transition-transform duration-300">→</span>
+                </button>
+              </form>
+            </div>
+          )}
+
+          {isOtpSubmited && isEmailSent && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="mb-6 text-center">
+                <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-2">{t('new_password')}</h2>
+                <p className="text-slate-500 text-xs md:text-sm font-medium">{t('create_strong_password')}</p>
+              </div>
+              <form onSubmit={onSubmitNewPassword} className="space-y-6">
+                <div className='flex items-center gap-3 w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus-within:border-emerald-500 focus-within:bg-white focus-within:shadow-lg focus-within:shadow-emerald-50 transition-all'>
+                  <img src={assets.lock_icon} alt="" className="w-5 h-5 opacity-40" />
+                  <input value={newPassword} type="password" placeholder={t('password')} onChange={(e) => setNewPassword(e.target.value)}
+                    className="bg-transparent outline-none text-slate-900 placeholder-slate-400 w-full font-medium text-lg" required />
+                </div>
+                <button disabled={loading} className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white font-black text-base shadow-xl shadow-emerald-100 flex items-center justify-center gap-3 group disabled:bg-slate-300 disabled:shadow-none tracking-wider">
+                  {loading ? <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div> : <>{t('reset_password')} <span className="group-hover:translate-x-2 transition-transform duration-300">→</span></>}
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

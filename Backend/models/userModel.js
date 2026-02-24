@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema({
     preferredLanguage: { type: String, default: 'en' },
     hasCompletedTour: { type: Boolean, default: false },
     simpleMode: { type: Boolean, default: false },
+    cartData: { type: Object, default: {} },
+    addresses: [{
+        fullName: { type: String, required: true },
+        phone: { type: String, required: true },
+        address: { type: String, required: true }
+    }]
 }, { timestamps: true })
 
 const userModel = mongoose.models.user || mongoose.model('user', userSchema)

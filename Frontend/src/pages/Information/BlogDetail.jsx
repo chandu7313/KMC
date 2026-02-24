@@ -4,7 +4,6 @@ import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
 import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 import { Calendar, User, ArrowLeft, Clock, Share2, Facebook, Twitter, Link } from 'lucide-react';
 
 const BlogDetail = () => {
@@ -42,10 +41,9 @@ const BlogDetail = () => {
                 <Navbar />
                 <div className="flex flex-col items-center justify-center py-64 space-y-4">
                     <div className="w-12 h-12 border-4 border-slate-50 border-t-emerald-700 rounded-full animate-spin"></div>
-                    <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Retrieving Content...</p>
-                </div>
-                <Footer />
+                <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Retrieving Content...</p>
             </div>
+        </div>
         );
     }
 

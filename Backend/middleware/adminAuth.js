@@ -25,6 +25,7 @@ const adminAuth = async (req, res, next) => {
             return res.json({ success: false, message: 'Not Authorized. Admin Access Required' });
         }
 
+        req.userId = tokenDecode.id;
         req.body.userId = tokenDecode.id;
         next();
 

@@ -1,6 +1,5 @@
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 
 const Contact = () => {
   return (
@@ -166,7 +165,6 @@ const Contact = () => {
 
       </div>
     </section>
-    <Footer/>
     </>
   );
 };

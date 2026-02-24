@@ -217,3 +217,58 @@ export const PASSWORD_RESET_TEMPLATE = `
 </body>
 </html>
 `
+
+export const ORDER_CONFIRMATION_TEMPLATE = `
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Order Confirmation</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    body { margin: 0; padding: 0; font-family: 'Open Sans', sans-serif; background: #E5E5E5; }
+    .container { width: 100%; max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }
+    .header { background: #22D172; padding: 20px; text-align: center; color: white; font-size: 24px; font-weight: bold; }
+    .content { padding: 30px; color: #333333; }
+    .order-details { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; }
+    .order-details th, .order-details td { border: 1px solid #eeeeee; padding: 12px; text-align: left; }
+    .order-details th { background: #f9f9f9; }
+    .footer { padding: 20px; text-align: center; font-size: 12px; color: #777777; background: #f9f9f9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">Order Confirmed!</div>
+    <div class="content">
+      <p>Hello {{name}},</p>
+      <p>Thank you for your order! We've received your order and are getting it ready.</p>
+      <p><strong>Order ID:</strong> {{orderId}}</p>
+      <p><strong>Delivery Address:</strong><br/>{{address}}</p>
+      
+      <table class="order-details">
+        <thead>
+          <tr>
+            <th>Total Amount</th>
+            <th>Payment Method</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>₹{{amount}}</td>
+            <td>{{paymentMethod}}</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <p>If you have any questions about your order, you can hit reply to this email.</p>
+    </div>
+    <div class="footer">
+      Kisan Mithar Consultancy - The Direct-to-Farm Marketplace
+    </div>
+  </div>
+</body>
+</html>
+`
+

@@ -2,7 +2,6 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
-import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 import { Award, TrendingUp, MapPin, Sprout } from 'lucide-react';
 
@@ -154,7 +153,6 @@ const SuccessStories = () => {
                     </div>
                 </div>
             </section>
-            <Footer />
         </div>
     );
 };

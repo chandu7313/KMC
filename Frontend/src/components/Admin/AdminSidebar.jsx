@@ -25,6 +25,8 @@ const AdminSidebar = () => {
     { to: "/admin/blogs", label: "Blog Articles", icon: <FileText size={20} /> },
     { to: "/admin/fertilizers", label: "Fertilizer Mgmt", icon: <Sprout size={20} /> },
     { to: "/admin/equipments", label: "Equipment Mgmt", icon: <Tractor size={20} /> },
+    { to: "/admin/soil-tests", label: "Soil Tests", icon: <Sprout size={20} /> },
+    { to: "/admin/soil-entry", label: "Manual Soil Entry", icon: <FileText size={20} /> },
     { to: "/admin/notifications", label: "Notifications", icon: <Bell size={20} /> },
     { to: "/admin/analytics", label: "Analytics", icon: <TrendingUp size={20} /> },
     { to: "/", label: "Go to Home", icon: <Home size={20} /> },
@@ -39,7 +41,7 @@ const AdminSidebar = () => {
       {/* Sidebar Header */}
       <div className="h-16 flex items-center justify-center border-b border-slate-800">
          <h1 className="text-xl font-bold tracking-wide">
-           <span className="text-green-500">Agri</span>Dust Admin
+           <span className="text-green-500">Kisan</span>Mithar Admin
          </h1>
       </div>
 

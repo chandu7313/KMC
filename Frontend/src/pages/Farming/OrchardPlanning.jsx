@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 
 const OrchardPlanning = () => {
   const [landSize, setLandSize] = useState("");
@@ -129,7 +128,6 @@ const OrchardPlanning = () => {
 
       </div>
     </section>
-    <Footer/>
     </>
   );
 };

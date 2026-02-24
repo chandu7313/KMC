@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { AppContext } from "../../context/AppContext";
 import { toast } from "react-toastify";
-import { Plus, Edit2, Trash2, Search, X } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, X, RefreshCw, MapPin } from "lucide-react";
 
 const MarketPriceManagement = () => {
     const { backendUrl } = useContext(AppContext);
@@ -16,11 +16,14 @@ const MarketPriceManagement = () => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedPriceId, setSelectedPriceId] = useState(null);
     const [formData, setFormData] = useState({
-        crop: '',
+        cropName: '',
         variety: '',
         district: '',
+        mandi: 'Local Mandi',
         unit: 'Quintal',
-        price: '',
+        modalPrice: '',
+        minPrice: '',
+        maxPrice: '',
         change: ''
     });
 
@@ -58,22 +61,28 @@ const MarketPriceManagement = () => {
             setIsEditMode(true);
             setSelectedPriceId(price._id);
             setFormData({
-                crop: price.crop,
+                cropName: price.cropName,
                 variety: price.variety,
                 district: price.district,
+                mandi: price.mandi || 'Local Mandi',
                 unit: price.unit,
-                price: price.price,
+                modalPrice: price.modalPrice,
+                minPrice: price.minPrice || '',
+                maxPrice: price.maxPrice || '',
                 change: price.change
             });
         } else {
             setIsEditMode(false);
             setSelectedPriceId(null);
             setFormData({
-                crop: '',
+                cropName: '',
                 variety: '',
                 district: '',
+                mandi: 'Local Mandi',
                 unit: 'Quintal',
-                price: '',
+                modalPrice: '',
+                minPrice: '',
+                maxPrice: '',
                 change: ''
             });
         }
@@ -118,17 +127,42 @@ const MarketPriceManagement = () => {
             toast.error(error.message);
         }
     };
-
+    const handleSync = async () => {
+        try {
+            axios.defaults.withCredentials = true;
+            setLoading(true);
+            const { data } = await axios.post(`${backendUrl}/api/market/sync`);
+            if (data.success) {
+                toast.success(data.message);
+                fetchPrices();
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error("Sync failed: " + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h2 className="text-2xl font-bold text-slate-800">Market Price Management</h2>
-                <button 
-                    onClick={() => handleOpenModal()}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition"
-                >
-                    <Plus size={18} /> Add New Price
-                </button>
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={handleSync}
+                        disabled={loading}
+                        className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-slate-200 transition disabled:opacity-50"
+                    >
+                        <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Sync Mandi Data
+                    </button>
+                    <button 
+                        onClick={() => handleOpenModal()}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition"
+                    >
+                        <Plus size={18} /> Add New Price
+                    </button>
+                </div>
             </div>
 
             {/* Filters */}
@@ -175,10 +209,10 @@ const MarketPriceManagement = () => {
                                 <tr><td colSpan="6" className="text-center py-10">No market data found</td></tr>
                             ) : prices.map((item) => (
                                 <tr key={item._id} className="hover:bg-slate-50 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-slate-900">{item.crop}</td>
+                                    <td className="px-6 py-4 font-medium text-slate-900">{item.cropName}</td>
                                     <td className="px-6 py-4">{item.variety}</td>
                                     <td className="px-6 py-4">{item.district}</td>
-                                    <td className="px-6 py-4 font-semibold">₹{item.price.toLocaleString()}</td>
+                                    <td className="px-6 py-4 font-semibold">₹{(item.modalPrice || 0).toLocaleString()}</td>
                                     <td className={`px-6 py-4 ${item.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                         {item.change > 0 ? '+' : ''}{item.change}%
                                     </td>
@@ -222,9 +256,9 @@ const MarketPriceManagement = () => {
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Crop</label>
                                     <input 
-                                        type="text" name="crop" required
+                                        type="text" name="cropName" required
                                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                        value={formData.crop}
+                                        value={formData.cropName}
                                         onChange={handleInputChange}
                                     />
                                 </div>
@@ -249,13 +283,23 @@ const MarketPriceManagement = () => {
                                 />
                             </div>
 
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Mandi Name</label>
+                                <input 
+                                    type="text" name="mandi" required
+                                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                                    value={formData.mandi}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Price (₹)</label>
                                     <input 
-                                        type="number" name="price" required
+                                        type="number" name="modalPrice" required
                                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                        value={formData.price}
+                                        value={formData.modalPrice}
                                         onChange={handleInputChange}
                                     />
                                 </div>
@@ -265,6 +309,27 @@ const MarketPriceManagement = () => {
                                         type="number" step="0.1" name="change" required
                                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
                                         value={formData.change}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Min Price</label>
+                                    <input 
+                                        type="number" name="minPrice"
+                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                                        value={formData.minPrice}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Max Price</label>
+                                    <input 
+                                        type="number" name="maxPrice"
+                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                                        value={formData.maxPrice}
                                         onChange={handleInputChange}
                                     />
                                 </div>

@@ -10,7 +10,8 @@ const equipmentOrderSchema = new mongoose.Schema({
     totalAmount: { type: Number, required: true },
     address: { type: String, required: true },
     status: { type: String, enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'], default: 'Pending' },
-    paymentStatus: { type: String, enum: ['Pending', 'Completed', 'Failed'], default: 'Pending' }
+    paymentStatus: { type: String, enum: ['Pending', 'Completed', 'Failed'], default: 'Pending' },
+    cancellationReason: { type: String, default: '' }
 }, { timestamps: true });
 
 const equipmentOrderModel = mongoose.models.equipmentOrder || mongoose.model('equipmentOrder', equipmentOrderSchema);

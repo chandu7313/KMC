@@ -23,7 +23,8 @@ export const getUserData = async (req, res) => {
                 language: user.language,
                 preferredLanguage: user.preferredLanguage,
                 hasCompletedTour: user.hasCompletedTour,
-                simpleMode: user.simpleMode
+                simpleMode: user.simpleMode,
+                addresses: user.addresses || []
             }
         })
 
@@ -64,6 +65,25 @@ export const updatePreferences = async (req, res) => {
 
         res.json({ success: true, message: "User preferences updated successfully" });
 
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export const saveAddress = async (req, res) => {
+    try {
+        const { userId, address } = req.body;
+        // address: { fullName, phone, address }
+
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        user.addresses.push(address);
+        await user.save();
+
+        res.json({ success: true, message: "Address saved successfully", addresses: user.addresses });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }

@@ -1,4 +1,4 @@
-import {Routes,Route } from 'react-router-dom'
+import {Routes,Route, useLocation } from 'react-router-dom'
 import Home from './pages/General/Home'
 import Login from './pages/Auth/Login'
 import EmailVerify from './pages/Auth/EmailVerify'
@@ -33,21 +33,35 @@ import SuccessStoriesManagement from './pages/Admin/SuccessStoriesManagement'
 import BlogsManagement from './pages/Admin/BlogsManagement'
 import FertilizerManagement from './pages/Admin/FertilizerManagement'
 import EquipmentManagement from './pages/Admin/EquipmentManagement'
+import SoilTestManagement from './pages/Admin/SoilTestManagement'
+import AdminSoilEntry from './pages/Admin/AdminSoilEntry'
 import Fertilizers from './pages/Farming/Fertilizers'
 import Equipments from './pages/Farming/Equipments'
 import MyOrders from './pages/Farming/MyOrders'
-import MyEquipmentOrders from './pages/Farming/MyEquipmentOrders'
+import SoilTestUpload from './pages/Farming/SoilTestUpload'
+import SoilHistory from './pages/Farming/SoilHistory'
+// New Marketplace Imports
+import Marketplace from './pages/Marketplace/Marketplace'
+import ProductDetail from './pages/Marketplace/ProductDetail'
+import CartPage from './pages/Marketplace/CartPage'
+import Checkout from './pages/Marketplace/Checkout'
+import AdminInventory from './pages/Admin/AdminInventory'
 
 const App = () => {
+  const location = useLocation();
+  const hideSupportPaths = ['/login', '/reset-password', '/email-verify'];
+
   return (
     <div className="">
-      <ToastContainer/>
+      <ToastContainer position="top-right" autoClose={3000} style={{ marginTop: '70px' }} />
       <Routes>
         <Route path="/" element={<Home/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/email-verify" element={<EmailVerify/>}/>
         <Route path="/reset-password" element={<ResetPassword/>}/>
         <Route path="/soil-crop-analysis" element={<SoilTestAndCropAdvice/>}/>
+        <Route path="/soil-test-upload" element={<SoilTestUpload/>}/>
+        <Route path="/soil-history" element={<SoilHistory/>}/>
         <Route path="/equipments" element={<Equipments/>}/>
         <Route path="/packages" element={<Packages/>}/>
         <Route path="/blogs" element={<Blogs/>}/>
@@ -55,7 +69,6 @@ const App = () => {
         <Route path="/about" element={<About/>}/>
         <Route path="/fertilizers" element={<Fertilizers/>}/>
         <Route path="/my-orders" element={<MyOrders/>}/>
-        <Route path="/my-equipment-orders" element={<MyEquipmentOrders/>}/>
         <Route path="/orchard-planning" element={<OrchardPlanning/>}/>
         <Route path="/success-stories" element={<SuccessStories/>}/>
         <Route path="/book-farm-visit" element={<BookFarmVisit/>}/>
@@ -64,6 +77,12 @@ const App = () => {
         <Route path="/whether-insights" element={<WhetherInsights/>}/>
         <Route path="/crop-selection" element={<CropSelection/>}/>
         
+        {/* Marketplace Routes */}
+        <Route path="/marketplace" element={<Marketplace/>}/>
+        <Route path="/product/:id" element={<ProductDetail/>}/>
+        <Route path="/cart" element={<CartPage/>}/>
+        <Route path="/checkout" element={<Checkout/>}/>
+
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
            <Route index element={<Dashboard />} />
@@ -78,11 +97,14 @@ const App = () => {
            <Route path="equipments" element={<EquipmentManagement />} />
            <Route path="notifications" element={<NotificationManagement />} />
            <Route path="analytics" element={<Analytics />} />
+           <Route path="soil-tests" element={<SoilTestManagement />} />
+           <Route path="soil-entry" element={<AdminSoilEntry />} />
+           <Route path="inventory" element={<AdminInventory />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage/>}/>
       </Routes>
-      <FloatingSupport/>
+      {!hideSupportPaths.includes(location.pathname) && <FloatingSupport/>}
     </div>
   )
 }

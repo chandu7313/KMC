@@ -158,6 +158,33 @@ export const getAdminEquipmentOrders = async (req, res) => {
     }
 };
 
+// Cancel Order (User)
+export const cancelEquipmentOrder = async (req, res) => {
+    try {
+        const { orderId, userId, reason } = req.body;
+
+        // Find order and verify ownership
+        const order = await equipmentOrderModel.findOne({ _id: orderId, userId });
+
+        if (!order) {
+            return res.json({ success: false, message: "Order not found or unauthorized" });
+        }
+
+        if (order.status !== 'Pending') {
+            return res.json({ success: false, message: "Only pending orders can be cancelled" });
+        }
+
+        order.status = 'Cancelled';
+        order.cancellationReason = reason || 'No reason provided';
+        await order.save();
+
+        res.json({ success: true, message: "Order Cancelled Successfully" });
+    } catch (error) {
+        console.log("Cancel Equipment Order Error:", error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
 // Update Order Status
 export const updateEquipmentOrderStatus = async (req, res) => {
     try {

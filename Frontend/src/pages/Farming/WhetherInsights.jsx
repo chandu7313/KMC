@@ -1,5 +1,4 @@
 import { CloudSun, CloudRain, Sun, Wind } from "lucide-react";
-import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 
 const weatherInsights = [
@@ -64,7 +63,6 @@ const WeatherInsights = () => {
         ))}
       </div>
     </section>
-    <Footer/>
     </>
   );
 };

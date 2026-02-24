@@ -1,5 +1,5 @@
 import express from 'express';
-import { addEquipment, listEquipments, updateEquipment, deleteEquipment, placeEquipmentOrder, getUserEquipmentOrders, getAdminEquipmentOrders, updateEquipmentOrderStatus } from '../controllers/equipmentController.js';
+import { addEquipment, listEquipments, updateEquipment, deleteEquipment, placeEquipmentOrder, getUserEquipmentOrders, getAdminEquipmentOrders, updateEquipmentOrderStatus, cancelEquipmentOrder } from '../controllers/equipmentController.js';
 import upload from '../middleware/uploadMiddleware.js';
 import userAuth from '../middleware/userAuth.js';
 import adminAuth from '../middleware/adminAuth.js';
@@ -18,5 +18,6 @@ equipmentRouter.post('/update-status', adminAuth, updateEquipmentOrderStatus);
 equipmentRouter.get('/list', listEquipments);
 equipmentRouter.post('/place-order', userAuth, placeEquipmentOrder);
 equipmentRouter.get('/user-orders', userAuth, getUserEquipmentOrders);
+equipmentRouter.post('/cancel-order', userAuth, cancelEquipmentOrder);
 
 export default equipmentRouter;

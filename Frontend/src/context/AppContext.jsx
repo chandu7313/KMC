@@ -20,6 +20,7 @@ export const AppContextProvider=(props)=>{
     const [loading, setLoading] = useState(true)
     const [runTour, setRunTour] = useState(false)
     const [voiceEnabled, setVoiceEnabled] = useState(localStorage.getItem('voiceEnabled') !== 'false')
+    const [cartItems, setCartItems] = useState({})
 
     const getAuthState = async ()=>{
         try{
@@ -38,11 +39,24 @@ export const AppContextProvider=(props)=>{
         }
     }
 
+    const getCartData = async () => {
+        try {
+            axios.defaults.withCredentials = true
+            const { data } = await axios.post(backendUrl + '/api/cart/get', {})
+            if (data.success) {
+                setCartItems(data.cartData)
+            }
+        } catch (error) {
+            console.error("Error fetching cart:", error)
+        }
+    }
+
     const getUserData = async ()=>{
         try{
             const {data} = await axios.get(backendUrl + '/api/user/data')
             if (data.success) {
                 setUserData(data.userData)
+                getCartData()
             } else {
                 toast.error(data.message)
             }
@@ -69,6 +83,16 @@ export const AppContextProvider=(props)=>{
         });
     };
 
+    const getCartCount = () => {
+        let totalCount = 0;
+        for (const itemId in cartItems) {
+            if (cartItems[itemId] > 0) {
+                totalCount += cartItems[itemId];
+            }
+        }
+        return totalCount;
+    }
+
     useEffect(()=>{
         getAuthState()
         if (!localStorage.getItem('tourCompleted') && localStorage.getItem('languageSet')) {
@@ -83,7 +107,8 @@ export const AppContextProvider=(props)=>{
         getUserData,
         loading,
         runTour, setRunTour, completeTour,
-        voiceEnabled, toggleVoice
+        voiceEnabled, toggleVoice,
+        cartItems, setCartItems, getCartData, getCartCount
     }
 
 
