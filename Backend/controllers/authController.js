@@ -84,6 +84,55 @@ export const verifyOtp = async (req, res) => {
     }
 }
 
+export const autoLogin = async (req, res) => {
+    try {
+        const { email, phone } = req.body;
+        let user;
+        
+        if (phone === '9999999999') {
+             user = await userModel.findOne({ phone: '9999999999' });
+             if (!user) {
+                 // Check if user exists with this email first to avoid duplicate key error
+                 user = await userModel.findOne({ email: "admin@agridust.com" });
+                 if (user) {
+                     // Update existing user with the expected phone number
+                     user.phone = "9999999999";
+                     user.role = 'admin';
+                     user.isAccountVerified = true;
+                     await user.save();
+                 } else {
+                     user = new userModel({ name: "Admin User", email: "admin@agridust.com", phone: "9999999999", role: 'admin', isAccountVerified: true });
+                     await user.save();
+                 }
+             }
+        } else if (email) {
+             user = await userModel.findOne({ email });
+             if (!user && email === 'amit@example.com') {
+                 user = new userModel({ name: "Amit Kumar", email: "amit@example.com", phone: "8888888888", role: 'user', district: "Pune", crops: ["Wheat"], isAccountVerified: true });
+                 await user.save();
+             } else if (!user && email === 'john.fo@agridust.com') {
+                 user = new userModel({ name: "John Officer", email: "john.fo@agridust.com", phone: "7777777777", role: 'field-officer', isAccountVerified: true });
+                 await user.save();
+             }
+        }
+        
+        if (!user) return res.json({ success: false, message: "User not found" });
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+        const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+
+        return res.json({ success: true, message: "Auto Login Successful", user })
+    } catch(error) {
+        return res.json({ success: false, message: error.message });
+    }
+}
+
 // --- EMAIL/PASSWORD FUNCTIONS ---
 
 export const register = async (req, res) => {

@@ -1,5 +1,5 @@
 import express from 'express'
-import { register, login, logout, sendVerifyOtp, verifyEmail, isAuthenticated, sendResetOtp, resetPassword, sendOtp, verifyOtp } from '../controllers/authController.js'
+import { register, login, logout, sendVerifyOtp, verifyEmail, isAuthenticated, sendResetOtp, resetPassword, sendOtp, verifyOtp, autoLogin } from '../controllers/authController.js'
 import userAuth from '../middleware/userAuth.js'
 
 const authRouter = express.Router()
@@ -7,6 +7,7 @@ const authRouter = express.Router()
 // Email/Password Routes
 authRouter.post('/register', register)
 authRouter.post('/login', login)
+authRouter.post('/auto-login', autoLogin)
 authRouter.post('/logout', logout)
 authRouter.post('/send-verify-otp', userAuth, sendVerifyOtp)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 authRouter.post('/verify-account', userAuth, verifyEmail)

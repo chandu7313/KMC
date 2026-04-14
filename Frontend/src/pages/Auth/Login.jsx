@@ -114,6 +114,32 @@ const Login = () => {
         }
     }
 
+    const handleAutoLogin = async (role) => {
+        try {
+            setLoading(true);
+            axios.defaults.withCredentials = true;
+            let payload = {};
+            if (role === 'admin') payload = { phone: '9999999999' };
+            else if (role === 'farmer') payload = { email: 'amit@example.com' };
+            else if (role === 'field-officer') payload = { email: 'john.fo@agridust.com' };
+
+            const { data } = await axios.post(backendUrl + "/api/auth/auto-login", payload);
+            if (data.success) {
+                setIsLoggedin(true);
+                getUserData();
+                await syncPreferencesToBackend();
+                toast.success(`Logged in automatically as ${role}`);
+                navigate("/");
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
         <div className="flex items-center justify-center min-h-screen px-4 bg-gradient-to-br from-stone-100 via-emerald-50 to-stone-200">
             
@@ -163,6 +189,20 @@ const Login = () => {
                             {showOtpInput ? `${t('verify_otp_title')} sent to +91 ${phone}` : (state === 'Login' ? "Sign in to continue to KMC" : t('sign_up_to_continue'))}
                         </p>
                     </div>
+
+                    {!showOtpInput && state === 'Login' && (
+                        <div className="mb-6">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center mb-3">Quick Developer Login</p>
+                            <div className="flex flex-wrap gap-2 justify-center">
+                                <button type="button" onClick={() => handleAutoLogin('admin')} className="text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm">Admin</button>
+                                <button type="button" onClick={() => handleAutoLogin('farmer')} className="text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm">Farmer</button>
+                                <button type="button" onClick={() => handleAutoLogin('field-officer')} className="text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm">Field Officer</button>
+                            </div>
+                            <div className="border-b border-slate-100 my-6 relative">
+                                <span className="absolute left-1/2 -translate-x-1/2 -top-2.5 bg-white px-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">OR</span>
+                            </div>
+                        </div>
+                    )}
 
                     {!showOtpInput && (
                         <div className="flex bg-slate-100 p-1 rounded-xl mb-6 shadow-inner overflow-hidden">

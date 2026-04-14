@@ -24,7 +24,8 @@ import {
   Map,
   TreeDeciduous,
   Zap,
-  Tractor
+  Tractor,
+  Landmark
 } from "lucide-react";
 
 const Navbar = () => {
@@ -85,6 +86,8 @@ const Navbar = () => {
         { label: t('equipments', 'Equipments'), to: "/equipments", icon: Wrench },
         { label: t('crop_selection', 'Crop Selection'), to: "/crop-selection", icon: Map },
         { label: t('orchard', 'Orchard'), to: "/orchard-planning", icon: TreeDeciduous },
+        { label: t('gov_schemes', 'Govt. Schemes'), to: "/government-schemes", icon: Landmark },
+        { label: t('experts', 'Experts'), to: "/expert-consultations", icon: User },
       ],
     },
     { label: t('market_prices', 'Market Prices'), to: "/market-prices" },

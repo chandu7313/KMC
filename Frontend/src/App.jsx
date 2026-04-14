@@ -46,6 +46,7 @@ import ProductDetail from './pages/Marketplace/ProductDetail'
 import CartPage from './pages/Marketplace/CartPage'
 import Checkout from './pages/Marketplace/Checkout'
 import AdminInventory from './pages/Admin/AdminInventory'
+import GovernmentSchemes from './pages/Farming/GovernmentSchemes'
 
 const App = () => {
   const location = useLocation();
@@ -76,6 +77,8 @@ const App = () => {
         <Route path="/contact" element={<Contact/>}/>
         <Route path="/whether-insights" element={<WhetherInsights/>}/>
         <Route path="/crop-selection" element={<CropSelection/>}/>
+        <Route path="/government-schemes" element={<GovernmentSchemes/>}/>
+        <Route path="/expert-consultations" element={<Advisor/>}/>
         
         {/* Marketplace Routes */}
         <Route path="/marketplace" element={<Marketplace/>}/>
