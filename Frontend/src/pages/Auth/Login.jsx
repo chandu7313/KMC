@@ -67,8 +67,16 @@ const Login = () => {
             const { data } = await axios.post(backendUrl + "/api/auth/verify-otp", { phone, otp })
             if (data.success) {
                 setIsLoggedin(true)
-                getUserData()
+                await getUserData()
                 await syncPreferencesToBackend()
+                // Check if farmer needs to complete onboarding survey
+                try {
+                    const surveyRes = await axios.get(backendUrl + "/api/survey/status")
+                    if (surveyRes.data.success && !surveyRes.data.hasCompletedSurvey) {
+                        navigate("/onboarding-survey")
+                        return
+                    }
+                } catch (err) { console.error("Survey status check failed", err) }
                 navigate("/")
             } else {
                 toast.error(data.message)
@@ -80,7 +88,7 @@ const Login = () => {
         }
     }
 
-    const onEmailAuth = async (e) => {
+        const onEmailAuth = async (e) => {
         try {
             e.preventDefault()
             setLoading(true)
@@ -90,8 +98,17 @@ const Login = () => {
                 const { data } = await axios.post(backendUrl + "/api/auth/register", { name, email, password })
                 if (data.success) {
                     setIsLoggedin(true)
-                    getUserData()
+                    await getUserData()
                     await syncPreferencesToBackend()
+                    
+                    try {
+                        const surveyRes = await axios.get(backendUrl + "/api/survey/status")
+                        if (surveyRes.data.success && !surveyRes.data.hasCompletedSurvey) {
+                            navigate("/onboarding-survey")
+                            return
+                        }
+                    } catch (err) { console.error("Survey status check failed", err) }
+                    
                     navigate("/")
                 } else {
                     toast.error(data.message)
@@ -100,8 +117,17 @@ const Login = () => {
                 const { data } = await axios.post(backendUrl + "/api/auth/login", { email, password })
                 if (data.success) {
                     setIsLoggedin(true)
-                    getUserData()
+                    await getUserData()
                     await syncPreferencesToBackend()
+                    
+                    try {
+                        const surveyRes = await axios.get(backendUrl + "/api/survey/status")
+                        if (surveyRes.data.success && !surveyRes.data.hasCompletedSurvey) {
+                            navigate("/onboarding-survey")
+                            return
+                        }
+                    } catch (err) { console.error("Survey status check failed", err) }
+                    
                     navigate("/")
                 } else {
                     toast.error(data.message)

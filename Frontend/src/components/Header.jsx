@@ -79,19 +79,19 @@ const Header = () => {
     </section>
 
     {/* --- OUR SERVICES --- */}
-    <section className="mx-auto w-[90%] px-4 sm:px-6 lg:px-8 mt-10 mb-16">
-      <div className="space-y-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-100 pb-6">
-            <div className="space-y-1">
-                <div className="text-[9px] font-black text-green-700 uppercase tracking-[0.3em]">Excellence in Agriculture</div>
-                <h2 className="text-3xl font-serif font-bold text-[#1f2d1f]">Our Core Services</h2>
+    <section className="mx-auto w-[90%] md:w-[94%] max-w-7xl px-4 sm:px-6 lg:px-8 mt-16 mb-20 animate-fade-in-up">
+      <div className="space-y-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-gray-200 pb-6">
+            <div className="space-y-2">
+                <div className="text-[11px] font-bold text-[#0e783a] uppercase tracking-[0.2em]">Excellence in Agriculture</div>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">Our Core Services</h2>
             </div>
-            <p className="text-slate-400 font-medium max-w-sm text-xs">
+            <p className="text-gray-500 font-medium max-w-sm text-sm">
                 A complete ecosystem of precision tools designed to maximize your yield and simplify your operations.
             </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {services.map((s, idx) => {
             const imgSrc =
               s.title === 'Soil Testing' ? assets.services_images.soil :
@@ -105,38 +105,34 @@ const Header = () => {
               <div 
                 key={idx} 
                 onClick={() => navigate(s.url)}
-                className="group relative bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer"
+                className="group flex flex-col bg-white rounded-[20px] overflow-hidden border border-gray-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_15px_40px_-5px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all duration-300 cursor-pointer"
               >
-                <div className="flex flex-col h-full">
                   {/* Top Image Part */}
-                  <div className="relative h-40 overflow-hidden">
-                    <img src={imgSrc || null} alt={s.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
-                    <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-white/5 to-transparent" />
+                  <div className="relative h-[200px] w-full overflow-hidden">
+                    <img src={imgSrc || null} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"/>
+                    <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500" />
                     
                     {/* Floating Icon Badge */}
-                    <div className="absolute bottom-3 left-6">
-                        <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center text-green-700 shadow-lg shadow-green-900/5 border border-slate-50 group-hover:bg-green-700 group-hover:text-white transition-colors duration-500">
-                            <s.icon size={22} strokeWidth={1.5} />
+                    <div className="absolute bottom-4 left-5">
+                        <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center text-[#168a44] shadow-md group-hover:bg-[#168a44] group-hover:text-white transition-colors duration-300 border border-gray-100">
+                            <s.icon size={20} strokeWidth={2.5} />
                         </div>
                     </div>
                   </div>
 
                   {/* Content Part */}
-                  <div className="p-6 pt-4 space-y-3">
-                    <div className="space-y-0.5">
-                        <h3 className="text-xl font-black text-[#1f2d1f] group-hover:text-green-700 transition-colors">
-                            {s.title}
-                        </h3>
-                        <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                            {s.desc}
-                        </p>
-                    </div>
+                  <div className="p-6 flex flex-col flex-1">
+                    <h3 className="text-xl font-extrabold text-gray-900 group-hover:text-[#168a44] transition-colors mb-2 tracking-tight">
+                        {s.title}
+                    </h3>
+                    <p className="text-[13px] text-gray-500 font-semibold mb-6 flex-1">
+                        {s.desc}
+                    </p>
 
-                    <div className="pt-2 flex items-center gap-2 text-green-700 font-black text-[9px] uppercase tracking-widest group-hover:gap-3 transition-all">
-                      Explore Service <ChevronRight size={12} strokeWidth={3} />
+                    <div className="mt-auto flex items-center gap-1.5 text-[#168a44] font-extrabold text-[10px] uppercase tracking-[0.15em] group-hover:gap-2.5 transition-all">
+                      Explore Service <ChevronRight size={14} strokeWidth={3} />
                     </div>
                   </div>
-                </div>
               </div>
             )
           })}

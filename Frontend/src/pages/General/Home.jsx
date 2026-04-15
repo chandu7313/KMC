@@ -95,7 +95,7 @@ const Home = () => {
                             <div 
                                 key={idx}
                                 onClick={() => navigate(service.url)}
-                                className="bg-slate-50 p-7 rounded-[32px] border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-slate-200 transition-all cursor-pointer group"
+                                className="bg-slate-50 p-7 rounded-[20px] border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-slate-200 transition-all cursor-pointer group"
                             >
                                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-green-700 mb-5 border border-slate-100 shadow-sm group-hover:scale-110 group-hover:bg-green-700 group-hover:text-white transition-all">
                                     <service.icon size={22} />

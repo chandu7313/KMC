@@ -23,6 +23,7 @@ export const getUserData = async (req, res) => {
                 language: user.language,
                 preferredLanguage: user.preferredLanguage,
                 hasCompletedTour: user.hasCompletedTour,
+                hasCompletedSurvey: user.hasCompletedSurvey,
                 simpleMode: user.simpleMode,
                 addresses: user.addresses || []
             }

@@ -18,6 +18,7 @@ import productRouter from "./routes/productRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
 import bookingRouter from "./routes/bookingRoutes.js";
+import surveyRouter from "./routes/surveyRoutes.js";
 import startCronJobs from "./config/cron.js";
 
 const app = express();
@@ -51,5 +52,6 @@ app.use('/api/product', productRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/booking', bookingRouter);
+app.use('/api/survey', surveyRouter);
 
 app.listen(port, () => console.log(`Server started on PORT:${port}`));

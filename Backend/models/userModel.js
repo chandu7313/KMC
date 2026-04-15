@@ -21,6 +21,18 @@ const userSchema = new mongoose.Schema({
     hasCompletedTour: { type: Boolean, default: false },
     simpleMode: { type: Boolean, default: false },
     cartData: { type: Object, default: {} },
+    hasCompletedSurvey: { type: Boolean, default: false },
+    surveyData: {
+        language: { type: String },
+        farmName: { type: String },
+        farmSize: { type: Number },
+        farmSizeUnit: { type: String, default: 'acres' },
+        landOwnership: { type: String },
+        soilType: { type: String },
+        waterSource: { type: String },
+        primaryCrops: [{ type: String }],
+        farmingExperience: { type: String },
+    },
     addresses: [{
         fullName: { type: String, required: true },
         phone: { type: String, required: true },
