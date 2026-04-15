@@ -20,6 +20,16 @@ import header_img2 from './header-images/header-img2.jpg'
 import header_img3 from './header-images/header-img3.webp'
 import header_img4 from './header-images/header-img4.jpg'
 import drone_img from './drone-image.png'
+import soil_testing from './header-images/soil-testing.png'
+import equi from './header-images/equip.png'
+import mandi_prices from './header-images/mandi-prices.png'
+import insights from './header-images/insights.png'
+import crop_selection from './header-images/crop-selection.png'
+import wheat from './wheat.png'
+import cotton from './cotton.png'
+import drip from './drip.png'
+import hero_image from './hero-image.png'
+
 
 export const assets = {
     arrow_icon,
@@ -42,5 +52,14 @@ export const assets = {
     },
     header_images: [header_img1, header_img2, header_img3, header_img4],
     company_members_img,
-    drone_img
+    drone_img,
+    soil_testing,
+    mandi_prices,
+    insights,
+    equi,
+    crop_selection,
+    wheat,
+    cotton,
+    drip,
+    hero_image
 }
