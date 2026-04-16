@@ -1,15 +1,16 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Navbar from "../../components/Navbar";
-import { Link } from "react-router-dom";
-import { ArrowRight, Leaf, Droplets, LayoutTemplate, Briefcase, TrendingUp, Check, Microscope, Building, Users, Calendar, CloudLightning } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, Leaf, Droplets, LayoutTemplate, Briefcase, TrendingUp, Check, Microscope, Building, Calendar, CloudLightning } from "lucide-react";
 
 // Imports for our local images
 import heroBg from "../../assets/orchard/hero.png";
 import soilImg from "../../assets/orchard/soil.png";
 
 const OrchardPlanning = () => {
+  const navigate = useNavigate();
 
-  // Unsplash fallbacks for images we couldn't generate due to quota
+  // Unsplash fallbacks for images
   const expertImages = [
     "https://images.unsplash.com/photo-1594824436998-dd40e4f69d89?auto=format&fit=crop&q=80&w=600&grayscale",
     "https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&q=80&w=600&grayscale",
@@ -45,10 +46,13 @@ const OrchardPlanning = () => {
               Leverage scientific data and industry expertise to transform your land into a high-yield, sustainable agricultural estate.
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              <button className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-colors flex items-center justify-center">
+              <button 
+                onClick={() => navigate('/orchard-planning/plan')}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-colors flex items-center justify-center active:scale-95"
+              >
                 Start Planning
               </button>
-              <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold px-8 py-3.5 rounded-full transition-colors flex items-center justify-center">
+              <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold px-8 py-3.5 rounded-full transition-colors flex items-center justify-center active:scale-95">
                 Talk to Expert
               </button>
             </div>
@@ -75,7 +79,7 @@ const OrchardPlanning = () => {
                   Comprehensive soil testing and topography mapping for optimal orchard layout.
                 </p>
              </div>
-             {/* Offset image container like the design */}
+             {/* Offset image container */}
              <div className="absolute -bottom-8 left-0 right-0 h-48 md:h-64 px-8 pb-8 z-0">
                <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
                   <img src={soilImg} className="w-full h-full object-cover" alt="Soil Analysis" />

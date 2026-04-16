@@ -15,6 +15,7 @@ import Blogs from './pages/Information/Blogs'
 import BlogDetail from './pages/Information/BlogDetail'
 import About from './pages/Information/About'
 import OrchardPlanning from './pages/Farming/OrchardPlanning'
+import PlanEstateForm from './pages/Farming/PlanEstateForm'
 import SuccessStories from './pages/Information/SuccessStories'
 import Contact from './pages/Information/ContactUs'
 import BookFarmVisit from './pages/Farming/BookFarmVisit'
@@ -73,6 +74,7 @@ const App = () => {
         <Route path="/fertilizers" element={<Fertilizers/>}/>
         <Route path="/my-orders" element={<MyOrders/>}/>
         <Route path="/orchard-planning" element={<OrchardPlanning/>}/>
+        <Route path="/orchard-planning/plan" element={<PlanEstateForm/>}/>
         <Route path="/success-stories" element={<SuccessStories/>}/>
         <Route path="/book-farm-visit" element={<BookFarmVisit/>}/>
         <Route path="/market-prices" element={<MarketPrices/>}/>
