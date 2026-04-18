@@ -4,7 +4,9 @@ import 'dotenv/config';
 import cookieParser from "cookie-parser";
 
 import connectCloudinary from "./config/cloudinary.js";
-import { connectDB } from "./config/database.js";
+import { connectDB, sequelize } from "./config/database.js";
+import './models/index.js'; // Register all models + relationships
+
 import authRouter from './routes/authRoutes.js'
 import userRouter from "./routes/userRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
@@ -13,7 +15,7 @@ import blogRouter from "./routes/blogRoutes.js";
 import successRouter from "./routes/successRoutes.js";
 import fertilizerRouter from "./routes/fertilizerRoutes.js";
 import equipmentRouter from "./routes/equipmentRoutes.js";
-import soilRouter from "./routes/soilRoutes.js"; // Modular 
+import soilRouter from "./routes/soilRoutes.js";
 import productRouter from "./routes/productRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 import orderRouter from "./routes/orderRoutes.js";
@@ -25,10 +27,17 @@ import startCronJobs from "./config/cron.js";
 const app = express();
 const port = process.env.PORT || 4000;
 
-// Initialize Cloudinary (Supabase client auto-inits on import)
+// Initialize Cloudinary
 connectCloudinary();
-connectDB(); // Test Sequelize Postgres Connection
-startCronJobs(); // Start background jobs
+
+// Connect DB, sync models, then start cron
+(async () => {
+    await connectDB();
+    // Sync models with existing DB tables (does NOT drop or alter existing columns)
+    await sequelize.sync({ alter: false });
+    console.log('✅ Sequelize models synced with database.');
+    startCronJobs(); // Start background jobs
+})();
 
 const allowedOrigins = [
     'http://localhost:5173',

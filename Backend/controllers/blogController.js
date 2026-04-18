@@ -1,6 +1,5 @@
 import { Blog } from '../models/index.js';
 import { v2 as cloudinary } from 'cloudinary';
-import { slugify } from '../utils/helpers.js'; // Assuming you have a helper like this, or we can inline it
 
 const generateSlug = (title) => {
     return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');

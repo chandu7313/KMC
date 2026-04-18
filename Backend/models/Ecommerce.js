@@ -8,12 +8,12 @@ const Product = sequelize.define('Product', {
     shortDescription: { type: DataTypes.STRING },
     category: { type: DataTypes.STRING, allowNull: false },
     subCategory: { type: DataTypes.STRING },
-    price: { type: DataTypes.DECIMAL, allowNull: false },
-    discountedPrice: { type: DataTypes.DECIMAL },
+    price: { type: DataTypes.FLOAT, allowNull: false },
+    discountedPrice: { type: DataTypes.FLOAT },
     images: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
     stock: { type: DataTypes.INTEGER, defaultValue: 0 },
     specifications: { type: DataTypes.JSONB, defaultValue: {} },
-    ratings: { type: DataTypes.DECIMAL, defaultValue: 0 },
+    ratings: { type: DataTypes.FLOAT, defaultValue: 0 },
     numReviews: { type: DataTypes.INTEGER, defaultValue: 0 },
     isFeatured: { type: DataTypes.BOOLEAN, defaultValue: false }
 }, {
@@ -35,7 +35,7 @@ const Review = sequelize.define('Review', {
 
 const MarketplaceOrder = sequelize.define('MarketplaceOrder', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    totalAmount: { type: DataTypes.DECIMAL, allowNull: false },
+    totalAmount: { type: DataTypes.FLOAT, allowNull: false },
     address: { type: DataTypes.STRING, allowNull: false },
     status: { type: DataTypes.STRING, defaultValue: 'Pending' },
     paymentMethod: { type: DataTypes.STRING, defaultValue: 'COD' },
@@ -52,7 +52,7 @@ const MarketplaceOrder = sequelize.define('MarketplaceOrder', {
 const MarketplaceOrderItem = sequelize.define('MarketplaceOrderItem', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     quantity: { type: DataTypes.INTEGER, allowNull: false },
-    price: { type: DataTypes.DECIMAL, allowNull: false }
+    price: { type: DataTypes.FLOAT, allowNull: false }
 }, {
     tableName: 'marketplace_order_items',
     underscored: true,

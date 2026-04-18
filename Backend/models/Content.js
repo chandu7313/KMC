@@ -23,8 +23,8 @@ const SuccessStory = sequelize.define('SuccessStory', {
     farmerName: { type: DataTypes.STRING },
     district: { type: DataTypes.STRING },
     crop: { type: DataTypes.STRING },
-    beforeYield: { type: DataTypes.DECIMAL },
-    afterYield: { type: DataTypes.DECIMAL },
+    beforeYield: { type: DataTypes.FLOAT },
+    afterYield: { type: DataTypes.FLOAT },
     description: { type: DataTypes.TEXT },
     image: { type: DataTypes.STRING },
     status: { type: DataTypes.STRING, defaultValue: 'draft' }
@@ -66,7 +66,7 @@ const Notification = sequelize.define('Notification', {
 
 const OrchardRequest = sequelize.define('OrchardRequest', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    acres: { type: DataTypes.DECIMAL, allowNull: false },
+    acres: { type: DataTypes.FLOAT, allowNull: false },
     location: { type: DataTypes.STRING, allowNull: false },
     waterType: { type: DataTypes.STRING, allowNull: false },
     goal: { type: DataTypes.STRING, allowNull: false },
@@ -86,7 +86,7 @@ const Order = sequelize.define('Order', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     userId: { type: DataTypes.STRING, allowNull: false },
     package: { type: DataTypes.STRING, allowNull: false },
-    amount: { type: DataTypes.DECIMAL, allowNull: false },
+    amount: { type: DataTypes.FLOAT, allowNull: false },
     date: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     status: { type: DataTypes.STRING, defaultValue: 'Active' }
 }, {

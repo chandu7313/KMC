@@ -44,7 +44,7 @@ const FarmerSurvey = sequelize.define('FarmerSurvey', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     language: { type: DataTypes.STRING },
     farmName: { type: DataTypes.STRING },
-    farmSize: { type: DataTypes.DECIMAL },
+    farmSize: { type: DataTypes.FLOAT },
     farmSizeUnit: { type: DataTypes.STRING, defaultValue: 'acres' },
     landOwnership: { type: DataTypes.STRING },
     soilType: { type: DataTypes.STRING },

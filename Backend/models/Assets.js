@@ -5,7 +5,7 @@ const Equipment = sequelize.define('Equipment', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     name: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
-    price: { type: DataTypes.DECIMAL, allowNull: false },
+    price: { type: DataTypes.FLOAT, allowNull: false },
     image: { type: DataTypes.STRING, allowNull: false },
     category: { type: DataTypes.STRING, allowNull: false },
     stock: { type: DataTypes.INTEGER, defaultValue: 0 },
@@ -18,7 +18,7 @@ const Equipment = sequelize.define('Equipment', {
 
 const EquipmentOrder = sequelize.define('EquipmentOrder', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    totalAmount: { type: DataTypes.DECIMAL, allowNull: false },
+    totalAmount: { type: DataTypes.FLOAT, allowNull: false },
     address: { type: DataTypes.STRING, allowNull: false },
     status: { type: DataTypes.STRING, defaultValue: 'Pending' },
     paymentStatus: { type: DataTypes.STRING, defaultValue: 'Pending' },
@@ -32,7 +32,7 @@ const EquipmentOrder = sequelize.define('EquipmentOrder', {
 const EquipmentOrderItem = sequelize.define('EquipmentOrderItem', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     quantity: { type: DataTypes.INTEGER, allowNull: false },
-    price: { type: DataTypes.DECIMAL, allowNull: false }
+    price: { type: DataTypes.FLOAT, allowNull: false }
 }, {
     tableName: 'equipment_order_items',
     underscored: true,
@@ -43,7 +43,7 @@ const Fertilizer = sequelize.define('Fertilizer', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     name: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
-    price: { type: DataTypes.DECIMAL, allowNull: false },
+    price: { type: DataTypes.FLOAT, allowNull: false },
     image: { type: DataTypes.STRING, allowNull: false },
     category: { type: DataTypes.STRING, allowNull: false },
     stock: { type: DataTypes.INTEGER, defaultValue: 0 }
@@ -55,7 +55,7 @@ const Fertilizer = sequelize.define('Fertilizer', {
 
 const FertilizerOrder = sequelize.define('FertilizerOrder', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    totalAmount: { type: DataTypes.DECIMAL, allowNull: false },
+    totalAmount: { type: DataTypes.FLOAT, allowNull: false },
     address: { type: DataTypes.STRING, allowNull: false },
     status: { type: DataTypes.STRING, defaultValue: 'Pending' },
     paymentStatus: { type: DataTypes.STRING, defaultValue: 'Pending' }
@@ -68,7 +68,7 @@ const FertilizerOrder = sequelize.define('FertilizerOrder', {
 const FertilizerOrderItem = sequelize.define('FertilizerOrderItem', {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     quantity: { type: DataTypes.INTEGER, allowNull: false },
-    price: { type: DataTypes.DECIMAL, allowNull: false }
+    price: { type: DataTypes.FLOAT, allowNull: false }
 }, {
     tableName: 'fertilizer_order_items',
     underscored: true,
