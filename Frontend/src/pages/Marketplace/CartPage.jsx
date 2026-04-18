@@ -22,7 +22,7 @@ const CartPage = () => {
 
         try {
             // First get cart content
-            const cartRes = await axios.post(`${backendUrl}/api/cart/get`, { userId: userData._id });
+            const cartRes = await axios.post(`${backendUrl}/api/cart/get`, { userId: userData.id });
             if (cartRes.data.success) {
                 setCartItems(cartRes.data.cartData);
                 setGlobalCartItems(cartRes.data.cartData);
@@ -52,7 +52,7 @@ const CartPage = () => {
 
         try {
             const { data } = await axios.post(`${backendUrl}/api/cart/update`, {
-                userId: userData._id,
+                userId: userData.id,
                 itemId,
                 quantity: newQuantity
             });
@@ -70,7 +70,7 @@ const CartPage = () => {
     const removeItem = async (itemId) => {
         try {
             const { data } = await axios.post(`${backendUrl}/api/cart/update`, {
-                userId: userData._id,
+                userId: userData.id,
                 itemId,
                 quantity: 0
             });
@@ -89,7 +89,7 @@ const CartPage = () => {
 
     // Calculate totals based on productsData matching cartItems
     const cartDetails = Object.keys(cartItems).map(itemId => {
-        const product = productsData.find(p => p._id === itemId);
+        const product = productsData.find(p => p.id === itemId);
         return product ? { ...product, quantity: cartItems[itemId] } : null;
     }).filter(Boolean);
 
@@ -163,7 +163,7 @@ const CartPage = () => {
                         {/* Cart Items List */}
                         <div className="lg:w-2/3 space-y-4">
                             {cartDetails.map(item => (
-                                <div key={item._id} className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center gap-6 group">
+                                <div key={item.id} className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center gap-6 group">
                                     <div className="w-full sm:w-32 aspect-square rounded-[20px] bg-slate-50 p-4 shrink-0 overflow-hidden relative border border-slate-100">
                                         <img src={item.images[0]} alt={item.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500" />
                                     </div>
@@ -175,7 +175,7 @@ const CartPage = () => {
                                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{item.category}</p>
                                             </div>
                                             <button 
-                                                onClick={() => removeItem(item._id)}
+                                                onClick={() => removeItem(item.id)}
                                                 className="p-3 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-colors shrink-0"
                                             >
                                                 <Trash2 size={18} />
@@ -190,12 +190,12 @@ const CartPage = () => {
                                             <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl p-1 shadow-inner">
                                                 <button 
                                                     className="w-10 h-10 rounded-lg bg-white flex items-center justify-center font-black text-slate-500 hover:text-slate-900 shadow-sm transition-colors"
-                                                    onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                                 ><Minus size={16}/></button>
                                                 <span className="w-12 text-center font-black text-slate-900">{item.quantity}</span>
                                                 <button 
                                                     className="w-10 h-10 rounded-lg bg-white flex items-center justify-center font-black text-slate-500 hover:text-slate-900 shadow-sm transition-colors"
-                                                    onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                                 ><Plus size={16}/></button>
                                             </div>
                                         </div>

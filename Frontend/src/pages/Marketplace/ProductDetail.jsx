@@ -55,7 +55,7 @@ const ProductDetail = () => {
             if (data.success) {
                 // Filter by category and exclude current product, then limit to 4
                 const related = data.products
-                    .filter(p => p.category === category && p._id !== currentId)
+                    .filter(p => p.category === category && p.id !== currentId)
                     .slice(0, 4);
                 setRelatedProducts(related);
             }
@@ -70,11 +70,11 @@ const ProductDetail = () => {
             return;
         }
         try {
-            const currentQty = cartItems[product?._id] || 0;
+            const currentQty = cartItems[product?.id] || 0;
             const newQty = currentQty + qty;
 
             const { data } = await axios.post(`${backendUrl}/api/cart/update`, {
-                itemId: product._id,
+                itemId: product.id,
                 quantity: newQty
             });
 
@@ -161,7 +161,7 @@ const ProductDetail = () => {
                                     {product.name}
                                 </h1>
                                 <p className="text-[14px] text-[#666] font-bold mb-7 tracking-wide flex items-center gap-2">
-                                    Brand: <span className="text-[#1a1a1a]">KMC</span> <span className="text-gray-300">•</span> SKU: <span className="text-[#1a1a1a]">{product._id.slice(-8).toUpperCase()}</span>
+                                    Brand: <span className="text-[#1a1a1a]">KMC</span> <span className="text-gray-300">•</span> SKU: <span className="text-[#1a1a1a]">{product.id.slice(-8).toUpperCase()}</span>
                                 </p>
 
                                 <div className="flex items-end gap-4 mb-4 mt-1">
@@ -302,8 +302,8 @@ const ProductDetail = () => {
                             <div className="grid grid-cols-4 gap-6">
                                 {relatedProducts.length > 0 ? relatedProducts.map((item, idx) => (
                                     <div 
-                                        key={item._id} 
-                                        onClick={() => navigate(`/marketplace/product/${item._id}`)}
+                                        key={item.id} 
+                                        onClick={() => navigate(`/marketplace/product/${item.id}`)}
                                         className="border border-gray-200 rounded-[8px] p-4 group hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer bg-white"
                                     >
                                         <div className="bg-[#f5f5f5] aspect-square rounded-[6px] mb-4 overflow-hidden relative">
@@ -387,7 +387,7 @@ const ProductDetail = () => {
                                 {product.name}
                             </h1>
                             <p className="text-[12px] text-[#666] font-bold mb-6 flex items-center gap-1.5">
-                                Brand: <span className="text-[#1a1a1a]">KMC</span> <span className="text-gray-300">•</span> SKU: <span className="text-[#1a1a1a]">{product._id.slice(-8).toUpperCase()}</span>
+                                Brand: <span className="text-[#1a1a1a]">KMC</span> <span className="text-gray-300">•</span> SKU: <span className="text-[#1a1a1a]">{product.id.slice(-8).toUpperCase()}</span>
                             </p>
 
                             <div className="flex items-end gap-3 mb-6">
@@ -497,8 +497,8 @@ const ProductDetail = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     {relatedProducts.length > 0 ? relatedProducts.map((item, idx) => (
                                         <div 
-                                            key={item._id} 
-                                            onClick={() => navigate(`/marketplace/product/${item._id}`)}
+                                            key={item.id} 
+                                            onClick={() => navigate(`/marketplace/product/${item.id}`)}
                                             className="border border-gray-200 rounded-[8px] p-3.5 text-left bg-white shadow-sm active:scale-95 transition-transform"
                                         >
                                             <div className="bg-[#f5f5f5] aspect-square rounded-[6px] mb-3 relative overflow-hidden">

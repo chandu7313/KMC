@@ -35,7 +35,7 @@ const Equipments = () => {
                 const filtered = data.products.filter(p => 
                     p.category === 'Equipments' || 
                     equipmentCategories.includes(p.category) || 
-                    equipmentCategories.includes(p.subCategory)
+                    equipmentCategories.includes(p.sub_category)
                 );
                 setProducts(filtered);
             } else {
@@ -55,7 +55,7 @@ const Equipments = () => {
     const filteredProducts = products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                               p.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = activeCategory === 'All' || p.category === activeCategory || p.subCategory === activeCategory;
+        const matchesCategory = activeCategory === 'All' || p.category === activeCategory || p.sub_category === activeCategory;
         return matchesSearch && matchesCategory;
     });
 
@@ -154,8 +154,8 @@ const Equipments = () => {
                     <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
                         {filteredProducts.map(product => (
                             <div 
-                                key={product._id} 
-                                onClick={() => navigate(`/product/${product._id}`)}
+                                key={product.id} 
+                                onClick={() => navigate(`/product/${product.id}`)}
                                 className="bg-white rounded-[16px] md:rounded-[24px] p-1.5 md:p-2 shadow-sm border border-slate-100 hover:shadow-xl hover:border-emerald-100 transition-all duration-300 group cursor-pointer flex flex-col h-full"
                             >
                                 {/* Image Container */}
@@ -167,7 +167,7 @@ const Equipments = () => {
                                     />
                                     
                                     {/* Badges */}
-                                    {product.isFeatured && (
+                                    {product.is_featured && (
                                         <div className="absolute top-2 left-2 flex flex-col gap-1">
                                             <span className="bg-yellow-400 text-yellow-950 px-2 py-1 flex items-center justify-center rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest shadow-sm">
                                                 Featured

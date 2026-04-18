@@ -1,4 +1,4 @@
-import successStoryModel from "../models/SuccessStory.js";
+import { SuccessStory } from '../models/index.js';
 import { v2 as cloudinary } from 'cloudinary';
 
 // Add Success Story
@@ -13,7 +13,7 @@ export const addSuccessStory = async (req, res) => {
             imageUrl = imageUpload.secure_url;
         }
 
-        const storyData = {
+        await SuccessStory.create({
             farmerName,
             district,
             crop,
@@ -22,10 +22,7 @@ export const addSuccessStory = async (req, res) => {
             description,
             status: status || 'draft',
             image: imageUrl
-        };
-
-        const story = new successStoryModel(storyData);
-        await story.save();
+        });
 
         res.json({ success: true, message: "Success Story Added" });
 
@@ -37,7 +34,10 @@ export const addSuccessStory = async (req, res) => {
 // List Stories (Admin)
 export const listStories = async (req, res) => {
     try {
-        const stories = await successStoryModel.find().sort({ createdAt: -1 });
+        const stories = await SuccessStory.findAll({
+            order: [['createdAt', 'DESC']]
+        });
+        
         res.json({ success: true, stories });
     } catch (error) {
         res.json({ success: false, message: error.message });
@@ -51,14 +51,29 @@ export const updateStory = async (req, res) => {
         const { farmerName, district, crop, beforeYield, afterYield, description, status } = req.body;
         const imageFile = req.file;
 
-        const updateData = { farmerName, district, crop, beforeYield, afterYield, description, status };
+        const updateData = {
+            farmerName,
+            district,
+            crop,
+            beforeYield,
+            afterYield,
+            description,
+            status
+        };
 
         if (imageFile) {
             const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
             updateData.image = imageUpload.secure_url;
         }
 
-        await successStoryModel.findByIdAndUpdate(id, updateData);
+        const story = await SuccessStory.findByPk(id);
+
+        if (!story) {
+            return res.json({ success: false, message: "Success Story not found" });
+        }
+
+        await story.update(updateData);
+
         res.json({ success: true, message: "Success Story Updated" });
 
     } catch (error) {
@@ -70,16 +85,29 @@ export const updateStory = async (req, res) => {
 export const deleteStory = async (req, res) => {
     try {
         const { id } = req.params;
-        await successStoryModel.findByIdAndDelete(id);
+        
+        const story = await SuccessStory.findByPk(id);
+        
+        if (!story) {
+            return res.json({ success: false, message: "Success Story not found" });
+        }
+        
+        await story.destroy();
+
         res.json({ success: true, message: "Success Story Deleted" });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
 };
+
 // List Published Stories (Public)
 export const listPublishedStories = async (req, res) => {
     try {
-        const stories = await successStoryModel.find({ status: 'published' }).sort({ createdAt: -1 });
+        const stories = await SuccessStory.findAll({
+            where: { status: 'published' },
+            order: [['createdAt', 'DESC']]
+        });
+        
         res.json({ success: true, stories });
     } catch (error) {
         res.json({ success: false, message: error.message });

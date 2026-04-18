@@ -65,7 +65,7 @@ const AdminSoilEntry = () => {
         try {
             axios.defaults.withCredentials = true;
             const { data } = await axios.post(`${backendUrl}/api/soil/admin/create`, {
-                farmerId: selectedFarmer._id,
+                farmerId: selectedFarmer.id,
                 ph: inputs.ph,
                 nitrogen: inputs.n,
                 phosphorus: inputs.p,
@@ -129,12 +129,12 @@ const AdminSoilEntry = () => {
                             )}
                             {farmers.map(farmer => (
                                 <button
-                                    key={farmer._id}
+                                    key={farmer.id}
                                     onClick={() => setSelectedFarmer(farmer)}
-                                    className={`w-full text-left p-4 rounded-2xl transition-all border ${selectedFarmer?._id === farmer._id ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-200' : 'bg-white border-slate-50 hover:bg-slate-50'}`}
+                                    className={`w-full text-left p-4 rounded-2xl transition-all border ${selectedFarmer?.id === farmer.id ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-200' : 'bg-white border-slate-50 hover:bg-slate-50'}`}
                                 >
                                     <p className="font-bold text-sm truncate">{farmer.name}</p>
-                                    <p className={`text-[10px] mt-0.5 font-medium ${selectedFarmer?._id === farmer._id ? 'text-green-100' : 'text-slate-500'}`}>{farmer.email}</p>
+                                    <p className={`text-[10px] mt-0.5 font-medium ${selectedFarmer?.id === farmer.id ? 'text-green-100' : 'text-slate-500'}`}>{farmer.email}</p>
                                 </button>
                             ))}
                         </div>

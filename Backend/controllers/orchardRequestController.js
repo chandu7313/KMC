@@ -1,4 +1,4 @@
-import OrchardModel from "../models/OrchardRequest.js";
+import { OrchardRequest } from '../models/index.js';
 import { v2 as cloudinary } from "cloudinary";
 
 // POST /api/orchard/request
@@ -20,12 +20,10 @@ export const createRequest = async (req, res) => {
             }
         }
 
-        const newRequest = new OrchardModel({
-            farmerId: req.body.userId || null, // Optional tie-in if user is logged in
-            landDetails: {
-                acres: Number(acres),
-                location
-            },
+        const newRequest = await OrchardRequest.create({
+            farmerId: req.body.userId || null,
+            acres: Number(acres),
+            location,
             waterType,
             goal,
             skillLevel,
@@ -33,8 +31,6 @@ export const createRequest = async (req, res) => {
             images: imageUrls,
             status: 'pending'
         });
-
-        await newRequest.save();
 
         res.json({ success: true, message: "Expert plan request submitted successfully", data: newRequest });
 
@@ -47,7 +43,10 @@ export const createRequest = async (req, res) => {
 // GET /api/orchard/admin-requests
 export const getRequests = async (req, res) => {
     try {
-        const requests = await OrchardModel.find({}).sort({ createdAt: -1 });
+        const requests = await OrchardRequest.findAll({
+            order: [['createdAt', 'DESC']]
+        });
+
         res.json({ success: true, requests });
     } catch (error) {
         console.error("Error fetching orchard requests:", error);
@@ -61,14 +60,16 @@ export const assignExpert = async (req, res) => {
         const { id } = req.params;
         const { assignedExpert } = req.body;
         
-        const request = await OrchardModel.findByIdAndUpdate(id, {
-            status: 'assigned',
-            assignedExpert
-        }, { new: true });
+        const request = await OrchardRequest.findByPk(id);
 
         if (!request) {
             return res.json({ success: false, message: "Request not found" });
         }
+        
+        await request.update({
+            status: 'assigned',
+            assignedExpert
+        });
 
         res.json({ success: true, message: "Expert assigned successfully", request });
     } catch (error) {

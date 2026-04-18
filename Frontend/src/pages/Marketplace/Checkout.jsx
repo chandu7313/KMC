@@ -27,7 +27,7 @@ const Checkout = () => {
                 return;
             }
             try {
-                const cartRes = await axios.post(`${backendUrl}/api/cart/get`, { userId: userData._id });
+                const cartRes = await axios.post(`${backendUrl}/api/cart/get`, { userId: userData.id });
                 if (cartRes.data.success) {
                     setCartItems(cartRes.data.cartData);
                     const prodRes = await axios.get(`${backendUrl}/api/product/list`);
@@ -63,7 +63,7 @@ const Checkout = () => {
     }, [addresses.length]);
 
     const cartDetails = Object.keys(cartItems).map(itemId => {
-        const product = productsData.find(p => p._id === itemId);
+        const product = productsData.find(p => p.id === itemId);
         return product ? { ...product, quantity: cartItems[itemId] } : null;
     }).filter(Boolean);
 
@@ -81,7 +81,7 @@ const Checkout = () => {
 
         let addressObj = null;
         if (isAddingNewAddress) {
-            if (!newAddress.fullName.trim() || !newAddress.phone.trim() || !newAddress.address.trim()) {
+            if (!newAddress.full_name.trim() || !newAddress.phone.trim() || !newAddress.address.trim()) {
                 toast.error("Please fill all details for the new address");
                 return;
             }
@@ -95,28 +95,28 @@ const Checkout = () => {
             return;
         }
 
-        const addressStr = `${addressObj.fullName}, Ph: ${addressObj.phone}, ${addressObj.address}`;
+        const addressStr = `${addressObj.full_name}, Ph: ${addressObj.phone}, ${addressObj.address}`;
 
         setLoading(true);
         try {
             // Save address if new
             if (isAddingNewAddress) {
                 await axios.post(`${backendUrl}/api/user/save-address`, {
-                    userId: userData._id,
+                    userId: userData.id,
                     address: addressObj
                 });
                 await getUserData(); // Refresh user context
             }
 
             const orderItems = cartDetails.map(item => ({
-                productId: item._id,
+                productId: item.id,
                 quantity: item.quantity,
                 price: item.discountedPrice || item.price
             }));
 
             if (paymentMethod === 'ONLINE') {
                 const { data } = await axios.post(`${backendUrl}/api/order/razorpay`, {
-                    userId: userData._id,
+                    userId: userData.id,
                     items: orderItems,
                     amount: total,
                     address: addressStr
@@ -138,7 +138,7 @@ const Checkout = () => {
                                     razorpay_payment_id: response.razorpay_payment_id,
                                     razorpay_signature: response.razorpay_signature,
                                     dbOrderId: data.dbOrderId,
-                                    userId: userData._id
+                                    userId: userData.id
                                 });
                                 if (verifyRes.data.success) {
                                     setOrderPlaced(true);
@@ -154,7 +154,7 @@ const Checkout = () => {
                             }
                         },
                         prefill: {
-                            name: addressObj.fullName,
+                            name: addressObj.full_name,
                             email: userData?.email,
                             contact: addressObj.phone
                         },
@@ -175,7 +175,7 @@ const Checkout = () => {
             } else {
                 // COD Flow
                 const { data } = await axios.post(`${backendUrl}/api/order/place`, {
-                    userId: userData._id,
+                    userId: userData.id,
                     items: orderItems,
                     amount: total,
                     address: addressStr,
@@ -275,7 +275,7 @@ const Checkout = () => {
                                                         className="mt-1 w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                                                     />
                                                     <div>
-                                                        <p className="font-bold text-slate-900 leading-tight">{addr.fullName} <span className="text-sm text-slate-500 font-medium">({addr.phone})</span></p>
+                                                        <p className="font-bold text-slate-900 leading-tight">{addr.full_name} <span className="text-sm text-slate-500 font-medium">({addr.phone})</span></p>
                                                         <p className="text-xs font-medium text-slate-500 mt-2 line-clamp-2">{addr.address}</p>
                                                     </div>
                                                 </div>
@@ -306,7 +306,7 @@ const Checkout = () => {
                                             <input 
                                                 type="text" 
                                                 className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 font-bold text-slate-700 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-                                                value={newAddress.fullName}
+                                                value={newAddress.full_name}
                                                 onChange={(e) => setNewAddress({...newAddress, fullName: e.target.value})}
                                                 placeholder="e.g. Ramesh Reddy"
                                             />
@@ -392,7 +392,7 @@ const Checkout = () => {
                             
                             <div className="space-y-4 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                                 {cartDetails.map(item => (
-                                    <div key={item._id} className="flex gap-4">
+                                    <div key={item.id} className="flex gap-4">
                                         <div className="w-16 h-16 rounded-xl bg-slate-50 p-2 shrink-0 border border-slate-100">
                                             <img src={item.images[0]} className="w-full h-full object-contain mix-blend-multiply" />
                                         </div>

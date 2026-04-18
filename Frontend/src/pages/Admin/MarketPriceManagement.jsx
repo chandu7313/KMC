@@ -59,16 +59,16 @@ const MarketPriceManagement = () => {
     const handleOpenModal = (price = null) => {
         if (price) {
             setIsEditMode(true);
-            setSelectedPriceId(price._id);
+            setSelectedPriceId(price.id);
             setFormData({
-                cropName: price.cropName,
+                cropName: price.crop_name,
                 variety: price.variety,
                 district: price.district,
                 mandi: price.mandi || 'Local Mandi',
                 unit: price.unit,
-                modalPrice: price.modalPrice,
-                minPrice: price.minPrice || '',
-                maxPrice: price.maxPrice || '',
+                modalPrice: price.modal_price,
+                minPrice: price.min_price || '',
+                maxPrice: price.max_price || '',
                 change: price.change
             });
         } else {
@@ -208,11 +208,11 @@ const MarketPriceManagement = () => {
                             ) : prices.length === 0 ? (
                                 <tr><td colSpan="6" className="text-center py-10">No market data found</td></tr>
                             ) : prices.map((item) => (
-                                <tr key={item._id} className="hover:bg-slate-50 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-slate-900">{item.cropName}</td>
+                                <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                                    <td className="px-6 py-4 font-medium text-slate-900">{item.crop_name}</td>
                                     <td className="px-6 py-4">{item.variety}</td>
                                     <td className="px-6 py-4">{item.district}</td>
-                                    <td className="px-6 py-4 font-semibold">₹{(item.modalPrice || 0).toLocaleString()}</td>
+                                    <td className="px-6 py-4 font-semibold">₹{(item.modal_price || 0).toLocaleString()}</td>
                                     <td className={`px-6 py-4 ${item.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                         {item.change > 0 ? '+' : ''}{item.change}%
                                     </td>
@@ -224,7 +224,7 @@ const MarketPriceManagement = () => {
                                             <Edit2 size={18} />
                                         </button>
                                         <button 
-                                            onClick={() => handleDelete(item._id)}
+                                            onClick={() => handleDelete(item.id)}
                                             className="text-slate-400 hover:text-red-600 transition"
                                         >
                                             <Trash2 size={18} />
@@ -258,7 +258,7 @@ const MarketPriceManagement = () => {
                                     <input 
                                         type="text" name="cropName" required
                                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                        value={formData.cropName}
+                                        value={formData.crop_name}
                                         onChange={handleInputChange}
                                     />
                                 </div>
@@ -299,7 +299,7 @@ const MarketPriceManagement = () => {
                                     <input 
                                         type="number" name="modalPrice" required
                                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                        value={formData.modalPrice}
+                                        value={formData.modal_price}
                                         onChange={handleInputChange}
                                     />
                                 </div>
@@ -320,7 +320,7 @@ const MarketPriceManagement = () => {
                                     <input 
                                         type="number" name="minPrice"
                                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                        value={formData.minPrice}
+                                        value={formData.min_price}
                                         onChange={handleInputChange}
                                     />
                                 </div>
@@ -329,7 +329,7 @@ const MarketPriceManagement = () => {
                                     <input 
                                         type="number" name="maxPrice"
                                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                                        value={formData.maxPrice}
+                                        value={formData.max_price}
                                         onChange={handleInputChange}
                                     />
                                 </div>

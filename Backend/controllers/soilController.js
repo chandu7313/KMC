@@ -1,5 +1,4 @@
-import SoilReport from '../models/SoilReport.js';
-import SoilReminder from '../models/SoilReminder.js';
+import { SoilReport, SoilReminder, User } from '../models/index.js';
 import { analyzeSoil } from '../services/soilAnalysisService.js';
 import { generateHealthCardPDF } from '../services/pdfService.js';
 import { v2 as cloudinary } from 'cloudinary';
@@ -29,8 +28,10 @@ export const uploadReport = async (req, res) => {
             );
         }
 
-        const report = new SoilReport({
-            farmerId: req.userId || req.body.userId,
+        const farmerId = req.userId || req.body.userId;
+
+        const reportData = {
+            farmerId,
             reportFile: reportFileUrl,
             status,
             ph: ph ? parseFloat(ph) : null,
@@ -42,16 +43,21 @@ export const uploadReport = async (req, res) => {
             suitableCrops: recommendations.crops || [],
             soilStatus: recommendations.phStatus || null,
             suitabilityPct: recommendations.suitabilityPct || null
-        });
+        };
 
-        await report.save();
+        const report = await SoilReport.create(reportData);
 
         if (status === 'Completed') {
             const reminderDate = new Date(report.createdAt || Date.now());
             reminderDate.setMonth(reminderDate.getMonth() + 6);
-            report.nextTestDate = reminderDate;
-            await report.save();
-            await SoilReminder.create({ user: req.userId || req.body.userId, report: report._id, reminderDate });
+
+            await report.update({ nextTestDate: reminderDate });
+
+            await SoilReminder.create({
+                userId: farmerId,
+                reportId: report.id,
+                reminderDate
+            });
         }
 
         res.status(201).json({ success: true, data: report });
@@ -62,7 +68,12 @@ export const uploadReport = async (req, res) => {
 
 export const getHistory = async (req, res) => {
     try {
-        const tests = await SoilReport.find({ farmerId: req.userId || req.body.userId }).sort({ createdAt: -1 });
+        const farmerId = req.userId || req.body.userId;
+        const tests = await SoilReport.findAll({
+            where: { farmerId },
+            order: [['createdAt', 'DESC']]
+        });
+
         res.status(200).json({ success: true, count: tests.length, data: tests });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -72,11 +83,18 @@ export const getHistory = async (req, res) => {
 export const downloadHealthCard = async (req, res) => {
     try {
         const { id } = req.params;
-        const report = await SoilReport.findById(id).populate('user', 'name email');
+        const report = await SoilReport.findByPk(id, {
+            include: [{ model: User, attributes: ['name', 'email'] }]
+        });
+
         if (!report) return res.status(404).json({ success: false, message: 'Report not found' });
         if (report.status !== 'Completed') return res.status(400).json({ success: false, message: 'Report is pending analysis.' });
 
-        const pdfBuffer = await generateHealthCardPDF(report);
+        // Map for PDF generation compat
+        const reportData = report.toJSON();
+        reportData.users = reportData.User;
+
+        const pdfBuffer = await generateHealthCardPDF(reportData);
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=Soil_Health_Card_${id}.pdf`);
         res.send(pdfBuffer);
@@ -87,8 +105,20 @@ export const downloadHealthCard = async (req, res) => {
 
 export const adminGetAllReports = async (req, res) => {
     try {
-        const tests = await SoilReport.find().populate('farmerId', 'name email phone').sort({ createdAt: -1 });
-        res.status(200).json({ success: true, count: tests.length, data: tests });
+        const tests = await SoilReport.findAll({
+            include: [{ model: User, attributes: ['name', 'email', 'phone'] }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        const mapped = tests.map(t => {
+            const data = t.toJSON();
+            const user = data.User;
+            data.farmerId = user ? { _id: data.farmerId, name: user.name, email: user.email, phone: user.phone } : { _id: data.farmerId };
+            delete data.User;
+            return data;
+        });
+
+        res.status(200).json({ success: true, count: mapped.length, data: mapped });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -99,33 +129,47 @@ export const adminAnalyzeReport = async (req, res) => {
         const { id } = req.params;
         const { ph, nitrogen, phosphorus, potassium, organicMatter } = req.body;
 
-        const report = await SoilReport.findById(id);
+        const report = await SoilReport.findByPk(id);
+
         if (!report) return res.status(404).json({ success: false, message: 'Report not found' });
 
-        report.ph = parseFloat(ph);
-        report.nitrogen = parseFloat(nitrogen);
-        report.phosphorus = parseFloat(phosphorus);
-        report.potassium = parseFloat(potassium);
-        report.organicMatter = parseFloat(organicMatter);
-        report.status = 'Completed';
-
-        const recommendations = analyzeSoil(report.ph, report.nitrogen, report.phosphorus, report.potassium, report.organicMatter);
-        report.recommendedFertilizer = recommendations.fertilizers;
-        report.suitableCrops = recommendations.crops;
-        report.soilStatus = recommendations.phStatus;
-        report.suitabilityPct = recommendations.suitabilityPct;
+        const recommendations = analyzeSoil(
+            parseFloat(ph),
+            parseFloat(nitrogen),
+            parseFloat(phosphorus),
+            parseFloat(potassium),
+            parseFloat(organicMatter)
+        );
 
         const reminderDate = new Date();
         reminderDate.setMonth(reminderDate.getMonth() + 6);
-        report.nextTestDate = reminderDate;
 
-        await report.save();
+        await report.update({
+            ph: parseFloat(ph),
+            nitrogen: parseFloat(nitrogen),
+            phosphorus: parseFloat(phosphorus),
+            potassium: parseFloat(potassium),
+            organicMatter: parseFloat(organicMatter),
+            status: 'Completed',
+            recommendedFertilizer: recommendations.fertilizers,
+            suitableCrops: recommendations.crops,
+            soilStatus: recommendations.phStatus,
+            suitabilityPct: recommendations.suitabilityPct,
+            nextTestDate: reminderDate
+        });
 
-        await SoilReminder.findOneAndUpdate(
-            { report: report._id },
-            { user: report.farmerId, report: report._id, reminderDate },
-            { upsert: true, new: true }
-        );
+        // Upsert soil reminder
+        const existingReminder = await SoilReminder.findOne({ where: { reportId: id } });
+
+        if (existingReminder) {
+            await existingReminder.update({ reminderDate });
+        } else {
+            await SoilReminder.create({
+                userId: report.farmerId,
+                reportId: id,
+                reminderDate
+            });
+        }
 
         res.status(200).json({ success: true, data: report, message: 'Analyzed successfully.' });
     } catch (error) {
@@ -149,7 +193,10 @@ export const adminCreateReport = async (req, res) => {
             parseFloat(organicMatter)
         );
 
-        const report = new SoilReport({
+        const reminderDate = new Date();
+        reminderDate.setMonth(reminderDate.getMonth() + 6);
+
+        const report = await SoilReport.create({
             farmerId,
             ph: parseFloat(ph),
             nitrogen: parseFloat(nitrogen),
@@ -160,19 +207,13 @@ export const adminCreateReport = async (req, res) => {
             recommendedFertilizer: recommendations.fertilizers,
             suitableCrops: recommendations.crops,
             soilStatus: recommendations.phStatus,
-            suitabilityPct: recommendations.suitabilityPct
+            suitabilityPct: recommendations.suitabilityPct,
+            nextTestDate: reminderDate
         });
 
-        await report.save();
-
-        const reminderDate = new Date();
-        reminderDate.setMonth(reminderDate.getMonth() + 6);
-        report.nextTestDate = reminderDate;
-        await report.save();
-
         await SoilReminder.create({
-            user: farmerId,
-            report: report._id,
+            userId: farmerId,
+            reportId: report.id,
             reminderDate
         });
 
@@ -215,7 +256,11 @@ export const analyzeStandalone = async (req, res) => {
 export const getFarmerHistory = async (req, res) => {
     try {
         const { farmerId } = req.params;
-        const history = await SoilReport.find({ farmerId }).sort({ createdAt: -1 });
+        const history = await SoilReport.findAll({
+            where: { farmerId },
+            order: [['createdAt', 'DESC']]
+        });
+
         res.status(200).json({ success: true, data: history });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

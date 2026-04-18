@@ -39,7 +39,7 @@ const SoilTestManagement = () => {
       n: test.nitrogen || '',
       p: test.phosphorus || '',
       k: test.potassium || '',
-      om: test.organicMatter || ''
+      om: test.organic_matter || ''
     });
   };
 
@@ -57,7 +57,7 @@ const SoilTestManagement = () => {
     e.preventDefault();
     try {
       axios.defaults.withCredentials = true;
-      const { data } = await axios.put(`${backendUrl}/api/soil-tests/${selectedTest._id}/analyze`, {
+      const { data } = await axios.put(`${backendUrl}/api/soil-tests/${selectedTest.id}/analyze`, {
         ph: inputs.ph,
         nitrogen: inputs.n,
         phosphorus: inputs.p,
@@ -100,13 +100,13 @@ const SoilTestManagement = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
                 {tests.map((test) => (
-                  <tr key={test._id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={test.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="p-4">
                       <div className="font-semibold text-slate-800">{test.farmerId?.name}</div>
                       <div className="text-slate-500 text-xs">{test.farmerId?.email}</div>
                     </td>
                     <td className="p-4 text-slate-600">
-                      {new Date(test.createdAt).toLocaleDateString()}
+                      {new Date(test.created_at).toLocaleDateString()}
                     </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${test.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>

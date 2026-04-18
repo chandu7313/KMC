@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import userModel from '../models/userModel.js';
+import { User } from '../models/index.js';
 
 const adminAuth = async (req, res, next) => {
     try {
@@ -15,7 +15,9 @@ const adminAuth = async (req, res, next) => {
             return res.json({ success: false, message: 'Not Authorized. Login Again' });
         }
 
-        const user = await userModel.findById(tokenDecode.id);
+        const user = await User.findByPk(tokenDecode.id, {
+            attributes: ['id', 'role']
+        });
 
         if (!user) {
             return res.json({ success: false, message: 'User not found' });

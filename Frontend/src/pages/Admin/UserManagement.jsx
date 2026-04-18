@@ -72,7 +72,7 @@ const UserManagement = () => {
             if (modalMode === 'add') {
                 response = await axios.post(`${backendUrl}/api/admin/users`, formData);
             } else {
-                response = await axios.put(`${backendUrl}/api/admin/users/${selectedUser._id}`, formData);
+                response = await axios.put(`${backendUrl}/api/admin/users/${selectedUser.id}`, formData);
             }
 
             if (response.data.success) {
@@ -136,7 +136,7 @@ const UserManagement = () => {
                             ) : users.length === 0 ? (
                                 <tr><td colSpan="4" className="text-center py-20 text-slate-400">No users found</td></tr>
                             ) : users.map((user) => (
-                                <tr key={user._id} className="hover:bg-slate-50/50 transition-colors">
+                                <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="font-bold text-slate-900">{user.name}</div>
                                         <div className="text-xs text-slate-500">{user.email}</div>
@@ -161,9 +161,9 @@ const UserManagement = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold
-                                            ${user.isAccountVerified ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
-                                            {user.isAccountVerified ? <CheckCircle size={12} /> : <div className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse"></div>}
-                                            {user.isAccountVerified ? 'Verified' : 'Pending'}
+                                            ${user.is_account_verified ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
+                                            {user.is_account_verified ? <CheckCircle size={12} /> : <div className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse"></div>}
+                                            {user.is_account_verified ? 'Verified' : 'Pending'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -176,7 +176,7 @@ const UserManagement = () => {
                                                 <Edit2 size={18} />
                                             </button>
                                             <button 
-                                                onClick={() => handleDelete(user._id)}
+                                                onClick={() => handleDelete(user.id)}
                                                 className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                                 title="Delete User"
                                             >

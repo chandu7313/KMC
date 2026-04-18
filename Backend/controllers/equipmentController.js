@@ -1,5 +1,4 @@
-import equipmentModel from "../models/Equipment.js";
-import equipmentOrderModel from "../models/EquipmentOrder.js";
+import { Equipment, EquipmentOrder, EquipmentOrderItem, User } from '../models/index.js';
 import { v2 as cloudinary } from 'cloudinary';
 
 // Add Equipment
@@ -25,7 +24,7 @@ export const addEquipment = async (req, res) => {
             }
         }
 
-        const equipmentData = {
+        await Equipment.create({
             name,
             description,
             price: Number(price),
@@ -33,10 +32,7 @@ export const addEquipment = async (req, res) => {
             stock: Number(stock),
             image: imageUrl,
             specifications: parsedSpecs
-        };
-
-        const equipment = new equipmentModel(equipmentData);
-        await equipment.save();
+        });
 
         res.json({ success: true, message: "Equipment Added Successfully" });
 
@@ -48,7 +44,9 @@ export const addEquipment = async (req, res) => {
 // List Equipments
 export const listEquipments = async (req, res) => {
     try {
-        const equipments = await equipmentModel.find().sort({ createdAt: -1 });
+        const equipments = await Equipment.findAll({
+            order: [['createdAt', 'DESC']]
+        });
         res.json({ success: true, equipments });
     } catch (error) {
         res.json({ success: false, message: error.message });
@@ -88,7 +86,14 @@ export const updateEquipment = async (req, res) => {
             updateData.image = imageUpload.secure_url;
         }
 
-        await equipmentModel.findByIdAndUpdate(id, updateData);
+        const equipment = await Equipment.findByPk(id);
+        
+        if (!equipment) {
+            return res.json({ success: false, message: "Equipment not found" });
+        }
+        
+        await equipment.update(updateData);
+
         res.json({ success: true, message: "Equipment Updated Successfully" });
 
     } catch (error) {
@@ -100,7 +105,14 @@ export const updateEquipment = async (req, res) => {
 export const deleteEquipment = async (req, res) => {
     try {
         const { id } = req.params;
-        await equipmentModel.findByIdAndDelete(id);
+        
+        const equipment = await Equipment.findByPk(id);
+        if (!equipment) {
+            return res.json({ success: false, message: "Equipment not found" });
+        }
+        
+        await equipment.destroy();
+
         res.json({ success: true, message: "Equipment Deleted Successfully" });
     } catch (error) {
         res.json({ success: false, message: error.message });
@@ -114,20 +126,30 @@ export const placeEquipmentOrder = async (req, res) => {
     try {
         const { userId, items, totalAmount, address } = req.body;
 
-        const orderData = {
+        const newOrder = await EquipmentOrder.create({
             userId,
-            items,
             totalAmount,
             address,
             status: 'Pending'
-        };
+        });
 
-        const newOrder = new equipmentOrderModel(orderData);
-        await newOrder.save();
+        // Insert order items
+        const orderItems = items.map(item => ({
+            orderId: newOrder.id,
+            equipmentId: item.equipmentId,
+            quantity: item.quantity,
+            price: item.price
+        }));
+
+        await EquipmentOrderItem.bulkCreate(orderItems);
 
         // Update stock
         for (const item of items) {
-            await equipmentModel.findByIdAndUpdate(item.equipmentId, { $inc: { stock: -item.quantity } });
+            const equipment = await Equipment.findByPk(item.equipmentId);
+
+            if (equipment) {
+                await equipment.update({ stock: equipment.stock - item.quantity });
+            }
         }
 
         res.json({ success: true, message: "Equipment Order Placed Successfully" });
@@ -141,8 +163,33 @@ export const placeEquipmentOrder = async (req, res) => {
 export const getUserEquipmentOrders = async (req, res) => {
     try {
         const { userId } = req.body;
-        const orders = await equipmentOrderModel.find({ userId }).populate('items.equipmentId').sort({ createdAt: -1 });
-        res.json({ success: true, orders });
+        const orders = await EquipmentOrder.findAll({
+            where: { userId },
+            include: [{
+                model: EquipmentOrderItem,
+                include: [{ model: Equipment }]
+            }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        // Reshape to match original response
+        const mapped = orders.map(order => {
+            const data = order.toJSON();
+            if(data.EquipmentOrderItems) {
+                data.items = data.EquipmentOrderItems.map(item => {
+                    const itemData = { ...item };
+                    itemData.equipmentId = itemData.Equipment;
+                    delete itemData.Equipment;
+                    return itemData;
+                });
+                delete data.EquipmentOrderItems;
+            } else {
+                data.items = [];
+            }
+            return data;
+        });
+
+        res.json({ success: true, orders: mapped });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -151,8 +198,38 @@ export const getUserEquipmentOrders = async (req, res) => {
 // Get Admin Orders
 export const getAdminEquipmentOrders = async (req, res) => {
     try {
-        const orders = await equipmentOrderModel.find().populate('userId', 'name phone').populate('items.equipmentId').sort({ createdAt: -1 });
-        res.json({ success: true, orders });
+        const orders = await EquipmentOrder.findAll({
+            include: [
+                { model: User, attributes: ['name', 'phone'] },
+                {
+                    model: EquipmentOrderItem,
+                    include: [{ model: Equipment }]
+                }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+
+        // Reshape to match original response
+        const mapped = orders.map(order => {
+            const data = order.toJSON();
+            data.userId = data.User;
+            delete data.User;
+            
+            if(data.EquipmentOrderItems) {
+                data.items = data.EquipmentOrderItems.map(item => {
+                    const itemData = { ...item };
+                    itemData.equipmentId = itemData.Equipment;
+                    delete itemData.Equipment;
+                    return itemData;
+                });
+                delete data.EquipmentOrderItems;
+            } else {
+                data.items = [];
+            }
+            return data;
+        });
+
+        res.json({ success: true, orders: mapped });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -164,7 +241,9 @@ export const cancelEquipmentOrder = async (req, res) => {
         const { orderId, userId, reason } = req.body;
 
         // Find order and verify ownership
-        const order = await equipmentOrderModel.findOne({ _id: orderId, userId });
+        const order = await EquipmentOrder.findOne({
+            where: { id: orderId, userId }
+        });
 
         if (!order) {
             return res.json({ success: false, message: "Order not found or unauthorized" });
@@ -174,9 +253,10 @@ export const cancelEquipmentOrder = async (req, res) => {
             return res.json({ success: false, message: "Only pending orders can be cancelled" });
         }
 
-        order.status = 'Cancelled';
-        order.cancellationReason = reason || 'No reason provided';
-        await order.save();
+        await order.update({
+            status: 'Cancelled',
+            cancellationReason: reason || 'No reason provided'
+        });
 
         res.json({ success: true, message: "Order Cancelled Successfully" });
     } catch (error) {
@@ -189,7 +269,13 @@ export const cancelEquipmentOrder = async (req, res) => {
 export const updateEquipmentOrderStatus = async (req, res) => {
     try {
         const { orderId, status } = req.body;
-        await equipmentOrderModel.findByIdAndUpdate(orderId, { status });
+        
+        const order = await EquipmentOrder.findByPk(orderId);
+        if (!order) {
+            return res.json({ success: false, message: "Order not found" });
+        }
+        
+        await order.update({ status });
         res.json({ success: true, message: "Equipment Order Status Updated" });
     } catch (error) {
         res.json({ success: false, message: error.message });

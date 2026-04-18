@@ -147,8 +147,8 @@ const Marketplace = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {filteredProducts.map(product => (
                             <div 
-                                key={product._id} 
-                                onClick={() => navigate(`/product/${product._id}`)}
+                                key={product.id} 
+                                onClick={() => navigate(`/product/${product.id}`)}
                                 className="bg-white rounded-[32px] p-2 shadow-sm border border-slate-100 hover:shadow-2xl hover:border-emerald-100 transition-all duration-500 group cursor-pointer flex flex-col h-full"
                             >
                                 {/* Image Container */}
@@ -164,7 +164,7 @@ const Marketplace = () => {
                                         <span className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black text-slate-900 shadow-sm uppercase tracking-widest">
                                             {product.category}
                                         </span>
-                                        {product.isFeatured && (
+                                        {product.is_featured && (
                                             <span className="bg-yellow-400 text-yellow-950 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
                                                 Featured
                                             </span>
@@ -195,7 +195,7 @@ const Marketplace = () => {
                                             {product.name}
                                         </h3>
                                         <p className="text-slate-400 text-[10px] font-bold line-clamp-2 leading-relaxed">
-                                            {product.shortDescription || product.description}
+                                            {product.short_description || product.description}
                                         </p>
                                     </div>
                                     

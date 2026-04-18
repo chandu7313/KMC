@@ -86,7 +86,7 @@ const FarmerManagement = () => {
                 ...editData,
                 crops: editData.crops.split(',').map(c => c.trim()).filter(c => c)
             };
-            const { data } = await axios.put(`${backendUrl}/api/admin/farmer/${selectedFarmer._id}`, dataToUpdate);
+            const { data } = await axios.put(`${backendUrl}/api/admin/farmer/${selectedFarmer.id}`, dataToUpdate);
             if (data.success) {
                 toast.success(data.message);
                 setIsEditModalOpen(false);
@@ -107,7 +107,7 @@ const FarmerManagement = () => {
             phone: farmer.phone || '',
             district: farmer.district,
             crops: farmer.crops.join(', '),
-            fieldOfficer: farmer.fieldOfficer?._id || ''
+            fieldOfficer: farmer.field_officer?.id || ''
         });
         setIsEditModalOpen(true);
     };
@@ -162,7 +162,7 @@ const FarmerManagement = () => {
                             ) : farmers.length === 0 ? (
                                 <tr><td colSpan="6" className="text-center py-10">No farmers found</td></tr>
                             ) : farmers.map((farmer) => (
-                                <tr key={farmer._id} className="hover:bg-slate-50 transition-colors">
+                                <tr key={farmer.id} className="hover:bg-slate-50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-slate-900">{farmer.name}</div>
                                         {farmer.phone && (
@@ -181,14 +181,14 @@ const FarmerManagement = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1 ${farmer.isAccountVerified ? 'text-green-600' : 'text-yellow-600'}`}>
-                                            <span className={`h-1.5 w-1.5 rounded-full ${farmer.isAccountVerified ? 'bg-green-600' : 'bg-yellow-600'}`}></span>
-                                            {farmer.isAccountVerified ? 'Approved' : 'Pending'}
+                                        <span className={`inline-flex items-center gap-1 ${farmer.is_account_verified ? 'text-green-600' : 'text-yellow-600'}`}>
+                                            <span className={`h-1.5 w-1.5 rounded-full ${farmer.is_account_verified ? 'bg-green-600' : 'bg-yellow-600'}`}></span>
+                                            {farmer.is_account_verified ? 'Approved' : 'Pending'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {farmer.fieldOfficer ? (
-                                            <span className="text-blue-600 font-medium">{farmer.fieldOfficer.name}</span>
+                                        {farmer.field_officer ? (
+                                            <span className="text-blue-600 font-medium">{farmer.field_officer.name}</span>
                                         ) : (
                                             <span className="text-slate-400 italic">Unassigned</span>
                                         )}
@@ -206,16 +206,16 @@ const FarmerManagement = () => {
                                         >
                                             Edit
                                         </button>
-                                        {!farmer.isAccountVerified ? (
+                                        {!farmer.is_account_verified ? (
                                             <button 
-                                                onClick={() => handleStatusUpdate(farmer._id, 'Approved')}
+                                                onClick={() => handleStatusUpdate(farmer.id, 'Approved')}
                                                 className="text-green-600 hover:text-green-700 font-medium"
                                             >
                                                 Approve
                                             </button>
                                         ) : (
                                             <button 
-                                                onClick={() => handleStatusUpdate(farmer._id, 'Pending')}
+                                                onClick={() => handleStatusUpdate(farmer.id, 'Pending')}
                                                 className="text-red-600 hover:text-red-700 font-medium"
                                             >
                                                 Reject
@@ -281,11 +281,11 @@ const FarmerManagement = () => {
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 <span className="text-slate-500">Field Officer:</span>
-                                <span className="col-span-2 font-medium">{selectedFarmer.fieldOfficer?.name || 'Not assigned'}</span>
+                                <span className="col-span-2 font-medium">{selectedFarmer.field_officer?.name || 'Not assigned'}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 <span className="text-slate-500">Joined:</span>
-                                <span className="col-span-2 font-medium">{new Date(selectedFarmer.createdAt).toLocaleDateString()}</span>
+                                <span className="col-span-2 font-medium">{new Date(selectedFarmer.created_at).toLocaleDateString()}</span>
                             </div>
                         </div>
                         <button 
@@ -357,11 +357,11 @@ const FarmerManagement = () => {
                                 <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase">Assign Field Officer</label>
                                 <select 
                                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
-                                    value={editData.fieldOfficer}
+                                    value={editData.field_officer}
                                     onChange={(e) => setEditData({...editData, fieldOfficer: e.target.value})}
                                 >
                                     <option value="">Unassigned</option>
-                                    {fieldOfficers.map(fo => <option key={fo._id} value={fo._id}>{fo.name}</option>)}
+                                    {fieldOfficers.map(fo => <option key={fo.id} value={fo.id}>{fo.name}</option>)}
                                 </select>
                             </div>
                         </div>

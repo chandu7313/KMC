@@ -1,13 +1,13 @@
 import axios from "axios";
-import MarketPrice from "../models/MarketPrice.js";
-import MarketHistory from "../models/marketHistoryModel.js";
+import { MarketPrice, MarketHistory } from '../models/index.js';
+import { Op } from 'sequelize';
 
 const DATA_GOV_API_KEY = process.env.DATA_GOV_API_KEY;
 const DATA_GOV_RESOURCE_ID = process.env.DATA_GOV_RESOURCE_ID;
 
 /**
  * Fetches real-time market data from data.gov.in (Agmarknet)
- * Filters for a specific state and upserts into MongoDB
+ * Filters for a specific state and upserts into Supabase
  */
 export const syncMandiData = async () => {
     try {
@@ -19,8 +19,7 @@ export const syncMandiData = async () => {
         console.log("--- Starting Mandi Data Sync ---");
 
         // Fetch data from Data.gov.in
-        // format=json, limit=1000 (adjust as needed)
-        const url = `https://api.data.gov.in/resource/x?api-key=${DATA_GOV_API_KEY}&format=json&limit=1000`;
+        const url = `https://api.data.gov.in/resource/${DATA_GOV_RESOURCE_ID}?api-key=${DATA_GOV_API_KEY}&format=json&limit=1000`;
 
         const response = await axios.get(url);
 
@@ -51,38 +50,63 @@ export const syncMandiData = async () => {
             const [day, month, year] = arrival_date.split('/');
             const arrivalDate = new Date(`${year}-${month}-${day}`);
 
-            // 1. Update/Insert current MarketPrice
-            await MarketPrice.findOneAndUpdate(
-                {
+            // 1. Update/Insert current MarketPrice (upsert by crop+district+mandi+date)
+            // First check if exists
+            const existing = await MarketPrice.findOne({
+                where: {
                     cropName: commodity,
-                    district,
+                    district: district,
                     mandi: market,
-                    arrivalDate
-                },
-                {
+                    arrivalDate: arrivalDate
+                }
+            });
+
+            if (existing) {
+                await existing.update({
                     variety: variety || 'Standard',
                     minPrice: parseInt(min_price),
                     maxPrice: parseInt(max_price),
                     modalPrice: parseInt(modal_price),
                     source: "agmarknet"
-                },
-                { upsert: true, new: true }
-            );
+                });
+            } else {
+                await MarketPrice.create({
+                    cropName: commodity,
+                    district,
+                    mandi: market,
+                    arrivalDate: arrivalDate,
+                    variety: variety || 'Standard',
+                    minPrice: parseInt(min_price),
+                    maxPrice: parseInt(max_price),
+                    modalPrice: parseInt(modal_price),
+                    source: "agmarknet"
+                });
+            }
 
             // 2. Also update MarketHistory for analytics
-            // (Only if it's the latest data for that day/crop/district)
-            await MarketHistory.findOneAndUpdate(
-                {
+            const dayStart = new Date(arrivalDate);
+            dayStart.setHours(0, 0, 0, 0);
+
+            const existingHistory = await MarketHistory.findOne({
+                where: {
+                    crop: commodity,
+                    district: district,
+                    date: dayStart
+                }
+            });
+
+            if (existingHistory) {
+                await existingHistory.update({
+                    price: parseInt(modal_price)
+                });
+            } else {
+                await MarketHistory.create({
                     crop: commodity,
                     district,
-                    date: {
-                        $gte: new Date(arrivalDate).setHours(0, 0, 0, 0),
-                        $lt: new Date(arrivalDate).setHours(23, 59, 59, 999)
-                    }
-                },
-                { price: parseInt(modal_price) },
-                { upsert: true }
-            );
+                    date: dayStart,
+                    price: parseInt(modal_price)
+                });
+            }
 
             updatedCount++;
         }

@@ -17,7 +17,7 @@ const SoilHistory = () => {
       axios.defaults.withCredentials = true;
       const { data } = await axios.get(`${backendUrl}/api/soil/history`);
       if (data.success) {
-        setHistory(data.data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
+        setHistory(data.data.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)));
       }
     } catch (error) {
       toast.error("Failed to load soil history");
@@ -47,7 +47,7 @@ const SoilHistory = () => {
   };
 
   const chartData = history.map(item => ({
-    date: new Date(item.createdAt).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }),
+    date: new Date(item.created_at).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }),
     ph: item.ph,
     n: item.nitrogen,
     p: item.phosphorus,
@@ -176,21 +176,21 @@ const SoilHistory = () => {
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {[...history].reverse().map(test => (
-                                    <tr key={test._id} className="hover:bg-slate-50 transition-colors">
+                                    <tr key={test.id} className="hover:bg-slate-50 transition-colors">
                                         <td className="px-8 py-5">
-                                            <p className="font-bold text-slate-900 text-sm">{new Date(test.createdAt).toLocaleDateString()}</p>
+                                            <p className="font-bold text-slate-900 text-sm">{new Date(test.created_at).toLocaleDateString()}</p>
                                         </td>
                                         <td className="px-8 py-5 font-black text-slate-700">{test.ph}</td>
                                         <td className="px-8 py-5 font-bold text-slate-600">{test.nitrogen} ppm</td>
                                         <td className="px-8 py-5 font-bold text-slate-600">{test.phosphorus} ppm</td>
                                         <td className="px-8 py-5 font-bold text-slate-600">{test.potassium} ppm</td>
                                         <td className="px-8 py-5">
-                                            <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded ${test.soilStatus === 'Neutral' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                                                {test.soilStatus}
+                                            <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded ${test.soil_status === 'Neutral' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                {test.soil_status}
                                             </span>
                                         </td>
                                         <td className="px-8 py-5 text-right">
-                                            <button onClick={() => handleDownload(test._id)} className="text-slate-400 hover:text-green-600 transition-colors">
+                                            <button onClick={() => handleDownload(test.id)} className="text-slate-400 hover:text-green-600 transition-colors">
                                                 <Download size={18} />
                                             </button>
                                         </td>

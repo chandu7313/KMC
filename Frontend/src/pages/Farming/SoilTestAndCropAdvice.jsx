@@ -130,7 +130,7 @@ const SoilTestAndCropAdvice = () => {
         { label: 'Nitrogen (N)', val: test.nitrogen, pct: getPct(test.nitrogen, targets.n), level: getLevel(getPct(test.nitrogen, targets.n)) },
         { label: 'Phosphorus (P)', val: test.phosphorus, pct: getPct(test.phosphorus, targets.p), level: getLevel(getPct(test.phosphorus, targets.p)) },
         { label: 'Potassium (K)', val: test.potassium, pct: getPct(test.potassium, targets.k), level: getLevel(getPct(test.potassium, targets.k)) },
-        { label: 'Organic Matter (OM)', val: test.organicMatter, pct: getPct(test.organicMatter, targets.om), level: getLevel(getPct(test.organicMatter, targets.om)) },
+        { label: 'Organic Matter (OM)', val: test.organic_matter, pct: getPct(test.organic_matter, targets.om), level: getLevel(getPct(test.organic_matter, targets.om)) },
     ];
   };
 
@@ -218,11 +218,11 @@ const SoilTestAndCropAdvice = () => {
                       ) : history.length === 0 ? (
                           <div className="text-center py-10 opacity-40 font-bold text-sm">No records found.</div>
                       ) : history.map(test => (
-                          <button key={test._id} onClick={() => setSelectedTest(test)} className={`w-full text-left p-5 rounded-3xl border-2 transition-all ${selectedTest?._id === test._id ? 'border-green-600 bg-green-50/30' : 'border-slate-50 hover:border-slate-200'}`}>
+                          <button key={test.id} onClick={() => setSelectedTest(test)} className={`w-full text-left p-5 rounded-3xl border-2 transition-all ${selectedTest?.id === test.id ? 'border-green-600 bg-green-50/30' : 'border-slate-50 hover:border-slate-200'}`}>
                               <div className="flex justify-between items-start">
                                   <div>
-                                      <p className="font-black text-slate-900 text-sm">{new Date(test.createdAt).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</p>
-                                      <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">Ref: {test._id.slice(-8)}</p>
+                                      <p className="font-black text-slate-900 text-sm">{new Date(test.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</p>
+                                      <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">Ref: {test.id.slice(-8)}</p>
                                   </div>
                                   <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${test.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                                       {test.status}
@@ -263,8 +263,8 @@ const SoilTestAndCropAdvice = () => {
                                       </div>
                                   </div>
                                   <div className="text-center">
-                                      <h4 className={`text-xl font-black ${selectedTest.soilStatus === 'Acidic' ? 'text-rose-600' : (selectedTest.soilStatus === 'Alkaline' ? 'text-amber-600' : 'text-green-600')}`}>
-                                          {selectedTest.soilStatus} Soil
+                                      <h4 className={`text-xl font-black ${selectedTest.soil_status === 'Acidic' ? 'text-rose-600' : (selectedTest.soil_status === 'Alkaline' ? 'text-amber-600' : 'text-green-600')}`}>
+                                          {selectedTest.soil_status} Soil
                                       </h4>
                                       <p className="text-sm font-medium text-slate-500 mt-2 px-4 italic">"Ideal for most Kharif and Rabi crops."</p>
                                   </div>
@@ -300,11 +300,11 @@ const SoilTestAndCropAdvice = () => {
                                           </div>
                                           <div>
                                               <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Suitability Index</p>
-                                              <p className="text-2xl font-black text-slate-900">{selectedTest.suitabilityPct || 92}%</p>
+                                              <p className="text-2xl font-black text-slate-900">{selectedTest.suitability_pct || 92}%</p>
                                           </div>
                                       </div>
                                       <button 
-                                          onClick={() => handleDownloadPDF(selectedTest._id)}
+                                          onClick={() => handleDownloadPDF(selectedTest.id)}
                                           disabled={downloading}
                                           className="bg-slate-50 text-slate-700 hover:bg-slate-100 px-6 py-4 rounded-3xl font-black text-sm transition-all flex items-center gap-3 border border-slate-200"
                                       >
@@ -327,7 +327,7 @@ const SoilTestAndCropAdvice = () => {
                                        <div className="w-8 h-8 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center flex-shrink-0 mt-1">
                                            <AlertCircle className="text-green-400" size={16} />
                                        </div>
-                                       <p className="text-lg font-bold leading-snug">{selectedTest.recommendedFertilizer || 'NPK levels are balanced. Maintain organic inputs.'}</p>
+                                       <p className="text-lg font-bold leading-snug">{selectedTest.recommended_fertilizer || 'NPK levels are balanced. Maintain organic inputs.'}</p>
                                    </div>
                                </div>
                                <div className="mt-8 pt-6 border-t border-slate-800">
@@ -341,7 +341,7 @@ const SoilTestAndCropAdvice = () => {
                           <div className="bg-white rounded-[40px] p-10 shadow-sm border border-slate-100 flex flex-col relative overflow-hidden">
                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-8">Optimal Crop Rotation</h4>
                                <div className="flex flex-wrap gap-3 mb-auto">
-                                   {selectedTest.suitableCrops?.map(crop => (
+                                   {selectedTest.suitable_crops?.map(crop => (
                                        <span key={crop} className="bg-slate-50 text-slate-800 font-black text-sm px-6 py-3 rounded-2xl border border-slate-100 hover:bg-green-600 hover:text-white transition-all cursor-default">
                                            {crop}
                                        </span>
@@ -362,7 +362,7 @@ const SoilTestAndCropAdvice = () => {
                               </div>
                               <div>
                                   <p className="text-xs font-black text-green-100 uppercase tracking-widest">Next Health Checkpoint</p>
-                                  <p className="text-xl font-black">{new Date(selectedTest.nextTestDate).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })}</p>
+                                  <p className="text-xl font-black">{new Date(selectedTest.next_test_date).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })}</p>
                               </div>
                           </div>
                           <button className="bg-white text-green-700 px-8 py-4 rounded-2xl font-black text-sm hover:bg-green-50 transition-all">

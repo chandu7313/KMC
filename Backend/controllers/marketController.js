@@ -1,18 +1,23 @@
-import MarketPrice from "../models/MarketPrice.js";
-import MarketHistory from "../models/marketHistoryModel.js";
+import { MarketPrice } from '../models/index.js';
 import { syncMandiData } from "../services/marketSyncService.js";
 import { getTrend, getRecommendation } from "../services/marketAnalyticsService.js";
 import { clearMarketCache } from "../middleware/marketMiddleware.js";
+import { Op } from 'sequelize';
 
 // Get all market prices with filtering
 export const getMarketPrices = async (req, res) => {
     try {
         const { crop, district } = req.query;
-        const filter = {};
-        if (crop) filter.cropName = new RegExp(crop, 'i');
-        if (district) filter.district = new RegExp(district, 'i');
+        let where = {};
 
-        const prices = await MarketPrice.find(filter).sort({ arrivalDate: -1 });
+        if (crop) where.cropName = { [Op.iLike]: `%${crop}%` };
+        if (district) where.district = { [Op.iLike]: `%${district}%` };
+
+        const prices = await MarketPrice.findAll({
+            where,
+            order: [['arrivalDate', 'DESC']]
+        });
+
         res.json({ success: true, prices });
     } catch (error) {
         res.json({ success: false, message: error.message });
@@ -24,19 +29,16 @@ export const addMarketPrice = async (req, res) => {
     try {
         const { cropName, variety, district, mandi, unit, price, minPrice, maxPrice, arrivalDate } = req.body;
 
-        const newPrice = new MarketPrice({
+        const newPrice = await MarketPrice.create({
             cropName,
             variety,
             district,
             mandi,
-            unit,
             modalPrice: price,
             minPrice,
             maxPrice,
             arrivalDate: arrivalDate || new Date()
         });
-
-        await newPrice.save();
 
         // Invalidate cache for this crop
         clearMarketCache(cropName);
@@ -51,19 +53,31 @@ export const addMarketPrice = async (req, res) => {
 export const updateMarketPrice = async (req, res) => {
     try {
         const { id } = req.params;
-        const updateData = req.body;
-        updateData.lastUpdated = Date.now();
+        const updateData = { ...req.body };
 
-        const updatedPrice = await MarketPrice.findByIdAndUpdate(id, updateData, { new: true });
+        // Define valid fields to update
+        const dbUpdate = {};
+        if (updateData.cropName !== undefined) dbUpdate.cropName = updateData.cropName;
+        if (updateData.variety !== undefined) dbUpdate.variety = updateData.variety;
+        if (updateData.district !== undefined) dbUpdate.district = updateData.district;
+        if (updateData.mandi !== undefined) dbUpdate.mandi = updateData.mandi;
+        if (updateData.minPrice !== undefined) dbUpdate.minPrice = updateData.minPrice;
+        if (updateData.maxPrice !== undefined) dbUpdate.maxPrice = updateData.maxPrice;
+        if (updateData.modalPrice !== undefined) dbUpdate.modalPrice = updateData.modalPrice;
+        if (updateData.arrivalDate !== undefined) dbUpdate.arrivalDate = updateData.arrivalDate;
 
-        if (!updatedPrice) {
+        const marketPrice = await MarketPrice.findByPk(id);
+
+        if (!marketPrice) {
             return res.json({ success: false, message: "Market price not found" });
         }
 
-        // Invalidate cache for this crop
-        clearMarketCache(updatedPrice.cropName);
+        await marketPrice.update(dbUpdate);
 
-        res.json({ success: true, message: "Market price updated successfully", price: updatedPrice });
+        // Invalidate cache for this crop
+        clearMarketCache(marketPrice.cropName);
+
+        res.json({ success: true, message: "Market price updated successfully", price: marketPrice });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -73,14 +87,17 @@ export const updateMarketPrice = async (req, res) => {
 export const deleteMarketPrice = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedPrice = await MarketPrice.findByIdAndDelete(id);
 
-        if (!deletedPrice) {
+        // Get crop name first for cache invalidation
+        const existing = await MarketPrice.findByPk(id, { attributes: ['cropName'] });
+
+        if (!existing) {
             return res.json({ success: false, message: "Market price not found" });
         }
 
-        // Invalidate cache for this crop
-        clearMarketCache(deletedPrice.cropName);
+        await existing.destroy();
+
+        clearMarketCache(existing.cropName);
 
         res.json({ success: true, message: "Market price deleted successfully" });
     } catch (error) {
@@ -113,7 +130,7 @@ export const getMarketAnalytics = async (req, res) => {
             success: true,
             crop,
             district,
-            trends: trendData.success ? trendData : null, // Assuming structure compatibility or adjustment
+            trends: trendData.success ? trendData : null,
             recommendation
         });
     } catch (error) {
@@ -125,7 +142,11 @@ export const getMarketAnalytics = async (req, res) => {
 export const getCropComparison = async (req, res) => {
     try {
         const { crop } = req.params;
-        const prices = await MarketPrice.find({ cropName: crop }).sort({ modalPrice: -1 });
+        const prices = await MarketPrice.findAll({
+            where: { cropName: crop },
+            order: [['modalPrice', 'DESC']]
+        });
+        
         res.json({ success: true, prices });
     } catch (error) {
         res.json({ success: false, message: error.message });
@@ -141,9 +162,12 @@ export const getRealTimePrice = async (req, res) => {
         }
 
         const priceData = await MarketPrice.findOne({
-            cropName: new RegExp(crop, 'i'),
-            district: new RegExp(district, 'i')
-        }).sort({ arrivalDate: -1 });
+            where: {
+                cropName: { [Op.iLike]: `%${crop}%` },
+                district: { [Op.iLike]: `%${district}%` }
+            },
+            order: [['arrivalDate', 'DESC']]
+        });
 
         if (!priceData) {
             return res.json({ success: false, message: "No real-time data found for this combination" });

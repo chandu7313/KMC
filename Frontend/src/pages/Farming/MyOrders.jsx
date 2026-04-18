@@ -50,7 +50,7 @@ const MyOrders = () => {
             axios.defaults.withCredentials = true;
             
             // Fetch Marketplace Orders
-            const marketplaceRes = await axios.post(backendUrl + '/api/order/userorders', { userId: userData._id });
+            const marketplaceRes = await axios.post(backendUrl + '/api/order/userorders', { userId: userData.id });
             
             // Fetch Equipment Orders
             const equipmentRes = await axios.get(backendUrl + '/api/equipment/user-orders');
@@ -85,7 +85,7 @@ const MyOrders = () => {
             }
 
             // Sort by newest first
-            const sortedOrders = allOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const sortedOrders = allOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             setOrders(sortedOrders);
             setFilteredOrders(sortedOrders);
             
@@ -139,8 +139,8 @@ const MyOrders = () => {
                 : '/api/order/cancel';
 
             const { data } = await axios.post(backendUrl + endpoint, {
-                userId: userData._id,
-                orderId: selectedOrder._id,
+                userId: userData.id,
+                orderId: selectedOrder.id,
                 reason: finalReason
             });
 
@@ -274,7 +274,7 @@ const MyOrders = () => {
                 ) : (
                     <div className="grid grid-cols-1 gap-4 md:gap-6">
                         {filteredOrders.map(order => (
-                            <div key={order._id} className="bg-white rounded-[20px] md:rounded-[32px] overflow-hidden shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                            <div key={order.id} className="bg-white rounded-[20px] md:rounded-[32px] overflow-hidden shadow-sm border border-slate-100 hover:shadow-md transition-all">
                                 <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-50">
                                     {/* Left Side: Order Items */}
                                     <div className="flex-1 p-4 md:p-6 space-y-4">
@@ -324,26 +324,26 @@ const MyOrders = () => {
                                         <div className="grid grid-cols-2 gap-4 py-4 border-y border-slate-100/50">
                                             <div className="space-y-0.5">
                                                 <div className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Order ID</div>
-                                                <div className="font-bold text-slate-900 text-[10px] md:text-xs truncate">#{order._id.slice(-8).toUpperCase()}</div>
+                                                <div className="font-bold text-slate-900 text-[10px] md:text-xs truncate">#{order.id.slice(-8).toUpperCase()}</div>
                                             </div>
                                             <div className="space-y-0.5">
                                                 <div className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Date</div>
-                                                <div className="font-bold text-slate-900 text-[10px] md:text-xs">{new Date(order.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</div>
+                                                <div className="font-bold text-slate-900 text-[10px] md:text-xs">{new Date(order.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}</div>
                                             </div>
                                             <div className="space-y-0.5">
                                                 <div className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Amount</div>
-                                                <div className="font-black text-emerald-600 text-sm md:text-base">₹{order.totalAmount?.toLocaleString()}</div>
+                                                <div className="font-black text-emerald-600 text-sm md:text-base">₹{order.total_amount?.toLocaleString()}</div>
                                             </div>
                                             <div className="space-y-0.5">
                                                 <div className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Expected Delivery</div>
                                                 <div className="font-bold text-slate-900 text-[10px] md:text-xs">
-                                                    {order.status === 'Delivered' ? 'Delivered' : getExpectedDelivery(order.createdAt)}
+                                                    {order.status === 'Delivered' ? 'Delivered' : getExpectedDelivery(order.created_at)}
                                                 </div>
                                             </div>
                                             <div className="space-y-0.5">
                                                 <div className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Payment Mode</div>
                                                 <div className="text-[8px] md:text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                                                    {order.paymentMethod === 'COD' ? 'Cash on Delivery' : 'Online Paid'}
+                                                    {order.payment_method === 'COD' ? 'Cash on Delivery' : 'Online Paid'}
                                                 </div>
                                             </div>
                                         </div>

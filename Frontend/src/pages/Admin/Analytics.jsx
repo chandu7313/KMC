@@ -43,22 +43,22 @@ const Analytics = () => {
 
     // Transform data for charts
     const growthData = data.farmerGrowth.map(item => ({
-        name: monthNames[item._id],
+        name: monthNames[item.id],
         farmers: item.count
     }));
 
     const cropData = data.cropDistribution.map(item => ({
-        name: item._id,
+        name: item.id,
         value: item.count
     }));
 
     const districtData = data.districtDistribution.map(item => ({
-        name: item._id,
+        name: item.id,
         count: item.count
     }));
 
     const revenueData = data.revenueTrend.map(item => ({
-        name: monthNames[item._id],
+        name: monthNames[item.id],
         amount: item.total
     }));
 

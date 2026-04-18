@@ -1,21 +1,24 @@
-import userModel from '../models/userModel.js'
-
+import { User, UserAddress } from '../models/index.js';
 
 export const getUserData = async (req, res) => {
-
     try {
-
         const { userId } = req.body
 
-        const user = await userModel.findById(userId)
+        const user = await User.findByPk(userId, {
+            attributes: ['id', 'name', 'email', 'role', 'isAccountVerified', 'language', 'preferredLanguage', 'hasCompletedTour', 'hasCompletedSurvey', 'simpleMode']
+        });
 
         if (!user) {
             return res.json({ success: false, message: "User not found" })
         }
 
+        // Fetch addresses separately from user_addresses table
+        const addresses = await UserAddress.findAll({ where: { userId } });
+
         res.json({
             success: true,
             userData: {
+                id: user.id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
@@ -25,15 +28,13 @@ export const getUserData = async (req, res) => {
                 hasCompletedTour: user.hasCompletedTour,
                 hasCompletedSurvey: user.hasCompletedSurvey,
                 simpleMode: user.simpleMode,
-                addresses: user.addresses || []
+                addresses: addresses || []
             }
         })
-
 
     } catch (error) {
         res.json({ success: false, message: error.message })
     }
-
 }
 
 export const updateLanguage = async (req, res) => {
@@ -44,10 +45,9 @@ export const updateLanguage = async (req, res) => {
             return res.json({ success: false, message: "Invalid language" })
         }
 
-        await userModel.findByIdAndUpdate(userId, { language })
+        await User.update({ language }, { where: { id: userId } });
 
         res.json({ success: true, message: "Language updated successfully" })
-
     } catch (error) {
         res.json({ success: false, message: error.message })
     }
@@ -62,10 +62,9 @@ export const updatePreferences = async (req, res) => {
         if (hasCompletedTour !== undefined) updateData.hasCompletedTour = hasCompletedTour;
         if (simpleMode !== undefined) updateData.simpleMode = simpleMode;
 
-        await userModel.findByIdAndUpdate(userId, updateData);
+        await User.update(updateData, { where: { id: userId } });
 
         res.json({ success: true, message: "User preferences updated successfully" });
-
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -76,15 +75,24 @@ export const saveAddress = async (req, res) => {
         const { userId, address } = req.body;
         // address: { fullName, phone, address }
 
-        const user = await userModel.findById(userId);
+        const user = await User.findByPk(userId, { attributes: ['id'] });
+
         if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
 
-        user.addresses.push(address);
-        await user.save();
+        // Insert into user_addresses table
+        await UserAddress.create({
+            userId: userId,
+            fullName: address.fullName,
+            phone: address.phone,
+            address: address.address
+        });
 
-        res.json({ success: true, message: "Address saved successfully", addresses: user.addresses });
+        // Return all addresses for the user
+        const addresses = await UserAddress.findAll({ where: { userId } });
+
+        res.json({ success: true, message: "Address saved successfully", addresses });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }

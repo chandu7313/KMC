@@ -27,7 +27,7 @@ const BookFarmVisit = () => {
         try {
             axios.defaults.withCredentials = true;
             const { data } = await axios.post(backendUrl + "/api/booking/user-bookings", {
-                userId: userData._id
+                userId: userData.id
             });
             if (data.success) {
                 setBookings(data.bookings);
@@ -62,7 +62,7 @@ const BookFarmVisit = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!formData.visitDate || !formData.purpose || !formData.village) {
+        if (!formData.visit_date || !formData.purpose || !formData.village) {
             return toast.error("Please fill all required fields");
         }
 
@@ -70,7 +70,7 @@ const BookFarmVisit = () => {
             setLoading(true);
             axios.defaults.withCredentials = true;
             const { data } = await axios.post(backendUrl + "/api/booking/create", {
-                farmerId: userData._id,
+                farmerId: userData.id,
                 ...formData
             });
 
@@ -129,7 +129,7 @@ const BookFarmVisit = () => {
                                     <input
                                         type="text"
                                         name="fullName"
-                                        value={formData.fullName}
+                                        value={formData.full_name}
                                         onChange={handleChange}
                                         placeholder="Your name"
                                         required
@@ -196,7 +196,7 @@ const BookFarmVisit = () => {
                                     <input
                                         type="date"
                                         name="visitDate"
-                                        value={formData.visitDate}
+                                        value={formData.visit_date}
                                         onChange={handleChange}
                                         required
                                         className="w-full outline-none bg-transparent text-sm md:text-base"
@@ -283,10 +283,10 @@ const BookFarmVisit = () => {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                             {bookings.map((booking) => (
-                                <div key={booking._id} className="bg-white rounded-xl md:rounded-2xl border border-slate-200 p-5 md:p-6 shadow-sm hover:shadow-md transition-all">
+                                <div key={booking.id} className="bg-white rounded-xl md:rounded-2xl border border-slate-200 p-5 md:p-6 shadow-sm hover:shadow-md transition-all">
                                     <div className="flex justify-between items-start mb-3 md:mb-4">
                                         <div className="bg-green-50 text-green-700 px-2.5 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold flex items-center gap-1.5">
-                                            <Calendar size={12} /> {new Date(booking.visitDate).toLocaleDateString()}
+                                            <Calendar size={12} /> {new Date(booking.visit_date).toLocaleDateString()}
                                         </div>
                                         <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest px-2 py-1 md:px-2.5 rounded-lg border ${
                                             booking.status === 'Confirmed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
@@ -302,7 +302,7 @@ const BookFarmVisit = () => {
                                     
                                     <div className="pt-3 md:pt-4 border-t border-slate-50 flex items-center justify-between text-[10px] md:text-[11px] font-black uppercase tracking-wider">
                                         <span className="text-slate-400">Booking ID</span>
-                                        <span className="text-slate-900">#{booking._id.slice(-6).toUpperCase()}</span>
+                                        <span className="text-slate-900">#{booking.id.slice(-6).toUpperCase()}</span>
                                     </div>
                                 </div>
                             ))}

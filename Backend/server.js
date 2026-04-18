@@ -3,8 +3,8 @@ import cors from "cors"
 import 'dotenv/config';
 import cookieParser from "cookie-parser";
 
-import connectDB from './config/mongodb.js'
 import connectCloudinary from "./config/cloudinary.js";
+import { connectDB } from "./config/database.js";
 import authRouter from './routes/authRoutes.js'
 import userRouter from "./routes/userRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
@@ -24,8 +24,10 @@ import startCronJobs from "./config/cron.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
-connectDB();
+
+// Initialize Cloudinary (Supabase client auto-inits on import)
 connectCloudinary();
+connectDB(); // Test Sequelize Postgres Connection
 startCronJobs(); // Start background jobs
 
 const allowedOrigins = [
@@ -35,7 +37,7 @@ const allowedOrigins = [
 
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({ origin: allowedOrigins, credentials: true }))
+app.use(cors({ origin: true, credentials: true }))
 
 
 //API Endpoints

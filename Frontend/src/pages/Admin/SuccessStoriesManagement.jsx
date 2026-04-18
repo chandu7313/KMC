@@ -93,13 +93,13 @@ const SuccessStoriesManagement = () => {
 
     const openEdit = (story) => {
         setEditMode(true);
-        setSelectedId(story._id);
+        setSelectedId(story.id);
         setFormData({
-            farmerName: story.farmerName,
+            farmerName: story.farmer_name,
             district: story.district,
             crop: story.crop,
-            beforeYield: story.beforeYield,
-            afterYield: story.afterYield,
+            beforeYield: story.before_yield,
+            afterYield: story.after_yield,
             description: story.description,
             status: story.status
         });
@@ -123,10 +123,10 @@ const SuccessStoriesManagement = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {stories.map(story => (
-                    <div key={story._id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
+                    <div key={story.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
                         <div className="relative h-48 bg-slate-100">
                             {story.image ? (
-                                <img src={story.image} alt={story.farmerName} className="w-full h-full object-cover" />
+                                <img src={story.image} alt={story.farmer_name} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">No Image</div>
                             )}
@@ -137,7 +137,7 @@ const SuccessStoriesManagement = () => {
                         <div className="p-6 space-y-4">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h3 className="font-bold text-slate-900 text-lg">{story.farmerName}</h3>
+                                    <h3 className="font-bold text-slate-900 text-lg">{story.farmer_name}</h3>
                                     <p className="text-slate-500 text-xs flex items-center gap-1"><MapPin size={12}/>{story.district}</p>
                                 </div>
                                 <div className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold border border-emerald-100">
@@ -148,11 +148,11 @@ const SuccessStoriesManagement = () => {
                             <div className="grid grid-cols-2 gap-4 py-3 border-y border-slate-50">
                                 <div>
                                     <p className="text-[10px] text-slate-400 font-bold uppercase">Before</p>
-                                    <p className="font-bold text-slate-700">{story.beforeYield} Q/acre</p>
+                                    <p className="font-bold text-slate-700">{story.before_yield} Q/acre</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-slate-400 font-bold uppercase text-right">After</p>
-                                    <p className="font-bold text-emerald-600 text-right">+{story.afterYield} Q/acre</p>
+                                    <p className="font-bold text-emerald-600 text-right">+{story.after_yield} Q/acre</p>
                                 </div>
                             </div>
 
@@ -164,7 +164,7 @@ const SuccessStoriesManagement = () => {
                                 <button onClick={() => openEdit(story)} className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition-colors">
                                     <Edit2 size={14} /> Edit
                                 </button>
-                                <button onClick={() => handleDelete(story._id)} className="w-10 flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl transition-colors">
+                                <button onClick={() => handleDelete(story.id)} className="w-10 flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-xl transition-colors">
                                     <Trash2 size={14} />
                                 </button>
                             </div>
@@ -189,7 +189,7 @@ const SuccessStoriesManagement = () => {
                                     <div className="relative">
                                         <User className="absolute left-4 top-3 text-slate-400" size={16} />
                                         <input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-slate-900" 
-                                            value={formData.farmerName} onChange={e => setFormData({...formData, farmerName: e.target.value})} placeholder="e.g. Ramesh Patel" />
+                                            value={formData.farmer_name} onChange={e => setFormData({...formData, farmerName: e.target.value})} placeholder="e.g. Ramesh Patel" />
                                     </div>
                                 </div>
                                 <div className="space-y-1">
@@ -216,7 +216,7 @@ const SuccessStoriesManagement = () => {
                                     <div className="relative">
                                         <TrendingUp className="absolute left-4 top-3 text-slate-400" size={16} />
                                         <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-slate-900" 
-                                            value={formData.beforeYield} onChange={e => setFormData({...formData, beforeYield: e.target.value})} placeholder="Old" />
+                                            value={formData.before_yield} onChange={e => setFormData({...formData, beforeYield: e.target.value})} placeholder="Old" />
                                     </div>
                                 </div>
                                 <div className="space-y-1">
@@ -224,7 +224,7 @@ const SuccessStoriesManagement = () => {
                                     <div className="relative">
                                         <TrendingUp className="absolute left-4 top-3 text-emerald-500" size={16} />
                                         <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-slate-900" 
-                                            value={formData.afterYield} onChange={e => setFormData({...formData, afterYield: e.target.value})} placeholder="New" />
+                                            value={formData.after_yield} onChange={e => setFormData({...formData, afterYield: e.target.value})} placeholder="New" />
                                     </div>
                                 </div>
                             </div>

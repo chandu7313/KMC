@@ -149,7 +149,7 @@ const AdminInventory = () => {
                                     <tr><td colSpan="5" className="p-10 text-center text-slate-400 font-medium">No products found matching "{searchTerm}"</td></tr>
                                 ) : (
                                     filteredProducts.map(product => (
-                                        <tr key={product._id} className="hover:bg-slate-50/50 transition-colors">
+                                        <tr key={product.id} className="hover:bg-slate-50/50 transition-colors">
                                             <td className="p-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 p-1 flex-shrink-0">
@@ -157,7 +157,7 @@ const AdminInventory = () => {
                                                     </div>
                                                     <div>
                                                         <h3 className="font-bold text-slate-900 text-sm line-clamp-1">{product.name}</h3>
-                                                        <p className="text-xs text-slate-500 font-medium line-clamp-1 truncate w-48">{product.shortDescription}</p>
+                                                        <p className="text-xs text-slate-500 font-medium line-clamp-1 truncate w-48">{product.short_description}</p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -173,7 +173,7 @@ const AdminInventory = () => {
                                                 </div>
                                             </td>
                                             <td className="p-4">
-                                                {product.isFeatured ? (
+                                                {product.is_featured ? (
                                                     <span className="inline-flex items-center gap-1 text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md">
                                                         <CheckCircle size={14}/> Featured
                                                     </span>
@@ -185,7 +185,7 @@ const AdminInventory = () => {
                                                         <Edit size={18}/>
                                                     </button>
                                                     <button 
-                                                        onClick={() => handleDeleteProduct(product._id)}
+                                                        onClick={() => handleDeleteProduct(product.id)}
                                                         className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                                                     >
                                                         <Trash2 size={18}/>
@@ -236,14 +236,14 @@ const AdminInventory = () => {
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-bold text-slate-500 uppercase">Short Description</label>
-                                <input name="shortDescription" value={formData.shortDescription} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-medium" />
+                                <input name="shortDescription" value={formData.short_description} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-medium" />
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-bold text-slate-500 uppercase">Full Description</label>
                                 <textarea name="description" value={formData.description} onChange={handleInputChange} required rows="3" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-medium resize-none" />
                             </div>
                              <div className="flex items-center gap-2 mt-4">
-                                <input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={handleInputChange} id="feat" className="w-4 h-4 text-emerald-600 rounded border-slate-300"/>
+                                <input type="checkbox" name="isFeatured" checked={formData.is_featured} onChange={handleInputChange} id="feat" className="w-4 h-4 text-emerald-600 rounded border-slate-300"/>
                                 <label htmlFor="feat" className="text-sm font-bold text-slate-700 cursor-pointer">Mark as Featured Product</label>
                             </div>
                             <div className="pt-6 border-t border-slate-100 flex justify-end gap-3">

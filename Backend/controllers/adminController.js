@@ -1,61 +1,93 @@
-import userModel from "../models/userModel.js";
+import { User, Order, Booking, Notification } from '../models/index.js';
 import bcrypt from "bcryptjs";
-import orderModel from "../models/orderModel.js";
-import bookingModel from "../models/bookingModel.js";
-import notificationModel from "../models/notificationModel.js";
+import { Op } from 'sequelize';
+import { sequelize } from '../config/database.js';
 
 // Get Dashboard Stats
 export const getDashboardStats = async (req, res) => {
     try {
-        const totalFarmers = await userModel.countDocuments({ role: 'user' });
-        const verifiedFarmers = await userModel.countDocuments({ role: 'user', isAccountVerified: true });
-        const pendingApprovals = await userModel.countDocuments({ role: 'user', isAccountVerified: false });
+        // Total Farmers
+        const totalFarmers = await User.count({ where: { role: 'user' } });
 
-        const totalDistricts = (await userModel.distinct('district')).length;
+        // Verified Farmers
+        const verifiedFarmers = await User.count({
+            where: { role: 'user', isAccountVerified: true }
+        });
+
+        // Pending Approvals
+        const pendingApprovals = await User.count({
+            where: { role: 'user', isAccountVerified: false }
+        });
+
+        // Total Districts
+        const districts = await User.findAll({
+            attributes: [[sequelize.fn('DISTINCT', sequelize.col('district')), 'district']],
+            where: { role: 'user' }
+        });
+        const totalDistricts = districts.filter(d => d.district).length;
 
         // Revenue & Active Packages
-        const orders = await orderModel.find();
+        const orders = await Order.findAll();
         const activePackages = orders.filter(o => o.status === 'Active').length;
-        const revenue = orders.reduce((acc, curr) => acc + curr.amount, 0);
+        const revenue = orders.reduce((acc, curr) => acc + Number(curr.amount), 0);
 
         // Monthly Registrations (Last 6 months)
-        const monthlyRegistrations = await userModel.aggregate([
-            {
-                $match: {
-                    createdAt: {
-                        $gte: new Date(new Date().setMonth(new Date().getMonth() - 5))
-                    }
-                }
-            },
-            {
-                $group: {
-                    _id: { $month: "$createdAt" },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { "_id": 1 } }
-        ]);
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
 
-        // District Distribution
-        const districtData = await userModel.aggregate([
-            { $match: { role: 'user' } },
-            { $group: { _id: "$district", count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: 5 }
-        ]);
+        const recentUsers6mo = await User.findAll({
+            attributes: ['createdAt'],
+            where: { createdAt: { [Op.gte]: sixMonthsAgo } }
+        });
 
-        // Crop Distribution
-        const cropData = await userModel.aggregate([
-            { $match: { role: 'user' } },
-            { $unwind: "$crops" },
-            { $group: { _id: "$crops", count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: 5 }
-        ]);
+        const monthCounts = {};
+        recentUsers6mo.forEach(u => {
+            const month = new Date(u.createdAt).getMonth() + 1;
+            monthCounts[month] = (monthCounts[month] || 0) + 1;
+        });
+        const monthlyRegistrations = Object.entries(monthCounts)
+            .sort(([a], [b]) => a - b)
+            .map(([month, count]) => ({ _id: Number(month), count }));
 
+        // District Distribution (Top 5)
+        const districtCountsData = await User.findAll({
+            attributes: [
+                'district',
+                [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+            ],
+            where: { role: 'user' },
+            group: ['district'],
+            order: [[sequelize.col('count'), 'DESC']],
+            limit: 5
+        });
+        
+        const districtData = districtCountsData.map(d => ({
+            _id: d.district || 'Other',
+            count: Number(d.get('count'))
+        }));
 
-        const recentUsers = await userModel.find().sort({ createdAt: -1 }).limit(5);
+        // Crop Distribution (Top 5)
+        const allFarmersCrops = await User.findAll({
+            attributes: ['crops'],
+            where: { role: 'user' }
+        });
 
+        const cropCounts = {};
+        allFarmersCrops.forEach(u => {
+            (u.crops || []).forEach(crop => {
+                cropCounts[crop] = (cropCounts[crop] || 0) + 1;
+            });
+        });
+        const cropData = Object.entries(cropCounts)
+            .map(([_id, count]) => ({ _id, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5);
+
+        // Recent Users
+        const recentUsers = await User.findAll({
+            order: [['createdAt', 'DESC']],
+            limit: 5
+        });
 
         res.json({
             success: true,
@@ -81,14 +113,17 @@ export const getDashboardStats = async (req, res) => {
 // Get All Users
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await userModel.find({}, '-password');
+        const users = await User.findAll({
+            attributes: ['id', 'name', 'email', 'phone', 'role', 'district', 'crops', 'isAccountVerified', 'language', 'preferredLanguage', 'hasCompletedTour', 'simpleMode', 'hasCompletedSurvey', 'fieldOfficerId', 'createdAt', 'updatedAt']
+        });
+
         res.json({ success: true, users });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
 }
 
-// Update User Role - Keep for compatibility if needed, but updateUser is more complete
+// Update User Role
 export const updateUserRole = async (req, res) => {
     try {
         const { userId, role } = req.body;
@@ -97,14 +132,15 @@ export const updateUserRole = async (req, res) => {
             return res.json({ success: false, message: "Invalid Role" });
         }
 
-        const user = await userModel.findByIdAndUpdate(userId, { role }, { new: true });
+        const user = await User.findByPk(userId);
 
         if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
 
-        res.json({ success: true, message: "User role updated", user });
+        await user.update({ role });
 
+        res.json({ success: true, message: "User role updated", user });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -115,40 +151,48 @@ export const getFarmers = async (req, res) => {
     try {
         const { page = 1, limit = 10, search = '', district = '', crop = '', status = '' } = req.query;
 
-        const query = { role: 'user' };
+        const where = { role: 'user' };
 
         if (search) {
-            query.name = { $regex: search, $options: 'i' };
+            where.name = { [Op.iLike]: `%${search}%` };
         }
 
         if (district) {
-            query.district = district;
+            where.district = district;
         }
 
         if (crop) {
-            query.crops = { $in: [crop] };
+            where.crops = { [Op.contains]: [crop] };
         }
 
         if (status !== '') {
-            query.isAccountVerified = status === 'Approved';
+            where.isAccountVerified = status === 'Approved';
         }
 
         const skip = (page - 1) * limit;
 
-        const farmers = await userModel.find(query)
-            .populate('fieldOfficer', 'name email')
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
+        const { count, rows: farmers } = await User.findAndCountAll({
+            where,
+            include: [{ model: User, as: 'FieldOfficer', attributes: ['name', 'email'] }],
+            order: [['createdAt', 'DESC']],
+            limit: parseInt(limit),
+            offset: skip
+        });
 
-        const totalFarmers = await userModel.countDocuments(query);
+        // Map fieldOfficer to match original shape
+        const mapped = farmers.map(f => {
+            const data = f.toJSON();
+            data.fieldOfficer = data.FieldOfficer;
+            delete data.FieldOfficer;
+            return data;
+        });
 
         res.json({
             success: true,
-            farmers,
-            totalPages: Math.ceil(totalFarmers / limit),
+            farmers: mapped,
+            totalPages: Math.ceil(count / limit),
             currentPage: parseInt(page),
-            totalFarmers
+            totalFarmers: count
         });
 
     } catch (error) {
@@ -164,14 +208,15 @@ export const updateFarmerStatus = async (req, res) => {
 
         const isAccountVerified = status === 'Approved';
 
-        const user = await userModel.findByIdAndUpdate(id, { isAccountVerified }, { new: true });
+        const user = await User.findByPk(id);
 
         if (!user) {
             return res.json({ success: false, message: "Farmer not found" });
         }
 
-        res.json({ success: true, message: `Farmer ${status}`, user });
+        await user.update({ isAccountVerified });
 
+        res.json({ success: true, message: `Farmer ${status}`, user });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -189,17 +234,25 @@ export const updateFarmerInfo = async (req, res) => {
         if (phone) updateData.phone = phone;
         if (district) updateData.district = district;
         if (crops) updateData.crops = crops;
-        if (fieldOfficer !== undefined) updateData.fieldOfficer = fieldOfficer || null;
+        if (fieldOfficer !== undefined) updateData.fieldOfficerId = fieldOfficer || null;
 
-        const user = await userModel.findByIdAndUpdate(id, updateData, { new: true })
-            .populate('fieldOfficer', 'name email');
+        const user = await User.findByPk(id);
 
         if (!user) {
             return res.json({ success: false, message: "Farmer not found" });
         }
 
-        res.json({ success: true, message: "Farmer information updated", user });
+        await user.update(updateData);
 
+        const updatedUser = await User.findByPk(id, {
+            include: [{ model: User, as: 'FieldOfficer', attributes: ['name', 'email'] }]
+        });
+        
+        const mappedUser = updatedUser.toJSON();
+        mappedUser.fieldOfficer = mappedUser.FieldOfficer;
+        delete mappedUser.FieldOfficer;
+
+        res.json({ success: true, message: "Farmer information updated", user: mappedUser });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -208,12 +261,25 @@ export const updateFarmerInfo = async (req, res) => {
 // Get All Bookings
 export const getBookings = async (req, res) => {
     try {
-        const bookings = await bookingModel.find({})
-            .populate('farmerId', 'name email district phone')
-            .populate('assignedOfficer', 'name email')
-            .sort({ createdAt: -1 });
+        const bookings = await Booking.findAll({
+            include: [
+                { model: User, as: 'Farmer', attributes: ['name', 'email', 'district', 'phone'] },
+                { model: User, as: 'Officer', attributes: ['name', 'email'] }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
 
-        res.json({ success: true, bookings });
+        // Map to match original response shape
+        const mapped = bookings.map(b => {
+            const data = b.toJSON();
+            data.farmerId = data.Farmer;
+            data.assignedOfficer = data.Officer;
+            delete data.Farmer;
+            delete data.Officer;
+            return data;
+        });
+
+        res.json({ success: true, bookings: mapped });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -226,19 +292,32 @@ export const updateBooking = async (req, res) => {
         const { assignedOfficer, status, paymentStatus } = req.body;
 
         const updateData = {};
-        if (assignedOfficer !== undefined) updateData.assignedOfficer = assignedOfficer || null;
+        if (assignedOfficer !== undefined) updateData.assignedOfficerId = assignedOfficer || null;
         if (status) updateData.status = status;
         if (paymentStatus) updateData.paymentStatus = paymentStatus;
 
-        const booking = await bookingModel.findByIdAndUpdate(id, updateData, { new: true })
-            .populate('farmerId', 'name email phone')
-            .populate('assignedOfficer', 'name email');
+        const booking = await Booking.findByPk(id);
 
         if (!booking) {
             return res.json({ success: false, message: "Booking not found" });
         }
 
-        res.json({ success: true, message: "Booking updated successfully", booking });
+        await booking.update(updateData);
+        
+        const updatedBooking = await Booking.findByPk(id, {
+            include: [
+                { model: User, as: 'Farmer', attributes: ['name', 'email', 'phone'] },
+                { model: User, as: 'Officer', attributes: ['name', 'email'] }
+            ]
+        });
+
+        const mappedBooking = updatedBooking.toJSON();
+        mappedBooking.farmerId = mappedBooking.Farmer;
+        mappedBooking.assignedOfficer = mappedBooking.Officer;
+        delete mappedBooking.Farmer;
+        delete mappedBooking.Officer;
+
+        res.json({ success: true, message: "Booking updated successfully", booking: mappedBooking });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -250,27 +329,24 @@ export const sendNotification = async (req, res) => {
         const { title, message, targetType, targetValue } = req.body;
         const adminId = req.body.userId; // From adminAuth middleware
 
-        let userQuery = { role: 'user' };
+        let whereConfig = { role: 'user' };
 
         if (targetType === 'District') {
-            userQuery.district = targetValue;
+            whereConfig.district = targetValue;
         } else if (targetType === 'Crop') {
-            userQuery.crops = { $in: [targetValue] };
+            whereConfig.crops = { [Op.contains]: [targetValue] };
         }
 
-        const recipients = await userModel.find(userQuery).select('_id');
-        const recipientCount = recipients.length;
+        const recipientCount = await User.count({ where: whereConfig });
 
-        const newNotification = new notificationModel({
+        const newNotification = await Notification.create({
             title,
             message,
             targetType,
             targetValue: targetValue || 'Global',
-            recipientCount,
+            recipientCount: recipientCount || 0,
             sentBy: adminId
         });
-
-        await newNotification.save();
 
         // Note: In a real app, we would trigger push notifications or SMS here
         res.json({
@@ -287,11 +363,22 @@ export const sendNotification = async (req, res) => {
 // Get Notification History
 export const getNotifications = async (req, res) => {
     try {
-        const notifications = await notificationModel.find({})
-            .populate('sentBy', 'name email')
-            .sort({ createdAt: -1 });
+        const notifications = await Notification.findAll({
+            include: [
+                { model: User, attributes: ['name', 'email'] } // Adjust relation mapping if needed
+            ],
+            order: [['createdAt', 'DESC']]
+        });
 
-        res.json({ success: true, notifications });
+        // Map to match original response shape
+        const mapped = notifications.map(n => {
+            const data = n.toJSON();
+            data.sentBy = data.User;
+            delete data.User;
+            return data;
+        });
+
+        res.json({ success: true, notifications: mapped });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
@@ -300,53 +387,69 @@ export const getNotifications = async (req, res) => {
 // Get Advanced Analytics
 export const getAnalytics = async (req, res) => {
     try {
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
         // 1. Monthly Farmer Growth (Last 12 months)
-        const farmerGrowth = await userModel.aggregate([
-            {
-                $match: {
-                    role: 'user',
-                    createdAt: { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 1)) }
-                }
-            },
-            {
-                $group: {
-                    _id: { $month: "$createdAt" },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { "_id": 1 } }
-        ]);
+        const recentFarmers = await User.findAll({
+            attributes: ['createdAt'],
+            where: { role: 'user', createdAt: { [Op.gte]: oneYearAgo } }
+        });
+
+        const farmerGrowthMap = {};
+        recentFarmers.forEach(u => {
+            const month = new Date(u.createdAt).getMonth() + 1;
+            farmerGrowthMap[month] = (farmerGrowthMap[month] || 0) + 1;
+        });
+        const farmerGrowth = Object.entries(farmerGrowthMap)
+            .map(([_id, count]) => ({ _id: Number(_id), count }))
+            .sort((a, b) => a._id - b._id);
 
         // 2. Crop Distribution
-        const cropDistribution = await userModel.aggregate([
-            { $match: { role: 'user' } },
-            { $unwind: "$crops" },
-            { $group: { _id: "$crops", count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
-        ]);
+        const allFarmersCrops = await User.findAll({
+            attributes: ['crops'],
+            where: { role: 'user' }
+        });
+
+        const cropDistMap = {};
+        allFarmersCrops.forEach(u => {
+            (u.crops || []).forEach(crop => {
+                cropDistMap[crop] = (cropDistMap[crop] || 0) + 1;
+            });
+        });
+        const cropDistribution = Object.entries(cropDistMap)
+            .map(([_id, count]) => ({ _id, count }))
+            .sort((a, b) => b.count - a.count);
 
         // 3. District Distribution
-        const districtDistribution = await userModel.aggregate([
-            { $match: { role: 'user' } },
-            { $group: { _id: "$district", count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
-        ]);
+        const allFarmers = await User.findAll({
+            attributes: ['district'],
+            where: { role: 'user' }
+        });
+
+        const distDistMap = {};
+        allFarmers.forEach(u => {
+            const d = u.district || 'Other';
+            distDistMap[d] = (distDistMap[d] || 0) + 1;
+        });
+        const districtDistribution = Object.entries(distDistMap)
+            .map(([_id, count]) => ({ _id, count }))
+            .sort((a, b) => b.count - a.count);
 
         // 4. Revenue Trend (Monthly orders)
-        const revenueTrend = await orderModel.aggregate([
-            {
-                $match: {
-                    createdAt: { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 1)) }
-                }
-            },
-            {
-                $group: {
-                    _id: { $month: "$createdAt" },
-                    total: { $sum: "$amount" }
-                }
-            },
-            { $sort: { "_id": 1 } }
-        ]);
+        const recentOrders = await Order.findAll({
+            attributes: ['amount', 'createdAt'],
+            where: { createdAt: { [Op.gte]: oneYearAgo } }
+        });
+
+        const revMap = {};
+        recentOrders.forEach(o => {
+            const month = new Date(o.createdAt).getMonth() + 1;
+            revMap[month] = (revMap[month] || 0) + Number(o.amount);
+        });
+        const revenueTrend = Object.entries(revMap)
+            .map(([_id, total]) => ({ _id: Number(_id), total }))
+            .sort((a, b) => a._id - b._id);
 
         res.json({
             success: true,
@@ -372,29 +475,32 @@ export const addUser = async (req, res) => {
             return res.json({ success: false, message: "Missing Details" });
         }
 
-        const existingUser = await userModel.findOne({ email });
+        const existingUser = await User.findOne({ where: { email } });
+
         if (existingUser) {
             return res.json({ success: false, message: "User with this email already exists" });
         }
 
-        const existingPhone = await userModel.findOne({ phone });
-        if (phone && existingPhone) {
-            return res.json({ success: false, message: "User with this phone number already exists" });
+        if (phone) {
+            const existingPhone = await User.findOne({ where: { phone } });
+
+            if (existingPhone) {
+                return res.json({ success: false, message: "User with this phone number already exists" });
+            }
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new userModel({
+        await User.create({
             name,
             email,
-            phone: phone || '',
+            phone: phone || null,
             password: hashedPassword,
             role,
-            district: district || '',
+            district: district || 'Other',
             isAccountVerified: true // Admin-created accounts are auto-verified
         });
 
-        await newUser.save();
         res.json({ success: true, message: "User added successfully" });
 
     } catch (error) {
@@ -419,11 +525,13 @@ export const updateUser = async (req, res) => {
             updateData.password = await bcrypt.hash(password, 10);
         }
 
-        const user = await userModel.findByIdAndUpdate(id, updateData, { new: true });
+        const user = await User.findByPk(id);
 
         if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
+
+        await user.update(updateData);
 
         res.json({ success: true, message: "User updated successfully", user });
 
@@ -437,11 +545,13 @@ export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const user = await userModel.findByIdAndDelete(id);
+        const user = await User.findByPk(id);
 
         if (!user) {
             return res.json({ success: false, message: "User not found" });
         }
+
+        await user.destroy();
 
         res.json({ success: true, message: "User deleted successfully" });
 

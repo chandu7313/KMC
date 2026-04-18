@@ -1,6 +1,4 @@
-import marketplaceOrderModel from "../models/MarketplaceOrder.js";
-import userModel from "../models/userModel.js";
-import productModel from "../models/Product.js";
+import { User, MarketplaceOrder, MarketplaceOrderItem, Product } from '../models/index.js';
 import razorpay from 'razorpay';
 import crypto from 'crypto';
 import transporter from '../config/nodemailer.js';
@@ -36,23 +34,32 @@ const placeOrder = async (req, res) => {
     try {
         const { userId, items, amount, address, paymentMethod } = req.body;
 
-        const orderData = {
+        // Insert order
+        const savedOrder = await MarketplaceOrder.create({
             userId,
-            items,
             totalAmount: amount,
             address,
             paymentMethod: paymentMethod || 'COD',
             paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Completed',
-        };
+        });
 
-        const newOrder = new marketplaceOrderModel(orderData);
-        const savedOrder = await newOrder.save();
+        // Insert order items
+        const orderItems = items.map(item => ({
+            orderId: savedOrder.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price
+        }));
+
+        await MarketplaceOrderItem.bulkCreate(orderItems);
 
         // Clear cart data
-        const user = await userModel.findByIdAndUpdate(userId, { cartData: {} });
-
-        // Send email (assuming address string contains the full address parts)
-        await sendConfirmationEmail(user.email, user.name, savedOrder._id.toString(), address, amount, 'Cash on Delivery');
+        const user = await User.findByPk(userId);
+        if (user) {
+            await user.update({ cartData: {} });
+            // Send email
+            await sendConfirmationEmail(user.email, user.name, savedOrder.id, address, amount, 'Cash on Delivery');
+        }
 
         res.json({ success: true, message: "Order Placed" });
     } catch (error) {
@@ -65,8 +72,29 @@ const placeOrder = async (req, res) => {
 const userOrders = async (req, res) => {
     try {
         const { userId } = req.body;
-        const orders = await marketplaceOrderModel.find({ userId }).populate('items.productId');
-        res.json({ success: true, orders });
+        const orders = await MarketplaceOrder.findAll({
+            where: { userId },
+            include: [{
+                model: MarketplaceOrderItem,
+                include: [{ model: Product }]
+            }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        // Reshape to match original response shape
+        const mapped = orders.map(order => {
+            const data = order.toJSON();
+            data.items = data.MarketplaceOrderItems.map(item => {
+                const itemData = { ...item };
+                itemData.productId = itemData.Product;
+                delete itemData.Product;
+                return itemData;
+            });
+            delete data.MarketplaceOrderItems;
+            return data;
+        });
+
+        res.json({ success: true, orders: mapped });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
@@ -78,30 +106,37 @@ const placeOrderRazorpay = async (req, res) => {
     try {
         const { userId, items, amount, address } = req.body;
 
-        const orderData = {
+        // Insert order
+        const newOrder = await MarketplaceOrder.create({
             userId,
-            items,
             totalAmount: amount,
             address,
             paymentMethod: 'Razorpay',
             paymentStatus: 'Pending',
-        };
+        });
 
-        const newOrder = new marketplaceOrderModel(orderData);
-        await newOrder.save();
+        // Insert order items
+        const orderItems = items.map(item => ({
+            orderId: newOrder.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price
+        }));
+
+        await MarketplaceOrderItem.bulkCreate(orderItems);
 
         const options = {
             amount: amount * 100, // Amount in paise
             currency: process.env.CURRENCY || 'INR',
-            receipt: newOrder._id.toString()
+            receipt: newOrder.id.substring(0, 40) // Razorpay receipt max len is 40
         };
 
         const rzpOrder = await razorpayInstance.orders.create(options);
 
         // Save razorpay order id
-        await marketplaceOrderModel.findByIdAndUpdate(newOrder._id, { razorpayOrderId: rzpOrder.id });
+        await newOrder.update({ razorpayOrderId: rzpOrder.id });
 
-        res.json({ success: true, order: rzpOrder, dbOrderId: newOrder._id });
+        res.json({ success: true, order: rzpOrder, dbOrderId: newOrder.id });
     } catch (error) {
         console.log("Razorpay Order Error:", error);
         res.json({ success: false, message: error.message });
@@ -121,16 +156,21 @@ const verifyRazorpay = async (req, res) => {
 
         if (razorpay_signature === expectedSign) {
             // Payment successful
-            const savedOrder = await marketplaceOrderModel.findByIdAndUpdate(dbOrderId, {
-                paymentStatus: 'Completed',
-                paymentDetails: { razorpay_payment_id, razorpay_signature }
-            });
+            const savedOrder = await MarketplaceOrder.findByPk(dbOrderId);
+            if (savedOrder) {
+                await savedOrder.update({
+                    paymentStatus: 'Completed',
+                    paymentDetails: { razorpay_payment_id, razorpay_signature }
+                });
+            }
 
             // Clear Cart
-            const user = await userModel.findByIdAndUpdate(userId, { cartData: {} });
-
-            // Send Confirmation Email
-            await sendConfirmationEmail(user.email, user.name, dbOrderId, savedOrder.address, savedOrder.totalAmount, 'Razorpay');
+            const user = await User.findByPk(userId);
+            if (user) {
+                await user.update({ cartData: {} });
+                // Send Confirmation Email
+                await sendConfirmationEmail(user.email, user.name, dbOrderId, savedOrder.address, savedOrder.totalAmount, 'Razorpay');
+            }
 
             res.json({ success: true, message: "Payment Successful" });
         } else {
@@ -145,8 +185,31 @@ const verifyRazorpay = async (req, res) => {
 // All Orders for Admin
 const allOrders = async (req, res) => {
     try {
-        const orders = await marketplaceOrderModel.find({});
-        res.json({ success: true, orders });
+        const orders = await MarketplaceOrder.findAll({
+            include: [{
+                model: MarketplaceOrderItem,
+                include: [{ model: Product }]
+            }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        const mapped = orders.map(order => {
+            const data = order.toJSON();
+            if(data.MarketplaceOrderItems) {
+                data.items = data.MarketplaceOrderItems.map(item => {
+                    const itemData = { ...item };
+                    itemData.productId = itemData.Product;
+                    delete itemData.Product;
+                    return itemData;
+                });
+                delete data.MarketplaceOrderItems;
+            } else {
+                data.items = [];
+            }
+            return data;
+        });
+
+        res.json({ success: true, orders: mapped });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
@@ -157,7 +220,11 @@ const allOrders = async (req, res) => {
 const updateStatus = async (req, res) => {
     try {
         const { orderId, status } = req.body;
-        await marketplaceOrderModel.findByIdAndUpdate(orderId, { status });
+        
+        const order = await MarketplaceOrder.findByPk(orderId);
+        if (!order) return res.json({ success: false, message: "Order not found" });
+
+        await order.update({ status });
         res.json({ success: true, message: "Status Updated" });
     } catch (error) {
         console.log(error);
@@ -171,7 +238,10 @@ const cancelOrder = async (req, res) => {
         const { orderId, userId, reason } = req.body;
 
         // Verify ownership and status
-        const order = await marketplaceOrderModel.findOne({ _id: orderId, userId });
+        const order = await MarketplaceOrder.findOne({
+            where: { id: orderId, userId }
+        });
+
         if (!order) {
             return res.json({ success: false, message: "Order not found or unauthorized" });
         }
@@ -180,9 +250,10 @@ const cancelOrder = async (req, res) => {
             return res.json({ success: false, message: "Only pending orders can be cancelled" });
         }
 
-        order.status = 'Cancelled';
-        order.cancellationReason = reason || 'No reason provided';
-        await order.save();
+        await order.update({
+            status: 'Cancelled',
+            cancellationReason: reason || 'No reason provided'
+        });
 
         res.json({ success: true, message: "Order Cancelled Successfully" });
     } catch (error) {

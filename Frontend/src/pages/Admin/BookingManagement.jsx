@@ -84,7 +84,7 @@ const BookingManagement = () => {
                             ) : bookings.length === 0 ? (
                                 <tr><td colSpan="7" className="text-center py-10">No bookings found</td></tr>
                             ) : bookings.map((booking) => (
-                                <tr key={booking._id} className="hover:bg-slate-50 transition-colors">
+                                <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-slate-900">{booking.farmerId?.name}</div>
                                         <div className="text-xs text-slate-500">{booking.farmerId?.district}</div>
@@ -93,23 +93,23 @@ const BookingManagement = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
                                             <Calendar size={14} className="text-slate-400" />
-                                            {new Date(booking.visitDate).toLocaleDateString()}
+                                            {new Date(booking.visit_date).toLocaleDateString()}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <select 
-                                            value={booking.assignedOfficer?._id || ""}
-                                            onChange={(e) => handleUpdateBooking(booking._id, { assignedOfficer: e.target.value })}
+                                            value={booking.assignedOfficer?.id || ""}
+                                            onChange={(e) => handleUpdateBooking(booking.id, { assignedOfficer: e.target.value })}
                                             className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-green-500 outline-none w-full"
                                         >
                                             <option value="">Unassigned</option>
-                                            {fieldOfficers.map(fo => <option key={fo._id} value={fo._id}>{fo.name}</option>)}
+                                            {fieldOfficers.map(fo => <option key={fo.id} value={fo.id}>{fo.name}</option>)}
                                         </select>
                                     </td>
                                     <td className="px-6 py-4">
                                         <select 
                                             value={booking.status}
-                                            onChange={(e) => handleUpdateBooking(booking._id, { status: e.target.value })}
+                                            onChange={(e) => handleUpdateBooking(booking.id, { status: e.target.value })}
                                             className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase border outline-none
                                                 ${booking.status === 'Completed' ? 'bg-green-50 text-green-700 border-green-200' : 
                                                   booking.status === 'Confirmed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
@@ -124,17 +124,17 @@ const BookingManagement = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center gap-1.5 font-medium
-                                            ${booking.paymentStatus === 'Completed' ? 'text-green-600' : 
-                                              booking.paymentStatus === 'Failed' ? 'text-red-600' : 'text-slate-500'}`}>
-                                            {booking.paymentStatus === 'Completed' ? <CheckCircle size={14} /> : 
-                                             booking.paymentStatus === 'Failed' ? <XCircle size={14} /> : <Clock size={14} />}
-                                            {booking.paymentStatus}
+                                            ${booking.payment_status === 'Completed' ? 'text-green-600' : 
+                                              booking.payment_status === 'Failed' ? 'text-red-600' : 'text-slate-500'}`}>
+                                            {booking.payment_status === 'Completed' ? <CheckCircle size={14} /> : 
+                                             booking.payment_status === 'Failed' ? <XCircle size={14} /> : <Clock size={14} />}
+                                            {booking.payment_status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         {booking.status !== 'Completed' && (
                                             <button 
-                                                onClick={() => handleUpdateBooking(booking._id, { status: 'Completed', paymentStatus: 'Completed' })}
+                                                onClick={() => handleUpdateBooking(booking.id, { status: 'Completed', paymentStatus: 'Completed' })}
                                                 className="text-green-600 hover:text-green-700 text-xs font-bold uppercase tracking-wider"
                                             >
                                                 Mark Completed

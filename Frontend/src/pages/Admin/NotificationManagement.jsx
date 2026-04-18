@@ -64,8 +64,8 @@ const NotificationManagement = () => {
         const payload = {
             title: titleToSend,
             message: formData.message,
-            targetType: formData.targetType,
-            targetValue: formData.targetValue || "Global"
+            targetType: formData.target_type,
+            targetValue: formData.target_value || "Global"
         };
 
         try {
@@ -114,12 +114,12 @@ const NotificationManagement = () => {
                                         key={t.value} type="button"
                                         onClick={() => handleTargetTypeChange(t.value)}
                                         className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 transition-all ${
-                                            formData.targetType === t.value 
+                                            formData.target_type === t.value 
                                             ? 'border-green-600 bg-green-50 text-green-800 shadow-sm' 
                                             : 'border-slate-50 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:border-slate-100'
                                         }`}
                                     >
-                                        <t.icon size={16} className={formData.targetType === t.value ? "text-green-600" : "text-slate-400"} /> 
+                                        <t.icon size={16} className={formData.target_type === t.value ? "text-green-600" : "text-slate-400"} /> 
                                         <span className="font-extrabold text-[13px]">{t.label}</span>
                                     </button>
                                 ))}
@@ -127,19 +127,19 @@ const NotificationManagement = () => {
                         </div>
 
                         {/* Filter Selection */}
-                        {formData.targetType !== 'All' && formData.targetType !== 'Specific' && (
+                        {formData.target_type !== 'All' && formData.target_type !== 'Specific' && (
                             <div className="space-y-3 animate-fade-in-up">
                             <label className="block text-xs font-bold text-slate-500">Select Filter</label>
                             <div className="relative">
                                 <select 
                                     name="targetValue"
-                                    value={formData.targetValue}
+                                    value={formData.target_value}
                                     onChange={handleInputChange}
                                     className="w-full border-0 bg-slate-100 rounded-xl px-4 py-3.5 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-green-600 outline-none appearance-none cursor-pointer hover:bg-slate-200 transition-colors"
                                     required
                                 >
                                     <option value="" disabled className="text-slate-400">Select District or Crop variety...</option>
-                                    {formData.targetType === 'District' 
+                                    {formData.target_type === 'District' 
                                         ? districtsList.map(d => <option key={d} value={d}>{d}</option>)
                                         : cropsList.map(c => <option key={c} value={c}>{c}</option>)
                                     }
@@ -149,13 +149,13 @@ const NotificationManagement = () => {
                             </div>
                         )}
 
-                        {formData.targetType === 'Specific' && (
+                        {formData.target_type === 'Specific' && (
                             <div className="space-y-3 animate-fade-in-up">
                             <label className="block text-xs font-bold text-slate-500">Select Filter</label>
                             <input 
                                 type="text"
                                 name="targetValue"
-                                value={formData.targetValue}
+                                value={formData.target_value}
                                 onChange={handleInputChange}
                                 placeholder="Enter specific phone number..."
                                 className="w-full border-0 bg-slate-100 hover:bg-slate-200 transition-colors rounded-xl px-4 py-3.5 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-green-600 outline-none"
@@ -304,14 +304,14 @@ const NotificationManagement = () => {
                                    if (status === 'FAILED') pillClasses = "bg-red-50 text-red-600 border-red-100";
 
                                    return (
-                                    <tr key={record._id} className="hover:bg-slate-50 border-b border-slate-50 transition-colors group">
+                                    <tr key={record.id} className="hover:bg-slate-50 border-b border-slate-50 transition-colors group">
                                         <td className="px-6 py-4 align-top w-1/2">
                                             <div className="font-extrabold text-slate-800 text-xs mb-1 line-clamp-1">{record.title || "Message Update..."}</div>
                                             <div className="text-[10px] text-slate-500 font-semibold">{new Date(record.sentAt).toLocaleString([], { month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</div>
                                         </td>
                                         <td className="px-6 py-4 align-top">
                                              <div className="text-center text-[13px] font-extrabold text-slate-700">
-                                                 {(record.recipientCount || 0).toLocaleString()}
+                                                 {(record.recipient_count || 0).toLocaleString()}
                                              </div>
                                         </td>
                                         <td className="px-6 py-4 align-top text-right">

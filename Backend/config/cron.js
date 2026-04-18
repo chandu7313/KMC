@@ -1,7 +1,5 @@
 import cron from 'node-cron';
-import SoilReminder from '../models/SoilReminder.js';
-import PriceAlert from '../models/priceAlertModel.js';
-import MarketPrice from '../models/MarketPrice.js';
+import supabase from './supabase.js';
 import { syncMandiData } from '../services/marketSyncService.js';
 
 const startCronJobs = () => {
@@ -9,22 +7,28 @@ const startCronJobs = () => {
     cron.schedule('0 10 * * *', async () => {
         try {
             console.log('--- Starting Soil Reminder Check ---');
-            const today = new Date();
-            const upcomingReminders = await SoilReminder.find({
-                reminderDate: { $lte: today },
-                isSent: false
-            }).populate('user', 'name phone email');
+            const today = new Date().toISOString();
 
-            for (const reminder of upcomingReminders) {
-                console.log(`Sending alert to: ${reminder.user?.name} (${reminder.user?.phone})`);
+            const { data: upcomingReminders, error } = await supabase
+                .from('soil_reminders')
+                .select('*, users:user_id(name, phone, email)')
+                .lte('reminder_date', today)
+                .eq('is_sent', false);
+
+            if (error) throw error;
+
+            for (const reminder of (upcomingReminders || [])) {
+                console.log(`Sending alert to: ${reminder.users?.name} (${reminder.users?.phone})`);
 
                 // Placeholder for real SMS/WhatsApp notification logic
-                // await notifyUser(reminder.user.phone, "KMC Health Alert: Your soil test is due this week.");
+                // await notifyUser(reminder.users.phone, "KMC Health Alert: Your soil test is due this week.");
 
-                reminder.isSent = true;
-                await reminder.save();
+                await supabase
+                    .from('soil_reminders')
+                    .update({ is_sent: true })
+                    .eq('id', reminder.id);
             }
-            console.log(`--- Finished: ${upcomingReminders.length} notifications sent ---`);
+            console.log(`--- Finished: ${(upcomingReminders || []).length} notifications sent ---`);
         } catch (error) {
             console.error('Error in soil reminder cron:', error);
         }
@@ -34,24 +38,40 @@ const startCronJobs = () => {
     cron.schedule('0 */4 * * *', async () => {
         try {
             console.log('--- Checking Price Alerts ---');
-            const activeAlerts = await PriceAlert.find({ status: 'Active' }).populate('userId', 'name email phone');
+            const { data: activeAlerts, error } = await supabase
+                .from('price_alerts')
+                .select('*, users:user_id(name, email, phone)')
+                .eq('status', 'Active');
 
-            for (const alert of activeAlerts) {
-                const currentPrice = await MarketPrice.findOne({ cropName: alert.crop });
+            if (error) throw error;
+
+            for (const alert of (activeAlerts || [])) {
+                const { data: currentPrice } = await supabase
+                    .from('market_prices')
+                    .select('modal_price')
+                    .eq('crop_name', alert.crop)
+                    .order('arrival_date', { ascending: false })
+                    .limit(1)
+                    .single();
+
                 if (!currentPrice) continue;
 
                 let triggered = false;
-                if (alert.condition === 'Above' && currentPrice.modalPrice >= alert.targetPrice) triggered = true;
-                if (alert.condition === 'Below' && currentPrice.modalPrice <= alert.targetPrice) triggered = true;
+                if (alert.condition === 'Above' && currentPrice.modal_price >= alert.target_price) triggered = true;
+                if (alert.condition === 'Below' && currentPrice.modal_price <= alert.target_price) triggered = true;
 
                 if (triggered) {
-                    console.log(`Alert Triggered for ${alert.userId?.name}: ${alert.crop} hit ₹${currentPrice.modalPrice}`);
+                    console.log(`Alert Triggered for ${alert.users?.name}: ${alert.crop} hit ₹${currentPrice.modal_price}`);
                     // Placeholder for real notification
-                    // await notifyUser(alert.userId.phone, `KMC Price Alert: ${alert.crop} is now ₹${currentPrice.modalPrice}, which is ${alert.condition} your target.`);
+                    // await notifyUser(alert.users.phone, `KMC Price Alert: ${alert.crop} is now ₹${currentPrice.modal_price}, which is ${alert.condition} your target.`);
 
-                    alert.status = 'Triggered';
-                    alert.lastNotified = new Date();
-                    await alert.save();
+                    await supabase
+                        .from('price_alerts')
+                        .update({
+                            status: 'Triggered',
+                            last_notified: new Date().toISOString()
+                        })
+                        .eq('id', alert.id);
                 }
             }
         } catch (error) {

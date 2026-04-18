@@ -69,7 +69,7 @@ const BlogDetail = () => {
                                 {blog.tags?.[0] || 'Agriculture'}
                             </span>
                             <div className="flex items-center gap-2 text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                                <Calendar size={12}/> {new Date(blog.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                                <Calendar size={12}/> {new Date(blog.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                             </div>
                             <div className="flex items-center gap-2 text-slate-400 text-[10px] font-black uppercase tracking-widest">
                                 <Clock size={12}/> 5 Min Read
@@ -96,7 +96,7 @@ const BlogDetail = () => {
                 <div className="max-w-6xl mx-auto px-6 my-16">
                     <div className="aspect-[21/9] rounded-[48px] overflow-hidden bg-slate-100 border border-slate-100 shadow-2xl">
                         <img 
-                            src={blog.featuredImage} 
+                            src={blog.featured_image} 
                             alt={blog.title} 
                             className="w-full h-full object-cover"
                         />

@@ -81,14 +81,14 @@ const Blogs = () => {
                     <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {filteredBlogs.map((blog) => (
                             <div
-                                key={blog._id}
+                                key={blog.id}
                                 className="group cursor-pointer"
                                 onClick={() => navigate(`/blog/${blog.slug}`)}
                             >
                                 <div className="space-y-6">
                                     <div className="aspect-[16/10] rounded-[48px] overflow-hidden bg-slate-50 border border-slate-100 relative">
                                         <img
-                                            src={blog.featuredImage}
+                                            src={blog.featured_image}
                                             alt={blog.title}
                                             className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-1000"
                                         />
@@ -98,7 +98,7 @@ const Blogs = () => {
                                     <div className="px-4 space-y-4">
                                         <div className="flex items-center gap-6">
                                             <div className="flex items-center gap-2 text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                                                <Calendar size={12} className="text-emerald-600"/> {new Date(blog.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                <Calendar size={12} className="text-emerald-600"/> {new Date(blog.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </div>
                                             <div className="flex items-center gap-2 text-slate-400 text-[10px] font-black uppercase tracking-widest">
                                                 <User size={12} className="text-emerald-600"/> {blog.author || 'AgriTeam'}

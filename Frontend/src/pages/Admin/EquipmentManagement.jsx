@@ -120,7 +120,7 @@ const EquipmentManagement = () => {
 
     const openEdit = (item) => {
         setEditMode(true);
-        setSelectedId(item._id);
+        setSelectedId(item.id);
         setFormData({
             name: item.name,
             description: item.description,
@@ -161,7 +161,7 @@ const EquipmentManagement = () => {
             {activeTab === 'inventory' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {equipments.map(item => (
-                        <div key={item._id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
+                        <div key={item.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
                             <div className="relative h-48 bg-slate-50">
                                 <img src={item.image} alt={item.name} className="w-full h-full object-contain p-4" />
                                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold shadow-sm border border-slate-100">
@@ -179,7 +179,7 @@ const EquipmentManagement = () => {
                                 </div>
                                 <div className="flex gap-2 pt-2">
                                     <button onClick={() => openEdit(item)} className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-lg transition-colors flex-1 flex justify-center"><Edit2 size={16}/></button>
-                                    <button onClick={() => handleDelete(item._id)} className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg transition-colors flex-1 flex justify-center"><Trash2 size={16}/></button>
+                                    <button onClick={() => handleDelete(item.id)} className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg transition-colors flex-1 flex justify-center"><Trash2 size={16}/></button>
                                 </div>
                             </div>
                         </div>
@@ -200,7 +200,7 @@ const EquipmentManagement = () => {
                         </thead>
                         <tbody className="divide-y divide-slate-50 text-slate-600">
                             {orders.map(order => (
-                                <tr key={order._id} className="hover:bg-slate-50/50 transition-colors">
+                                <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="font-bold text-slate-800">{order.userId?.name}</div>
                                         <div className="text-[10px]">{order.userId?.phone}</div>
@@ -212,11 +212,11 @@ const EquipmentManagement = () => {
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 font-bold text-slate-900">₹{order.totalAmount}</td>
+                                    <td className="px-6 py-4 font-bold text-slate-900">₹{order.total_amount}</td>
                                     <td className="px-6 py-4">
                                         <select 
                                             value={order.status} 
-                                            onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
+                                            onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
                                             className={`text-[10px] font-bold px-3 py-1.5 rounded-full border-none outline-none ${
                                                 order.status === 'Delivered' ? 'bg-emerald-50 text-emerald-600' : 
                                                 order.status === 'Cancelled' ? 'bg-rose-50 text-rose-500' : 'bg-amber-50 text-amber-600'
@@ -230,7 +230,7 @@ const EquipmentManagement = () => {
                                         </select>
                                     </td>
                                     <td className="px-6 py-4 text-right text-[10px] font-medium text-slate-400">
-                                        {new Date(order.createdAt).toLocaleDateString()}
+                                        {new Date(order.created_at).toLocaleDateString()}
                                     </td>
                                 </tr>
                             ))}

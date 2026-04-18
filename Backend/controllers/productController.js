@@ -1,10 +1,10 @@
-import productModel from "../models/Product.js";
+import { Product } from '../models/index.js';
 
 // Add Product (Admin)
 const addProduct = async (req, res) => {
     try {
         const { name, description, shortDescription, category, subCategory, price, stock, specifications, isFeatured } = req.body;
-        const images = req.files.map(file => file.path); // Assuming multer-cloudinary is used
+        const images = req.files ? req.files.map(file => file.path) : []; // Assuming multer-cloudinary is used
 
         const productData = {
             name,
@@ -19,8 +19,7 @@ const addProduct = async (req, res) => {
             isFeatured: isFeatured === 'true'
         };
 
-        const product = new productModel(productData);
-        await product.save();
+        await Product.create(productData);
 
         res.json({ success: true, message: "Product Added" });
     } catch (error) {
@@ -32,7 +31,8 @@ const addProduct = async (req, res) => {
 // List Products
 const listProducts = async (req, res) => {
     try {
-        const products = await productModel.find({});
+        const products = await Product.findAll();
+
         res.json({ success: true, products });
     } catch (error) {
         console.log(error);
@@ -43,7 +43,14 @@ const listProducts = async (req, res) => {
 // Remove Product (Admin)
 const removeProduct = async (req, res) => {
     try {
-        await productModel.findByIdAndDelete(req.body.id);
+        const product = await Product.findByPk(req.body.id);
+        
+        if (!product) {
+             return res.json({ success: false, message: "Product not found" });
+        }
+        
+        await product.destroy();
+
         res.json({ success: true, message: "Product Removed" });
     } catch (error) {
         console.log(error);
@@ -55,7 +62,12 @@ const removeProduct = async (req, res) => {
 const singleProduct = async (req, res) => {
     try {
         const { productId } = req.body;
-        const product = await productModel.findById(productId);
+        const product = await Product.findByPk(productId);
+
+        if (!product) {
+            return res.json({ success: false, message: "Product not found" });
+        }
+
         res.json({ success: true, product });
     } catch (error) {
         console.log(error);

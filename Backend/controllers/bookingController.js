@@ -1,5 +1,4 @@
-import bookingModel from "../models/bookingModel.js";
-import userModel from "../models/userModel.js";
+import { Booking } from '../models/index.js';
 
 // Create a new farm visit booking
 export const createBooking = async (req, res) => {
@@ -10,7 +9,7 @@ export const createBooking = async (req, res) => {
             return res.json({ success: false, message: "Missing required booking details" });
         }
 
-        const newBooking = new bookingModel({
+        const newBooking = await Booking.create({
             farmerId,
             fullName,
             phone,
@@ -19,8 +18,6 @@ export const createBooking = async (req, res) => {
             visitDate,
             purpose
         });
-
-        await newBooking.save();
 
         res.json({ success: true, message: "Farm visit booked successfully!", booking: newBooking });
 
@@ -33,7 +30,11 @@ export const createBooking = async (req, res) => {
 export const getUserBookings = async (req, res) => {
     try {
         const { userId } = req.body;
-        const bookings = await bookingModel.find({ farmerId: userId }).sort({ createdAt: -1 });
+        
+        const bookings = await Booking.findAll({
+            where: { farmerId: userId },
+            order: [['createdAt', 'DESC']]
+        });
 
         res.json({ success: true, bookings });
     } catch (error) {

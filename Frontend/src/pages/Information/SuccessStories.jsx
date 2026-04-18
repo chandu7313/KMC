@@ -54,13 +54,13 @@ const SuccessStories = () => {
                     <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-24">
                         {stories.map((story) => (
                             <div
-                                key={story._id}
+                                key={story.id}
                                 className="bg-white rounded-[40px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all group"
                             >
                                 <div className="h-64 h-full w-full relative overflow-hidden bg-slate-100">
                                     <img
                                         src={story.image}
-                                        alt={story.farmerName}
+                                        alt={story.farmer_name}
                                         className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                     <div className="absolute top-4 left-4">
@@ -73,7 +73,7 @@ const SuccessStories = () => {
                                 <div className="p-10 space-y-6">
                                     <div className="space-y-1">
                                         <h3 className="text-2xl font-black text-[#1f2d1f]">
-                                            {story.farmerName}
+                                            {story.farmer_name}
                                         </h3>
                                         <p className="text-sm text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
                                             <MapPin size={14} className="text-green-700"/> {story.district}
@@ -88,14 +88,14 @@ const SuccessStories = () => {
                                         <div className="bg-rose-50 p-4 rounded-2xl border border-rose-100">
                                             <div className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Before Advisor</div>
                                             <div className="flex items-end gap-1">
-                                                <span className="text-xl font-black text-rose-700">{story.beforeYield}</span>
+                                                <span className="text-xl font-black text-rose-700">{story.before_yield}</span>
                                                 <span className="text-[10px] font-bold text-rose-400 pb-1 uppercase">kg/acre</span>
                                             </div>
                                         </div>
                                         <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 border-2 shadow-sm">
                                             <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">After Performance</div>
                                             <div className="flex items-end gap-1">
-                                                <span className="text-xl font-black text-emerald-700">{story.afterYield}</span>
+                                                <span className="text-xl font-black text-emerald-700">{story.after_yield}</span>
                                                 <span className="text-[10px] font-bold text-emerald-400 pb-1 uppercase">kg/acre</span>
                                             </div>
                                         </div>
@@ -106,7 +106,7 @@ const SuccessStories = () => {
                                             <TrendingUp size={18}/>
                                         </div>
                                         <div className="text-sm font-black text-green-800 uppercase tracking-tighter">
-                                            {Math.round(((story.afterYield - story.beforeYield) / story.beforeYield) * 100)}% Yield Improvement
+                                            {Math.round(((story.after_yield - story.before_yield) / story.before_yield) * 100)}% Yield Improvement
                                         </div>
                                     </div>
                                 </div>

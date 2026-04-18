@@ -88,8 +88,8 @@ const MarketPrices = () => {
   }, [fetchData]);
 
   const stats = [
-    { label: "State Avg", value: `₹${(comparisons.reduce((acc, p) => acc + (p.modalPrice || p.price), 0) / (comparisons.length || 1)).toFixed(0)}`, icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Best Mandi", value: comparisons[0]?.district || "N/A", sub: `₹${comparisons[0]?.modalPrice || comparisons[0]?.price || 0}`, icon: MapPin, color: "text-green-600", bg: "bg-green-50" },
+    { label: "State Avg", value: `₹${(comparisons.reduce((acc, p) => acc + (p.modal_price || p.price), 0) / (comparisons.length || 1)).toFixed(0)}`, icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
+    { label: "Best Mandi", value: comparisons[0]?.district || "N/A", sub: `₹${comparisons[0]?.modal_price || comparisons[0]?.price || 0}`, icon: MapPin, color: "text-green-600", bg: "bg-green-50" },
     { label: "Market Sentiment", value: analytics?.prediction?.bestTimeToSell || "Stable", icon: Target, color: "text-orange-600", bg: "bg-orange-50" },
   ];
 
@@ -166,7 +166,7 @@ const MarketPrices = () => {
                  </div>
               </div>
               <p className="text-slate-500 font-black text-xs uppercase tracking-widest mb-2">Current Price ({selectedCrop})</p>
-              <h3 className="text-4xl font-black text-slate-900">₹{realTimeData?.modalPrice || "---"}</h3>
+              <h3 className="text-4xl font-black text-slate-900">₹{realTimeData?.modal_price || "---"}</h3>
               <div className="flex items-center gap-2 mt-2">
                  <MapPin size={14} className="text-green-600" />
                  <p className="text-slate-400 font-bold text-xs">{realTimeData?.mandi || "Select Mandi"}</p>
@@ -362,15 +362,15 @@ const MarketPrices = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {prices.filter(p => !searchTerm || (p.cropName && p.cropName.toLowerCase().includes(searchTerm.toLowerCase())) || (p.district && p.district.toLowerCase().includes(searchTerm.toLowerCase()))).map((item) => (
-                      <tr key={item._id} className="hover:bg-green-50/30 transition group">
+                    {prices.filter(p => !searchTerm || (p.crop_name && p.crop_name.toLowerCase().includes(searchTerm.toLowerCase())) || (p.district && p.district.toLowerCase().includes(searchTerm.toLowerCase()))).map((item) => (
+                      <tr key={item.id} className="hover:bg-green-50/30 transition group">
                         <td className="px-10 py-6">
                            <div className="flex items-center gap-4">
                              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-400 group-hover:bg-green-100 group-hover:text-green-600 transition-colors">
-                               {item.cropName ? item.cropName[0] : '?'}
+                               {item.crop_name ? item.crop_name[0] : '?'}
                              </div>
                              <div>
-                               <p className="font-black text-slate-900">{item.cropName}</p>
+                               <p className="font-black text-slate-900">{item.crop_name}</p>
                                <p className="text-xs font-bold text-slate-400">{item.variety}</p>
                              </div>
                            </div>
@@ -378,15 +378,15 @@ const MarketPrices = () => {
                         <td className="px-10 py-6 font-bold text-slate-600">{item.district}</td>
                         <td className="px-10 py-6">
                            <div className="flex items-center gap-2">
-                             <span className="text-xs font-bold text-slate-400">₹{item.minPrice || item.modalPrice - 50}</span>
+                             <span className="text-xs font-bold text-slate-400">₹{item.min_price || item.modal_price - 50}</span>
                              <div className="h-1 w-12 bg-slate-100 rounded-full overflow-hidden">
                                 <div className="h-full bg-green-500 w-[60%]" />
                              </div>
-                             <span className="text-xs font-bold text-slate-400">₹{item.maxPrice || item.modalPrice + 50}</span>
+                             <span className="text-xs font-bold text-slate-400">₹{item.max_price || item.modal_price + 50}</span>
                            </div>
                         </td>
                         <td className="px-10 py-6">
-                           <span className="text-xl font-black text-slate-900">₹{item.modalPrice}</span>
+                           <span className="text-xl font-black text-slate-900">₹{item.modal_price}</span>
                            <span className="text-[10px] ml-1 font-bold text-slate-400">/{item.unit}</span>
                         </td>
                         <td className="px-10 py-6">
@@ -401,21 +401,21 @@ const MarketPrices = () => {
                 </table>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-8">
-                   {prices.filter(p => !searchTerm || (p.cropName && p.cropName.toLowerCase().includes(searchTerm.toLowerCase())) || (p.district && p.district.toLowerCase().includes(searchTerm.toLowerCase()))).map((item) => (
-                      <div key={item._id} className="bg-slate-50 p-6 rounded-[32px] border border-slate-100 group hover:bg-white hover:shadow-xl transition-all duration-500">
+                   {prices.filter(p => !searchTerm || (p.crop_name && p.crop_name.toLowerCase().includes(searchTerm.toLowerCase())) || (p.district && p.district.toLowerCase().includes(searchTerm.toLowerCase()))).map((item) => (
+                      <div key={item.id} className="bg-slate-50 p-6 rounded-[32px] border border-slate-100 group hover:bg-white hover:shadow-xl transition-all duration-500">
                          <div className="flex justify-between items-start mb-6">
-                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center font-black text-green-600 shadow-sm">{item.cropName ? item.cropName[0] : '?'}</div>
+                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center font-black text-green-600 shadow-sm">{item.crop_name ? item.crop_name[0] : '?'}</div>
                             <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${item.change >= 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                                {item.change >= 0 ? "+" : ""}{item.change}%
                             </div>
                          </div>
-                         <h4 className="text-xl font-black text-slate-900 truncate">{item.cropName}</h4>
+                         <h4 className="text-xl font-black text-slate-900 truncate">{item.crop_name}</h4>
                          <p className="text-slate-400 font-bold text-xs mb-6 uppercase tracking-widest">{item.district}</p>
                          
                          <div className="flex items-end justify-between">
                             <div>
                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Mandi Price</p>
-                               <span className="text-2xl font-black text-slate-900">₹{item.modalPrice}</span>
+                               <span className="text-2xl font-black text-slate-900">₹{item.modal_price}</span>
                             </div>
                             <button className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition translate-y-2 group-hover:translate-y-0">
                                <ChevronRight size={20} />

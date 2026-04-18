@@ -1,4 +1,5 @@
-import MarketHistory from "../models/marketHistoryModel.js";
+import { MarketHistory } from '../models/index.js';
+import { Op } from 'sequelize';
 
 /**
  * Fetch last 30 days data and calculate averages and trends
@@ -8,20 +9,23 @@ export const getTrend = async (crop, district) => {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const history = await MarketHistory.find({
-            crop,
-            district,
-            date: { $gte: thirtyDaysAgo }
-        }).sort({ date: 1 });
+        const history = await MarketHistory.findAll({
+            where: {
+                crop: crop,
+                district: district,
+                date: { [Op.gte]: thirtyDaysAgo }
+            },
+            order: [['date', 'ASC']]
+        });
 
-        if (history.length === 0) {
+        if (!history || history.length === 0) {
             return {
                 success: false,
                 message: "No historical data found for this crop and district"
             };
         }
 
-        const prices = history.map(h => h.price);
+        const prices = history.map(h => Number(h.price));
         const lastPrice = prices[prices.length - 1];
 
         // 7-day average
@@ -36,7 +40,6 @@ export const getTrend = async (crop, district) => {
         const pctChange = ((lastPrice - startPrice) / startPrice) * 100;
 
         // Determine trend
-        // If last 7 days avg is significantly higher/lower than 30-day avg
         let trend = "Stable";
         const threshold = 0.02; // 2% threshold
         const ratio = avg7 / avg30;

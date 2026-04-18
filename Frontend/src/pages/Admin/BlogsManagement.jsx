@@ -99,7 +99,7 @@ const BlogsManagement = () => {
 
     const openEdit = (blog) => {
         setEditMode(true);
-        setSelectedId(blog._id);
+        setSelectedId(blog.id);
         setFormData({
             title: blog.title,
             excerpt: blog.excerpt || '',
@@ -139,12 +139,12 @@ const BlogsManagement = () => {
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                         {blogs.map(blog => (
-                            <tr key={blog._id} className="hover:bg-slate-50/30 transition-colors group">
+                            <tr key={blog.id} className="hover:bg-slate-50/30 transition-colors group">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
-                                            {blog.featuredImage ? (
-                                                <img src={blog.featuredImage} className="w-full h-full object-cover" />
+                                            {blog.featured_image ? (
+                                                <img src={blog.featured_image} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-slate-300 font-bold text-xl">B</div>
                                             )}
@@ -174,7 +174,7 @@ const BlogsManagement = () => {
                                         <button onClick={() => openEdit(blog)} className="p-2 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 rounded-lg transition-all">
                                             <Edit2 size={16} />
                                         </button>
-                                        <button onClick={() => handleDelete(blog._id)} className="p-2 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition-all">
+                                        <button onClick={() => handleDelete(blog.id)} className="p-2 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition-all">
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
