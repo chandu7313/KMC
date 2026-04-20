@@ -11,7 +11,7 @@ import '../errors/app_exception.dart';
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:4000/api',
+      baseUrl: dotenv.env['API_BASE_URL'] ?? 'http://localhost:4000/api',
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
       sendTimeout: const Duration(seconds: 30),
@@ -19,6 +19,8 @@ final dioProvider = Provider<Dio>((ref) {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+      // On web, allow the browser to send/receive cookies automatically
+      extra: {'withCredentials': true},
     ),
   );
 
@@ -34,6 +36,8 @@ final dioProvider = Provider<Dio>((ref) {
 
 // ============================================================
 // AUTH INTERCEPTOR — Attaches JWT token to every request
+// On web: uses withCredentials (browser manages cookies)
+// On mobile: manually attaches token from secure storage
 // ============================================================
 class _AuthInterceptor extends Interceptor {
   final Ref _ref;
@@ -44,23 +48,31 @@ class _AuthInterceptor extends Interceptor {
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    final token = await _storage.read(key: AppConstants.tokenKey);
-    if (token != null && token.isNotEmpty) {
-      options.headers['Cookie'] = 'token=$token';
+    if (kIsWeb) {
+      // On web, the browser handles cookies automatically via withCredentials
+      options.extra['withCredentials'] = true;
+    } else {
+      // On mobile, manually attach token from secure storage
+      final token = await _storage.read(key: AppConstants.tokenKey);
+      if (token != null && token.isNotEmpty) {
+        options.headers['Cookie'] = 'token=$token';
+      }
     }
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    // Extract and store token from Set-Cookie header if present
-    final cookies = response.headers['set-cookie'];
-    if (cookies != null) {
-      for (final cookie in cookies) {
-        if (cookie.startsWith('token=')) {
-          final token = cookie.split(';').first.replaceFirst('token=', '');
-          if (token.isNotEmpty) {
-            _storage.write(key: AppConstants.tokenKey, value: token);
+    if (!kIsWeb) {
+      // On mobile only — extract and store token from Set-Cookie header
+      final cookies = response.headers['set-cookie'];
+      if (cookies != null) {
+        for (final cookie in cookies) {
+          if (cookie.startsWith('token=')) {
+            final token = cookie.split(';').first.replaceFirst('token=', '');
+            if (token.isNotEmpty) {
+              _storage.write(key: AppConstants.tokenKey, value: token);
+            }
           }
         }
       }

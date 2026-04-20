@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -86,11 +87,19 @@ class AuthRepository {
     } catch (_) {
       // Ignore errors — always clear local data
     }
-    await _storage.delete(key: AppConstants.tokenKey);
+    if (!kIsWeb) {
+      await _storage.delete(key: AppConstants.tokenKey);
+    }
   }
 
   /// Check if a stored token exists locally
+  /// On web, the browser manages cookies — just try the is-auth endpoint
   Future<bool> hasStoredToken() async {
+    if (kIsWeb) {
+      // On web, cookies are managed by the browser.
+      // We can't check them directly, so return true to trigger isAuthenticated().
+      return true;
+    }
     final token = await _storage.read(key: AppConstants.tokenKey);
     return token != null && token.isNotEmpty;
   }

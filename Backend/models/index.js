@@ -1,7 +1,7 @@
 import { User, UserAddress, FarmerSurvey } from './User.js';
 import { Product, Review, MarketplaceOrder, MarketplaceOrderItem } from './Ecommerce.js';
 import { Equipment, EquipmentOrder, EquipmentOrderItem, Fertilizer, FertilizerOrder, FertilizerOrderItem } from './Assets.js';
-import { SoilReport, SoilReminder, MarketPrice, MarketHistory, PriceAlert } from './Agri.js';
+import { SoilReport, SoilReminder, MarketPrice, MarketHistory, PriceAlert, CropDiagnosis } from './Agri.js';
 import { Blog, SuccessStory, Booking, Notification, OrchardRequest, Order } from './Content.js';
 
 // Setup Relationships
@@ -56,6 +56,10 @@ SoilReminder.belongsTo(SoilReport, { foreignKey: 'reportId' });
 User.hasMany(PriceAlert, { foreignKey: 'userId', onDelete: 'CASCADE' });
 PriceAlert.belongsTo(User, { foreignKey: 'userId' });
 
+// Crop Diagnoses
+User.hasMany(CropDiagnosis, { foreignKey: 'farmerId', onDelete: 'CASCADE' });
+CropDiagnosis.belongsTo(User, { foreignKey: 'farmerId' });
+
 // Bookings & Content
 User.hasMany(Booking, { foreignKey: 'farmerId', onDelete: 'CASCADE' });
 Booking.belongsTo(User, { as: 'Farmer', foreignKey: 'farmerId' });
@@ -73,6 +77,6 @@ export {
     Product, Review, MarketplaceOrder, MarketplaceOrderItem,
     Equipment, EquipmentOrder, EquipmentOrderItem,
     Fertilizer, FertilizerOrder, FertilizerOrderItem,
-    SoilReport, SoilReminder, MarketPrice, MarketHistory, PriceAlert,
+    SoilReport, SoilReminder, MarketPrice, MarketHistory, PriceAlert, CropDiagnosis,
     Blog, SuccessStory, Booking, Notification, OrchardRequest, Order
 };

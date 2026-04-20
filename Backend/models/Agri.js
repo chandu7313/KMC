@@ -75,4 +75,25 @@ const PriceAlert = sequelize.define('PriceAlert', {
     timestamps: true
 });
 
-export { SoilReport, SoilReminder, MarketPrice, MarketHistory, PriceAlert };
+const CropDiagnosis = sequelize.define('CropDiagnosis', {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    imageUrl: { type: DataTypes.STRING, allowNull: false },
+    cropName: { type: DataTypes.STRING },
+    fieldName: { type: DataTypes.STRING },
+    diseaseName: { type: DataTypes.STRING, defaultValue: 'Unknown' },
+    severity: { type: DataTypes.STRING, defaultValue: 'Unknown' },
+    confidence: { type: DataTypes.FLOAT, defaultValue: 0 },
+    description: { type: DataTypes.TEXT },
+    treatment: { type: DataTypes.TEXT }, // JSON stringified array
+    prevention: { type: DataTypes.TEXT }, // JSON stringified array
+    isHealthy: { type: DataTypes.BOOLEAN, defaultValue: false },
+    allSuggestions: { type: DataTypes.TEXT }, // JSON stringified
+    rawResponse: { type: DataTypes.TEXT }, // Full API response for debugging
+    recommendedProducts: { type: DataTypes.TEXT }, // Gemini generated JSON stringified
+}, {
+    tableName: 'crop_diagnoses',
+    underscored: true,
+    timestamps: true,
+});
+
+export { SoilReport, SoilReminder, MarketPrice, MarketHistory, PriceAlert, CropDiagnosis };

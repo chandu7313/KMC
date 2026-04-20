@@ -20,6 +20,22 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   /// Called on app launch — check if a stored token exists and is valid
   Future<void> _checkAuthOnBoot() async {
     try {
+      // Add a timeout so splash screen never gets stuck
+      await Future.any([
+        _doAuthCheck(),
+        Future.delayed(const Duration(seconds: 5)),
+      ]);
+      // If still loading after timeout, just go to login
+      if (state is AsyncLoading) {
+        state = const AsyncValue.data(null);
+      }
+    } catch (e, st) {
+      state = const AsyncValue.data(null);
+    }
+  }
+
+  Future<void> _doAuthCheck() async {
+    try {
       final hasToken = await _authRepo.hasStoredToken();
       if (!hasToken) {
         state = const AsyncValue.data(null);

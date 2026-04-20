@@ -50,6 +50,7 @@ import AdminInventory from './pages/Admin/AdminInventory'
 import GovernmentSchemes from './pages/Farming/GovernmentSchemes'
 import FarmerProfile from './pages/Farming/FarmerProfile'
 import FarmerOnboardingSurvey from './pages/Farming/FarmerOnboardingSurvey'
+import CropDoctor from './pages/Farming/CropDoctor'
 
 const App = () => {
   const location = useLocation();
@@ -85,6 +86,7 @@ const App = () => {
         <Route path="/expert-consultations" element={<Advisor/>}/>
         <Route path="/profile" element={<FarmerProfile/>}/>
         <Route path="/onboarding-survey" element={<FarmerOnboardingSurvey/>}/>
+        <Route path="/crop-doctor" element={<CropDoctor/>}/>
         
         {/* Marketplace Routes */}
         <Route path="/marketplace" element={<Marketplace/>}/>

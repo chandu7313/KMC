@@ -82,6 +82,7 @@ const Navbar = () => {
       hasDropdown: true,
       dropDownOptions: [
         { label: t('soil_test', 'Soil Test'), to: "/soil-crop-analysis", icon: FlaskConical },
+        { label: 'Crop Doctor', to: '/crop-doctor', icon: Zap },
         { label: t('fertilizers', 'Fertilizers'), to: "/fertilizers", icon: Sprout },
         { label: t('equipments', 'Equipments'), to: "/equipments", icon: Wrench },
         { label: t('crop_selection', 'Crop Selection'), to: "/crop-selection", icon: Map },

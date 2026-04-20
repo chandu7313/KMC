@@ -22,6 +22,7 @@ import orderRouter from "./routes/orderRoutes.js";
 import bookingRouter from "./routes/bookingRoutes.js";
 import surveyRouter from "./routes/surveyRoutes.js";
 import orchardRouter from "./routes/orchardRequestRoutes.js";
+import cropDoctorRouter from "./routes/cropDoctorRoutes.js";
 import startCronJobs from "./config/cron.js";
 
 const app = express();
@@ -46,7 +47,17 @@ const allowedOrigins = [
 
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({ origin: true, credentials: true }))
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, etc)
+        if (!origin) return callback(null, true);
+        // Allow all localhost origins (for Flutter web dev server on random ports)
+        if (origin.startsWith('http://localhost')) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        callback(null, true); // Allow all in dev mode
+    },
+    credentials: true
+}))
 
 
 //API Endpoints
@@ -66,5 +77,6 @@ app.use('/api/order', orderRouter);
 app.use('/api/booking', bookingRouter);
 app.use('/api/survey', surveyRouter);
 app.use('/api/orchard', orchardRouter);
+app.use('/api/crop-doctor', cropDoctorRouter);
 
 app.listen(port, () => console.log(`Server started on PORT:${port}`));
