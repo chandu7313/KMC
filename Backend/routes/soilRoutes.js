@@ -7,7 +7,8 @@ import {
     adminAnalyzeReport,
     adminCreateReport,
     analyzeStandalone,
-    getFarmerHistory
+    getFarmerHistory,
+    analyzeWithAI
 } from '../controllers/soilController.js';
 import userAuth from '../middleware/userAuth.js';
 import adminAuth from '../middleware/adminAuth.js';
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.post('/upload', userAuth, upload.single('reportFile'), uploadReport);
 router.post('/analyze', analyzeStandalone);
+router.post('/analyze-ai', analyzeWithAI);
 router.get('/history', userAuth, getHistory);
 router.get('/history/:farmerId', adminAuth, getFarmerHistory);
 router.get('/download/:id', userAuth, downloadHealthCard);

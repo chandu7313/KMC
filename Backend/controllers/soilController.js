@@ -2,6 +2,7 @@ import { SoilReport, SoilReminder, User } from '../models/index.js';
 import { analyzeSoil } from '../services/soilAnalysisService.js';
 import { generateHealthCardPDF } from '../services/pdfService.js';
 import { v2 as cloudinary } from 'cloudinary';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const uploadReport = async (req, res) => {
     try {
@@ -262,6 +263,88 @@ export const getFarmerHistory = async (req, res) => {
         });
 
         res.status(200).json({ success: true, data: history });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export const analyzeWithAI = async (req, res) => {
+    try {
+        const { ph, nitrogen, phosphorus, potassium, organicMatter, language } = req.body;
+
+        if (ph === undefined || nitrogen === undefined || phosphorus === undefined || potassium === undefined) {
+            return res.status(400).json({ success: false, message: 'ph, nitrogen, phosphorus, and potassium are required.' });
+        }
+
+        if (!process.env.GEMINI_API_KEY) {
+            return res.status(500).json({ success: false, message: 'AI service not configured.' });
+        }
+
+        const lang = language === 'hi' ? 'simple Hinglish (Hindi-English mix)' : 'simple English';
+
+        const prompt = `You are an expert Indian agricultural soil scientist. A farmer has provided their soil test data:
+- Soil pH: ${ph}
+- Nitrogen (N): ${nitrogen} kg/ha
+- Phosphorus (P): ${phosphorus} kg/ha
+- Potassium (K): ${potassium} kg/ha
+- Organic Matter: ${organicMatter || 0}%
+
+Analyze this soil data and provide a farmer-friendly soil health report.
+
+Return ONLY a valid JSON object with NO markdown, NO extra text:
+{
+  "overallHealth": "Good" or "Average" or "Poor",
+  "healthScore": 75,
+  "summary": "One line summary of overall soil health in ${lang}",
+  "recommendations": [
+    "Short actionable recommendation 1 in ${lang}",
+    "Short actionable recommendation 2 in ${lang}",
+    "Short actionable recommendation 3 in ${lang}",
+    "Short actionable recommendation 4 in ${lang}",
+    "Short actionable recommendation 5 in ${lang}"
+  ],
+  "fertilizers": [
+    { "name": "Fertilizer name", "dosage": "how much per acre", "when": "when to apply" }
+  ],
+  "bestCrops": ["Crop1", "Crop2", "Crop3"],
+  "warnings": ["Any urgent warning in ${lang}"]
+}
+
+Keep all text in ${lang}. Be specific to Indian farming. Use simple words a farmer can understand. Mention specific Indian brand fertilizers with prices in INR where possible.`;
+
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+
+        let aiResult = null;
+        let lastError = null;
+
+        for (const modelName of MODELS) {
+            try {
+                const model = genAI.getGenerativeModel({
+                    model: modelName,
+                    generationConfig: { responseMimeType: 'application/json' },
+                });
+                const result = await model.generateContent(prompt);
+                const text = result.response.text();
+                aiResult = JSON.parse(text);
+                break;
+            } catch (err) {
+                lastError = err;
+                const is429 = err?.message?.includes('429') || err?.message?.includes('quota');
+                const is404 = err?.message?.includes('404') || err?.message?.includes('not found');
+                if (is429 || is404) {
+                    await new Promise(r => setTimeout(r, 2000));
+                    continue;
+                }
+                break;
+            }
+        }
+
+        if (!aiResult) {
+            return res.status(500).json({ success: false, message: 'AI analysis failed. Please try again in a few minutes.' });
+        }
+
+        res.status(200).json({ success: true, data: aiResult });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

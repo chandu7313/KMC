@@ -20,8 +20,52 @@ import {
     Pill,
     Leaf,
     LeafyGreen,
-    ShoppingCart
+    ShoppingCart,
+    Droplets,
+    RefreshCw,
+    Trash2,
+    Move,
+    Eye,
+    AlertCircle,
+    Clock,
+    Shield,
+    Zap,
+    Star,
+    Plus,
+    Minus,
+    X
 } from 'lucide-react';
+
+// Map icon name strings from Gemini to Lucide components
+const PREVENTION_ICON_MAP = {
+    water: Droplets,
+    rotate: RefreshCw,
+    trash: Trash2,
+    spacing: Move,
+    eye: Eye,
+    leaf: Leaf,
+};
+
+// Urgency styling
+const URGENCY_STYLES = {
+    urgent: { border: 'border-[#c32222]', bg: 'bg-[#fbf5f4]', badge: 'bg-red-100 text-red-700', numBg: 'bg-white text-[#c32222] shadow-[0_2px_10px_rgba(195,34,34,0.1)]' },
+    high: { border: 'border-orange-400', bg: 'bg-orange-50', badge: 'bg-orange-100 text-orange-700', numBg: 'bg-orange-100 text-orange-700' },
+    normal: { border: 'border-[#135327]', bg: 'bg-[#f6f9f3]', badge: 'bg-green-100 text-green-700', numBg: 'bg-[#e0edd6] text-[#135327]' },
+};
+
+// Symptom severity badge
+const SYMPTOM_SEVERITY = {
+    high: 'bg-red-100 text-red-700 border-red-200',
+    medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    low: 'bg-blue-100 text-blue-700 border-blue-200',
+};
+
+// Product effectiveness badge
+const EFFECTIVENESS_BADGE = {
+    high: { bg: 'bg-green-100 text-green-700', label: 'High Effectiveness' },
+    medium: { bg: 'bg-yellow-100 text-yellow-700', label: 'Moderate' },
+    low: { bg: 'bg-gray-100 text-gray-600', label: 'Mild' },
+};
 
 const CropDoctor = () => {
     const { backendUrl, userData, navigate } = useContext(AppContext);
@@ -32,8 +76,11 @@ const CropDoctor = () => {
     const [selectedDiagnosis, setSelectedDiagnosis] = useState(null);
     
     // Result View Tabs
-    const [actionTab, setActionTab] = useState('Treatment');
+    const [actionTab, setActionTab] = useState('Symptoms');
     const [productTab, setProductTab] = useState('Sprays');
+
+    // Local cart state for product recommendations
+    const [cart, setCart] = useState([]);
     
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
@@ -60,6 +107,9 @@ const CropDoctor = () => {
             const { data } = await axios.get(`${backendUrl}/api/crop-doctor/detail/${id}`);
             if (data.success) {
                 setSelectedDiagnosis(data.data);
+                setActionTab('Symptoms');
+                setProductTab('Sprays');
+                setCart([]);
             }
         } catch (error) {
             toast.error("Failed to load diagnosis details");
@@ -92,13 +142,16 @@ const CropDoctor = () => {
             const formData = new FormData();
             formData.append('cropImage', file);
 
-            toast.info("Analyzing crop image. Please wait...", { autoClose: 3000 });
+            toast.info("Analyzing crop image with AI. Please wait...", { autoClose: 5000 });
             const { data } = await axios.post(`${backendUrl}/api/crop-doctor/diagnose`, formData);
 
             if (data.success) {
-                toast.success('Clinical diagnosis complete!');
-                fetchHistory(); // Refresh the list
+                toast.success('Diagnosis complete!');
+                fetchHistory();
                 setSelectedDiagnosis(data.data);
+                setActionTab('Symptoms');
+                setProductTab('Sprays');
+                setCart([]);
             } else {
                 toast.error(data.message);
             }
@@ -111,7 +164,33 @@ const CropDoctor = () => {
         }
     };
 
-    // Dummy products removed directly, falling back to Gemini generated selectedDiagnosis.recommendedProducts
+    // ----- Cart helpers -----
+    const addToCart = (product) => {
+        setCart(prev => {
+            const exists = prev.find(p => p.name === product.name);
+            if (exists) {
+                return prev.map(p => p.name === product.name ? { ...p, qty: p.qty + 1 } : p);
+            }
+            const avgPrice = Math.round(((product.estimatedPriceMin || 0) + (product.estimatedPriceMax || 0)) / 2);
+            return [...prev, { ...product, qty: 1, unitPrice: avgPrice }];
+        });
+        toast.success(`${product.name} added to cart`, { autoClose: 1500 });
+    };
+
+    const updateCartQty = (name, delta) => {
+        setCart(prev => prev.map(p => {
+            if (p.name !== name) return p;
+            const newQty = p.qty + delta;
+            return newQty > 0 ? { ...p, qty: newQty } : p;
+        }).filter(p => p.qty > 0));
+    };
+
+    const removeFromCart = (name) => {
+        setCart(prev => prev.filter(p => p.name !== name));
+    };
+
+    const cartTotal = cart.reduce((sum, p) => sum + p.unitPrice * p.qty, 0);
+    const cartCount = cart.reduce((sum, p) => sum + p.qty, 0);
 
     const getSeverityBadge = (severity, isHealthy) => {
         if (isHealthy || severity === 'None') return "bg-green-100 text-green-700";
@@ -126,16 +205,13 @@ const CropDoctor = () => {
     // RESULT VIEW COMPONENT (Replaces the entire page when active)
     // =========================================================
     if (selectedDiagnosis) {
-        
-        // Prepare action plan items
-        let actionItems = [];
-        if (actionTab === 'Treatment') {
-            actionItems = selectedDiagnosis.treatment || [];
-        } else if (actionTab === 'Prevention') {
-            actionItems = selectedDiagnosis.prevention || [];
-        } else {
-            actionItems = selectedDiagnosis.description ? [selectedDiagnosis.description] : [];
-        }
+        const d = selectedDiagnosis;
+
+        // Get products for currently active tab
+        const products = d.recommendedProducts || { sprays: [], fertilizers: [], organic: [] };
+        const currentProducts = productTab === 'Sprays' ? (products.sprays || [])
+            : productTab === 'Fertilizers' ? (products.fertilizers || [])
+            : (products.organic || []);
 
         return (
             <div className="min-h-screen bg-[#f8faf8] font-sans flex flex-col">
@@ -144,36 +220,39 @@ const CropDoctor = () => {
                 <main className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 lg:px-8 pt-24 pb-16 flex-1">
                     <div className="flex flex-col lg:flex-row gap-6 items-start h-full">
                         
-                        {/* LEFT COLUMN: Overview */}
+                        {/* ==================== LEFT COLUMN ==================== */}
                         <div className="w-full lg:w-[320px] shrink-0 space-y-4">
                             {/* Image & Confidence Box */}
                             <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 relative max-h-[350px]">
-                                <img src={selectedDiagnosis.imageUrl} alt="Scan" className="w-full h-full object-cover min-h-[250px]" />
+                                <img src={d.imageUrl} alt="Scan" className="w-full h-full object-cover min-h-[250px]" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                                 <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-lg">
                                     <div className="flex justify-between items-end mb-2">
                                         <span className="text-[10px] font-black tracking-widest uppercase text-gray-700">Analysis Confidence</span>
-                                        <span className={`text-base font-black ${selectedDiagnosis.isHealthy ? 'text-[#135327]' : 'text-red-700'}`}>
-                                            {selectedDiagnosis.confidence}%
+                                        <span className={`text-base font-black ${d.isHealthy ? 'text-[#135327]' : 'text-red-700'}`}>
+                                            {d.confidence}%
                                         </span>
                                     </div>
                                     <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
                                         <div 
-                                            className={`h-full rounded-full transition-all duration-1000 ${selectedDiagnosis.isHealthy ? 'bg-[#135327]' : 'bg-[#c32222]'}`} 
-                                            style={{ width: `${selectedDiagnosis.confidence}%` }}>
+                                            className={`h-full rounded-full transition-all duration-1000 ${d.isHealthy ? 'bg-[#135327]' : 'bg-[#c32222]'}`} 
+                                            style={{ width: `${d.confidence}%` }}>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Status Alert Box */}
-                            <div className={`rounded-xl p-5 text-white flex items-start gap-4 ${selectedDiagnosis.isHealthy ? 'bg-[#135327]' : 'bg-[#c32222]'}`}>
-                                {selectedDiagnosis.isHealthy ? <CheckCircle2 className="mt-0.5" /> : <TriangleAlert className="mt-0.5" />}
+                            <div className={`rounded-xl p-5 text-white flex items-start gap-4 ${d.isHealthy ? 'bg-[#135327]' : 'bg-[#c32222]'}`}>
+                                {d.isHealthy ? <CheckCircle2 className="mt-0.5" /> : <TriangleAlert className="mt-0.5" />}
                                 <div>
-                                    <h3 className="font-black text-sm mb-1">{selectedDiagnosis.isHealthy ? 'Healthy Plant Detected' : 'Disease Detected'}</h3>
+                                    <h3 className="font-black text-sm mb-1">{d.isHealthy ? 'Healthy Plant Detected' : 'Disease Detected'}</h3>
                                     <p className="text-sm font-medium opacity-90 leading-tight">
-                                        {selectedDiagnosis.isHealthy ? 'No pathogens found' : selectedDiagnosis.diseaseName}
+                                        {d.isHealthy ? 'No pathogens found' : d.diseaseName}
                                     </p>
+                                    {d.scientificName && !d.isHealthy && (
+                                        <p className="text-xs font-medium opacity-70 italic mt-1">{d.scientificName}</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -181,20 +260,42 @@ const CropDoctor = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-[#f0f4ea] rounded-xl p-5">
                                     <p className="text-[9px] font-black uppercase tracking-widest text-[#5a8050] mb-1">Severity</p>
-                                    <p className={`font-black text-sm ${selectedDiagnosis.isHealthy ? 'text-[#135327]' : 'text-[#c32222]'}`}>
-                                        {selectedDiagnosis.severity}
+                                    <p className={`font-black text-sm ${d.isHealthy ? 'text-[#135327]' : 'text-[#c32222]'}`}>
+                                        {d.severity}
                                     </p>
                                 </div>
                                 <div className="bg-[#f0f4ea] rounded-xl p-5">
                                     <p className="text-[9px] font-black uppercase tracking-widest text-[#5a8050] mb-1">Crop</p>
-                                    <p className="font-black text-sm text-[#1a2f1b]">{selectedDiagnosis.cropName || 'Unknown'}</p>
+                                    <p className="font-black text-sm text-[#1a2f1b]">{d.cropName || 'Unknown'}</p>
                                 </div>
                             </div>
 
                             <div className="bg-[#f0f4ea] rounded-xl p-5">
                                 <p className="text-[9px] font-black uppercase tracking-widest text-[#5a8050] mb-1">Cause Classification</p>
-                                <p className="font-black text-sm text-[#1a2f1b]">{selectedDiagnosis.isHealthy ? 'Natural Growth' : 'Pathogen / Deficiency'}</p>
+                                <p className="font-black text-sm text-[#1a2f1b]">
+                                    {d.causeClassification || (d.isHealthy ? 'Natural Growth' : 'Pathogen / Deficiency')}
+                                </p>
                             </div>
+
+                            {/* Similar Diseases */}
+                            {d.similarDiseases && d.similarDiseases.length > 0 && !d.isHealthy && (
+                                <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-[#5a8050] mb-3">Similar Diseases</p>
+                                    <div className="space-y-2.5">
+                                        {d.similarDiseases.map((sd, idx) => (
+                                            <div key={idx} className="flex items-center justify-between bg-[#fafcf8] rounded-lg px-3 py-2.5">
+                                                <div className="flex-1 min-w-0 mr-3">
+                                                    <p className="text-xs font-bold text-[#1a2f1b] truncate">{sd.name}</p>
+                                                    <p className="text-[10px] text-[#5a8050] leading-snug mt-0.5 line-clamp-2">{sd.keyDifference}</p>
+                                                </div>
+                                                <div className="shrink-0 w-10 h-10 rounded-full bg-[#e9efe3] flex items-center justify-center">
+                                                    <span className="text-xs font-black text-[#135327]">{sd.similarity}%</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Buttons */}
                             <div className="grid grid-cols-2 gap-4 mt-2">
@@ -208,14 +309,19 @@ const CropDoctor = () => {
                             <button onClick={() => navigate('/expert-consultations')} className="w-full bg-[#fce5df] hover:bg-[#ffded5] text-[#cf4227] rounded-xl py-4 font-black text-xs uppercase tracking-widest flex justify-center items-center gap-2 transition-colors mt-2">
                                 Consult Expert
                             </button>
-                            <button onClick={() => setSelectedDiagnosis(null)} className="w-full bg-[#135327] hover:bg-[#0f441f] text-white rounded-xl py-4 font-black text-xs uppercase tracking-widest flex justify-center items-center gap-2 transition-colors shadow-lg mt-2">
+                            <button onClick={() => { setSelectedDiagnosis(null); setCart([]); }} className="w-full bg-[#135327] hover:bg-[#0f441f] text-white rounded-xl py-4 font-black text-xs uppercase tracking-widest flex justify-center items-center gap-2 transition-colors shadow-lg mt-2">
                                 <ScanLine size={16} /> Scan Another
                             </button>
                         </div>
 
-                        {/* MIDDLE COLUMN: Action Plan */}
+                        {/* ==================== MIDDLE COLUMN: Action Plan ==================== */}
                         <div className="flex-1 bg-white rounded-[32px] p-8 lg:p-10 shadow-sm border border-gray-100 min-h-screen lg:min-h-0 self-stretch">
-                            <h2 className="text-[26px] font-black text-[#1a2f1b] mb-8">Action Plan</h2>
+                            <h2 className="text-[26px] font-black text-[#1a2f1b] mb-3">Action Plan</h2>
+                            {d.description && (
+                                <p className="text-sm font-medium text-[#4b664d] leading-relaxed mb-6 bg-[#f6f9f3] p-4 rounded-2xl">
+                                    {d.description}
+                                </p>
+                            )}
                             
                             {/* Tabs */}
                             <div className="flex border-b border-gray-100 mb-8 overflow-x-auto">
@@ -230,46 +336,142 @@ const CropDoctor = () => {
                                 ))}
                             </div>
 
-                            {/* Content Cards */}
-                            <div className="space-y-4">
-                                {actionItems.length === 0 ? (
-                                    <p className="text-gray-500 font-medium p-6 bg-gray-50 rounded-2xl">No systematic action plan provided for this categorisation.</p>
-                                ) : (
-                                    actionItems.map((item, idx) => {
-                                        const isUrgent = idx === 0 && !selectedDiagnosis.isHealthy && actionTab !== 'Prevention';
-                                        
-                                        // Attempt to nicely format title vs description if text has a colon
-                                        let title = `Step ${idx + 1}`;
-                                        let desc = item;
-                                        if (item.includes(':')) {
-                                            const parts = item.split(':');
-                                            title = parts[0];
-                                            desc = parts.slice(1).join(':').trim();
-                                        } else if (isUrgent && actionTab === 'Treatment') {
-                                            title = "Urgent Initial Action";
-                                        }
+                            {/* ========== SYMPTOMS TAB ========== */}
+                            {actionTab === 'Symptoms' && (
+                                <div className="space-y-4">
+                                    {(!d.symptoms || d.symptoms.length === 0) ? (
+                                        <div className="text-center py-12">
+                                            <CheckCircle2 className="mx-auto text-[#135327] mb-3" size={40} />
+                                            <p className="text-gray-500 font-bold text-sm">No symptoms detected — crop appears healthy.</p>
+                                        </div>
+                                    ) : (
+                                        d.symptoms.map((symptom, idx) => {
+                                            const severityStyle = SYMPTOM_SEVERITY[symptom.severity] || SYMPTOM_SEVERITY.medium;
+                                            return (
+                                                <div key={idx} className="bg-[#f6f9f3] rounded-2xl p-6 border border-[#e5efdb] hover:shadow-md transition-shadow">
+                                                    <div className="flex items-start justify-between gap-4 mb-2">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-[#e0edd6] flex items-center justify-center shrink-0">
+                                                                <AlertCircle size={16} className="text-[#135327]" />
+                                                            </div>
+                                                            <h4 className="font-black text-[#1a2f1b] text-sm">{symptom.title}</h4>
+                                                        </div>
+                                                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0 ${severityStyle}`}>
+                                                            {symptom.severity}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm font-medium text-[#4b664d] leading-relaxed ml-11">{symptom.description}</p>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            )}
 
-                                        return (
-                                            <div key={idx} className={`border-l-[5px] p-6 rounded-r-2xl rounded-l-md flex gap-5 ${isUrgent ? 'border-[#c32222] bg-[#fbf5f4]' : 'border-[#135327] bg-[#f6f9f3]'}`}>
-                                                <div className={`w-10 h-10 rounded-full font-black text-sm flex items-center justify-center shrink-0 ${isUrgent ? 'bg-white text-[#c32222] shadow-[0_2px_10px_rgba(195,34,34,0.1)]' : 'bg-[#e0edd6] text-[#135327]'}`}>
-                                                    {idx + 1}
+                            {/* ========== TREATMENT TAB ========== */}
+                            {actionTab === 'Treatment' && (
+                                <div className="space-y-4">
+                                    {!d.treatment ? (
+                                        <div className="text-center py-12">
+                                            <CheckCircle2 className="mx-auto text-[#135327] mb-3" size={40} />
+                                            <p className="text-gray-500 font-bold text-sm">No treatment required for healthy crops.</p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Immediate Action Banner */}
+                                            {d.treatment.immediateAction && (
+                                                <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5 flex items-start gap-4 mb-2">
+                                                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                                                        <Zap size={18} className="text-red-600" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-black text-red-800 text-sm mb-1">⚡ Immediate Action Required</h4>
+                                                        <p className="text-sm font-medium text-red-700 leading-relaxed">{d.treatment.immediateAction}</p>
+                                                    </div>
                                                 </div>
-                                                <div className="pt-2">
-                                                    <h4 className={`text-base font-black mb-2 ${isUrgent ? 'text-[#36130e]' : 'text-[#1a2f1b]'}`}>
-                                                        {title}
-                                                    </h4>
-                                                    <p className={`text-sm font-medium leading-relaxed ${isUrgent ? 'text-[#7d3b32]' : 'text-[#4b664d]'}`}>
-                                                        {desc}
-                                                    </p>
-                                                </div>
+                                            )}
+
+                                            {/* Treatment Steps */}
+                                            {(d.treatment.steps || []).map((step, idx) => {
+                                                const urgencyStyle = URGENCY_STYLES[step.urgency] || URGENCY_STYLES.normal;
+                                                return (
+                                                    <div key={idx} className={`border-l-[5px] p-6 rounded-r-2xl rounded-l-md flex gap-5 ${urgencyStyle.border} ${urgencyStyle.bg}`}>
+                                                        <div className={`w-10 h-10 rounded-full font-black text-sm flex items-center justify-center shrink-0 ${urgencyStyle.numBg}`}>
+                                                            {step.stepNumber || idx + 1}
+                                                        </div>
+                                                        <div className="pt-1 flex-1">
+                                                            <div className="flex items-start justify-between gap-3 mb-2">
+                                                                <h4 className="text-base font-black text-[#1a2f1b]">{step.title}</h4>
+                                                                <div className="flex gap-2 shrink-0">
+                                                                    <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${urgencyStyle.badge}`}>
+                                                                        {step.urgency}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <p className="text-sm font-medium text-[#4b664d] leading-relaxed">{step.description}</p>
+                                                            {step.timeframe && (
+                                                                <div className="flex items-center gap-1.5 mt-3 text-[#5a8050]">
+                                                                    <Clock size={12} />
+                                                                    <span className="text-xs font-bold">{step.timeframe}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+
+                                            {/* Treatment Footer */}
+                                            <div className="bg-[#f0f4ea] rounded-2xl p-5 mt-2 flex flex-col sm:flex-row sm:items-center gap-4">
+                                                {d.treatment.harvestSafetyInterval && (
+                                                    <div className="flex items-center gap-2 flex-1">
+                                                        <Shield size={16} className="text-[#135327] shrink-0" />
+                                                        <div>
+                                                            <p className="text-[9px] font-black uppercase tracking-widest text-[#5a8050]">Harvest Safety</p>
+                                                            <p className="text-xs font-bold text-[#1a2f1b]">{d.treatment.harvestSafetyInterval}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {d.treatment.totalDuration && (
+                                                    <div className="flex items-center gap-2 flex-1">
+                                                        <Clock size={16} className="text-[#135327] shrink-0" />
+                                                        <div>
+                                                            <p className="text-[9px] font-black uppercase tracking-widest text-[#5a8050]">Total Duration</p>
+                                                            <p className="text-xs font-bold text-[#1a2f1b]">{d.treatment.totalDuration}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )
-                                    })
-                                )}
-                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* ========== PREVENTION TAB ========== */}
+                            {actionTab === 'Prevention' && (
+                                <div className="space-y-4">
+                                    {(!d.prevention || d.prevention.length === 0) ? (
+                                        <p className="text-gray-500 font-medium p-6 bg-gray-50 rounded-2xl">No prevention tips available.</p>
+                                    ) : (
+                                        d.prevention.map((tip, idx) => {
+                                            const IconComp = PREVENTION_ICON_MAP[tip.icon] || Leaf;
+                                            return (
+                                                <div key={idx} className="border-l-[5px] border-[#135327] p-6 rounded-r-2xl rounded-l-md flex gap-5 bg-[#f6f9f3] hover:shadow-md transition-shadow">
+                                                    <div className="w-10 h-10 rounded-full bg-[#e0edd6] flex items-center justify-center shrink-0">
+                                                        <IconComp size={18} className="text-[#135327]" />
+                                                    </div>
+                                                    <div className="pt-1">
+                                                        <h4 className="text-base font-black text-[#1a2f1b] mb-2">{tip.title}</h4>
+                                                        <p className="text-sm font-medium text-[#4b664d] leading-relaxed">{tip.description}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            )}
                         </div>
 
-                        {/* RIGHT COLUMN: Recommended Products */}
+                        {/* ==================== RIGHT COLUMN: Products ==================== */}
                         <div className="w-full lg:w-[380px] shrink-0 bg-white rounded-[32px] p-6 lg:p-8 shadow-sm border border-gray-100 flex flex-col min-h-screen lg:min-h-0 self-stretch relative">
                             <h2 className="text-[24px] font-black text-[#1a2f1b] mb-6 flex items-center gap-3">
                                 <ShoppingCart className="text-[#135327]" size={24} strokeWidth={2.5} /> Recommended
@@ -293,49 +495,113 @@ const CropDoctor = () => {
                             </div>
 
                             {/* Product List */}
-                            <div className="space-y-4 mb-20">
-                                {(!selectedDiagnosis.recommendedProducts || selectedDiagnosis.recommendedProducts.length === 0) ? (
-                                    <div className="bg-[#f6f9f3] p-4 rounded-[20px] shadow-sm text-center">
-                                        <p className="text-xs font-bold text-gray-500">No specific commercial products matched for this diagnosis.</p>
+                            <div className="space-y-4 mb-28 overflow-y-auto flex-1">
+                                {currentProducts.length === 0 ? (
+                                    <div className="bg-[#f6f9f3] p-6 rounded-[20px] shadow-sm text-center">
+                                        <p className="text-xs font-bold text-gray-500">No {productTab.toLowerCase()} recommended for this diagnosis.</p>
                                     </div>
-                                ) : selectedDiagnosis.recommendedProducts.map((prod, idx) => (
-                                    <div key={idx} className="bg-[#f6f9f3] p-4 rounded-[20px] flex gap-4 relative shadow-sm border border-transparent hover:border-[#135327]/20 transition-all group">
-                                        {prod.isBest && (
-                                            <span className="absolute -top-3 right-4 bg-[#135327] text-white px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase shadow-md pointer-events-none">
-                                                Best Choice
-                                            </span>
-                                        )}
-                                        <div className="w-20 h-20 bg-white rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-100 group-hover:scale-105 transition-transform">
-                                            <img src={prod.img || "https://images.unsplash.com/photo-1584727638096-042c45049ebe?w=200&h=200&fit=crop"} alt={prod.name} className="w-full h-full object-cover" />
-                                        </div>
-                                        <div className="flex-1 flex flex-col justify-between py-1 pr-14">
-                                            <div>
-                                                <h4 className="font-bold text-[#1a2f1b] text-xs leading-snug line-clamp-2">{prod.name}</h4>
-                                                <p className="text-[10px] text-gray-500 font-medium mt-1">{prod.pack}</p>
+                                ) : (
+                                    currentProducts.map((prod, idx) => {
+                                        const eff = EFFECTIVENESS_BADGE[prod.effectiveness] || EFFECTIVENESS_BADGE.medium;
+                                        const inCart = cart.find(c => c.name === prod.name);
+                                        return (
+                                            <div key={idx} className="bg-[#f6f9f3] p-5 rounded-[20px] relative shadow-sm border border-transparent hover:border-[#135327]/20 transition-all group">
+                                                {prod.isBestChoice && (
+                                                    <span className="absolute -top-3 right-4 bg-[#135327] text-white px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase shadow-md pointer-events-none flex items-center gap-1">
+                                                        <Star size={10} /> Best Choice
+                                                    </span>
+                                                )}
+                                                
+                                                {/* Product Header */}
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <div className="flex-1 min-w-0 mr-3">
+                                                        <h4 className="font-black text-[#1a2f1b] text-sm leading-snug">{prod.name}</h4>
+                                                        <p className="text-[10px] text-gray-500 font-bold mt-0.5">{prod.brand} • {prod.type}</p>
+                                                    </div>
+                                                    <span className={`px-2 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shrink-0 ${eff.bg}`}>
+                                                        {eff.label}
+                                                    </span>
+                                                </div>
+
+                                                {/* Product Details */}
+                                                <div className="space-y-1.5 mb-3">
+                                                    {prod.dosage && (
+                                                        <p className="text-[11px] text-[#4b664d] font-medium">
+                                                            <span className="font-bold text-[#1a2f1b]">Dosage:</span> {prod.dosage}
+                                                        </p>
+                                                    )}
+                                                    {prod.applicationMethod && (
+                                                        <p className="text-[11px] text-[#4b664d] font-medium">
+                                                            <span className="font-bold text-[#1a2f1b]">Method:</span> {prod.applicationMethod}
+                                                        </p>
+                                                    )}
+                                                    {(prod.frequency || prod.when) && (
+                                                        <p className="text-[11px] text-[#4b664d] font-medium">
+                                                            <span className="font-bold text-[#1a2f1b]">{prod.frequency ? 'Frequency' : 'When'}:</span> {prod.frequency || prod.when}
+                                                        </p>
+                                                    )}
+                                                    {prod.precautions && (
+                                                        <p className="text-[10px] text-orange-600 font-bold mt-1">⚠️ {prod.precautions}</p>
+                                                    )}
+                                                </div>
+
+                                                {/* Price + Add Button */}
+                                                <div className="flex items-center justify-between pt-3 border-t border-[#e5efdb]">
+                                                    <p className="text-[#135327] font-black text-lg">
+                                                        ₹{prod.estimatedPriceMin || 0}<span className="text-xs font-bold text-gray-400"> – ₹{prod.estimatedPriceMax || 0}</span>
+                                                    </p>
+                                                    {inCart ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <button onClick={() => updateCartQty(prod.name, -1)} className="w-7 h-7 rounded-lg bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors">
+                                                                <Minus size={12} />
+                                                            </button>
+                                                            <span className="text-sm font-black text-[#1a2f1b] w-5 text-center">{inCart.qty}</span>
+                                                            <button onClick={() => updateCartQty(prod.name, 1)} className="w-7 h-7 rounded-lg bg-[#135327] hover:bg-[#0f441f] text-white flex items-center justify-center transition-colors">
+                                                                <Plus size={12} />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <button 
+                                                            onClick={() => addToCart(prod)}
+                                                            className="bg-[#135327] hover:bg-[#0f441f] text-white px-4 py-2 rounded-lg text-[10px] uppercase font-black tracking-wider transition-colors shadow-sm flex items-center gap-1.5"
+                                                        >
+                                                            <Plus size={12} /> Add
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <p className="text-[#135327] font-black text-lg">{prod.price}</p>
-                                        </div>
-                                        <button className="absolute bottom-4 right-4 bg-[#135327] hover:bg-[#0f441f] text-white px-4 py-1.5 rounded-lg text-[10px] uppercase font-black tracking-wider transition-colors shadow-sm">
-                                            Add
-                                        </button>
-                                    </div>
-                                ))}
+                                        );
+                                    })
+                                )}
                             </div>
 
                             {/* Floating Cart Widget */}
-                            <div className="absolute bottom-6 left-6 right-6 bg-white border border-[#e5efdb] rounded-[20px] p-4 flex justify-between items-center shadow-[0_10px_30px_rgba(19,83,39,0.1)]">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-[#eef6e6] rounded-xl flex items-center justify-center text-[#135327]">
-                                        <ShoppingCart size={16} strokeWidth={2.5} />
+                            <div className="absolute bottom-6 left-6 right-6 bg-white border border-[#e5efdb] rounded-[20px] p-4 shadow-[0_10px_30px_rgba(19,83,39,0.1)] z-10">
+                                {cartCount > 0 ? (
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-[#eef6e6] rounded-xl flex items-center justify-center text-[#135327] relative">
+                                                <ShoppingCart size={16} strokeWidth={2.5} />
+                                                <span className="absolute -top-1.5 -right-1.5 bg-[#c32222] text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center">{cartCount}</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-[#1a2f1b]">{cartCount} item{cartCount !== 1 ? 's' : ''} in cart</p>
+                                                <p className="text-[11px] font-medium text-gray-500">Subtotal: <span className="font-black text-[#135327]">₹{cartTotal.toLocaleString()}</span></p>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            onClick={() => toast.info('Checkout coming soon!')}
+                                            className="bg-[#135327] hover:bg-[#0f441f] text-white px-5 py-3 rounded-xl text-[11px] font-black tracking-widest uppercase transition-colors shadow-md"
+                                        >
+                                            Checkout →
+                                        </button>
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-[#1a2f1b]">3 items in cart</p>
-                                        <p className="text-[11px] font-medium text-gray-500">Subtotal: <span className="font-black text-[#135327]">₹849</span></p>
+                                ) : (
+                                    <div className="flex items-center gap-3 justify-center py-1">
+                                        <ShoppingCart size={16} className="text-gray-400" />
+                                        <p className="text-xs font-bold text-gray-400">Add products above to fill your cart</p>
                                     </div>
-                                </div>
-                                <button className="bg-[#135327] hover:bg-[#0f441f] text-white px-5 py-3 rounded-xl text-[11px] font-black tracking-widest uppercase transition-colors shadow-md">
-                                    Checkout →
-                                </button>
+                                )}
                             </div>
                         </div>
 

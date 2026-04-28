@@ -39,7 +39,6 @@ import AdminSoilEntry from './pages/Admin/AdminSoilEntry'
 import Fertilizers from './pages/Farming/Fertilizers'
 import Equipments from './pages/Farming/Equipments'
 import MyOrders from './pages/Farming/MyOrders'
-import SoilTestUpload from './pages/Farming/SoilTestUpload'
 import SoilHistory from './pages/Farming/SoilHistory'
 // New Marketplace Imports
 import Marketplace from './pages/Marketplace/Marketplace'
@@ -65,7 +64,6 @@ const App = () => {
         <Route path="/email-verify" element={<EmailVerify/>}/>
         <Route path="/reset-password" element={<ResetPassword/>}/>
         <Route path="/soil-crop-analysis" element={<SoilTestAndCropAdvice/>}/>
-        <Route path="/soil-test-upload" element={<SoilTestUpload/>}/>
         <Route path="/soil-history" element={<SoilHistory/>}/>
         <Route path="/equipments" element={<Equipments/>}/>
         <Route path="/packages" element={<Packages/>}/>

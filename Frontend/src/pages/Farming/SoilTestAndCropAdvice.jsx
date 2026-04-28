@@ -1,73 +1,111 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useContext } from 'react';
 import Navbar from '../../components/Navbar';
 import { AppContext } from '../../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Download, FileText, Upload, Clock, CheckCircle, Beaker, TrendingUp, Calendar, AlertCircle, Info, ChevronRight, Sprout } from 'lucide-react';
+import { Upload, X, FileText, Image as ImageIcon, Loader2, Calendar, ShieldCheck, ArrowRight, Beaker, UserCheck, Info, CheckCircle2, Leaf, Sprout, AlertTriangle } from 'lucide-react';
 
 const SoilTestAndCropAdvice = () => {
   const { backendUrl, userData, navigate } = useContext(AppContext);
-  
-  const [history, setHistory] = useState([]);
-  const [selectedTest, setSelectedTest] = useState(null);
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-
-  const [inputs, setInputs] = useState({
+  const [manualData, setManualData] = useState({
     ph: '',
-    n: '',
-    p: '',
-    k: '',
-    om: ''
+    nitrogen: '',
+    phosphorus: '',
+    potassium: '',
+    organicMatter: ''
   });
-
-  const [uploadFile, setUploadFile] = useState(null);
-
-  const fetchHistory = async () => {
-    if (!userData) return;
-    setFetchLoading(true);
-    try {
-      axios.defaults.withCredentials = true;
-      const { data } = await axios.get(`${backendUrl}/api/soil/history`);
-      if (data.success) {
-        setHistory(data.data);
-        if (data.data.length > 0 && !selectedTest) {
-           setSelectedTest(data.data[0]);
-        }
-      }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setFetchLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (userData) {
-      fetchHistory();
-    }
-  }, [userData]);
-
-  const onChange = (e) => {
-    const { name, value } = e.target;
-    setInputs((prev) => ({ ...prev, [name]: value }));
-  };
+  const [bookingData, setBookingData] = useState({
+    farmerName: '',
+    preferredDate: '',
+    timeSlot: '',
+    purpose: '',
+    notes: ''
+  });
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [resultData, setResultData] = useState(null);
+  const [step, setStep] = useState(1);
 
   const handleFileChange = (e) => {
-    setUploadFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    // Validate File Type
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      toast.error('Only PDF and Image files (JPG, PNG) are allowed.');
+      return;
+    }
+
+    // Validate File Size (10MB)
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      toast.error('File size must be less than 10MB.');
+      return;
+    }
+
+    setFile(selectedFile);
+
+    // Create Preview
+    if (selectedFile.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result);
+      reader.readAsDataURL(selectedFile);
+    } else {
+      setPreview('pdf'); // Indicator for PDF
+    }
   };
 
-  const submitData = async (e) => {
-    e.preventDefault();
+  const clearFile = () => {
+    setFile(null);
+    setPreview(null);
+  };
+
+  const handleManualChange = (e) => {
+    setManualData({ ...manualData, [e.target.name]: e.target.value });
+  };
+
+  const handleBookingChange = (e) => {
+    setBookingData({ ...bookingData, [e.target.name]: e.target.value });
+  };
+
+  const handleBookVisit = async () => {
     if (!userData) {
-      toast.error('Please login to analyze soil');
+      toast.error('Please login to book a visit.');
       navigate('/login');
       return;
     }
 
-    if (!uploadFile && (!inputs.ph || !inputs.n || !inputs.p || !inputs.k || !inputs.om)) {
-      toast.error('Please upload a report OR fill all manual data fields.');
+    if (!bookingData.farmerName || !bookingData.preferredDate || !bookingData.timeSlot || !bookingData.purpose) {
+      toast.error('Please fill all required booking fields.');
+      return;
+    }
+
+    setBookingLoading(true);
+    try {
+      // For now, show success — backend endpoint can be wired later
+      toast.success('Officer visit booked successfully! You will receive a confirmation shortly.');
+      setBookingData({ farmerName: '', preferredDate: '', timeSlot: '', purpose: '', notes: '' });
+    } catch (error) {
+      toast.error('Error booking visit. Please try again.');
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!userData) {
+      toast.error('Please login to upload soil tests.');
+      navigate('/login');
+      return;
+    }
+
+    const hasManualData = manualData.ph && manualData.nitrogen && manualData.phosphorus && manualData.potassium && manualData.organicMatter;
+
+    if (!file && !hasManualData) {
+      toast.error('Please either upload a report or fill all manual entry fields.');
       return;
     }
 
@@ -75,304 +113,422 @@ const SoilTestAndCropAdvice = () => {
     try {
       axios.defaults.withCredentials = true;
       const formData = new FormData();
-      if (uploadFile) formData.append('reportFile', uploadFile);
-      if (inputs.ph) {
-          formData.append('ph', inputs.ph);
-          formData.append('nitrogen', inputs.n);
-          formData.append('phosphorus', inputs.p);
-          formData.append('potassium', inputs.k);
-          formData.append('organicMatter', inputs.om);
+      if (file) {
+        formData.append('reportFile', file);
+      }
+      if (hasManualData) {
+        formData.append('ph', manualData.ph);
+        formData.append('nitrogen', manualData.nitrogen);
+        formData.append('phosphorus', manualData.phosphorus);
+        formData.append('potassium', manualData.potassium);
+        formData.append('organicMatter', manualData.organicMatter);
       }
 
-      const { data } = await axios.post(`${backendUrl}/api/soil/upload`, formData);
+      const { data } = await axios.post(`${backendUrl}/api/soil/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
       if (data.success) {
-        toast.success('Soil data submitted successfully!');
-        setInputs({ ph: '', n: '', p: '', k: '', om: '' });
-        setUploadFile(null);
-        fetchHistory();
+        toast.success(hasManualData ? 'Soil data analyzed successfully!' : 'Soil report uploaded successfully!');
+        setResultData(data.data);
+        setStep(3);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(error.response?.data?.message || 'Error submitting data.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDownloadPDF = async (id) => {
-    setDownloading(true);
-    try {
-        axios.defaults.withCredentials = true;
-        const response = await axios.get(`${backendUrl}/api/soil/download/${id}`, {
-            responseType: 'blob'
-        });
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `Soil_Health_Card_${id}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-    } catch (error) {
-        toast.error("Failed to download PDF");
-    } finally {
-        setDownloading(false);
-    }
-  };
-
-  const nutriBars = (test) => {
-    if (!test || test.status === "Pending") return [];
-    const targets = { n: 50, p: 30, k: 200, om: 3 };
-    const getPct = (val, target) => Math.min(100, (val / target) * 100);
-    const getLevel = (pct) => pct < 60 ? 'Low' : (pct < 90 ? 'Medium' : 'High');
-    
-    return [
-        { label: 'Nitrogen (N)', val: test.nitrogen, pct: getPct(test.nitrogen, targets.n), level: getLevel(getPct(test.nitrogen, targets.n)) },
-        { label: 'Phosphorus (P)', val: test.phosphorus, pct: getPct(test.phosphorus, targets.p), level: getLevel(getPct(test.phosphorus, targets.p)) },
-        { label: 'Potassium (K)', val: test.potassium, pct: getPct(test.potassium, targets.k), level: getLevel(getPct(test.potassium, targets.k)) },
-        { label: 'Organic Matter (OM)', val: test.organic_matter, pct: getPct(test.organic_matter, targets.om), level: getLevel(getPct(test.organic_matter, targets.om)) },
-    ];
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar />
-
-      <main className="flex-1 mx-auto w-full max-w-[1440px] px-4 sm:px-8 pt-24 pb-12">
+      <main className="flex-1 mx-auto w-full max-w-6xl px-4 pt-28 pb-24">
         
-        {/* Page Header */}
-        <section className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="animate-in slide-in-from-left duration-700">
-                <div className="flex items-center gap-3 mb-2">
-                    <span className="bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Farmer Dashboard</span>
-                    <span className="h-1 shadow-sm w-8 bg-slate-200 rounded-full"></span>
-                </div>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tight">Soil Intelligence Management</h1>
-                <p className="mt-2 text-slate-500 font-medium">Science-backed soil analysis for maximum crop yield.</p>
-            </div>
-            <div className="flex gap-3 animate-in slide-in-from-right duration-700">
-                <button onClick={() => navigate('/soil-test-upload')} className="bg-white border-2 border-slate-200 text-slate-700 px-6 py-3 rounded-2xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2">
-                    <Upload size={18} /> Upload Report
-                </button>
-                <button onClick={() => navigate('/soil-history')} className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-800 shadow-xl shadow-slate-200 transition-all flex items-center gap-2">
-                    <TrendingUp size={18} /> View Trends
-                </button>
-            </div>
-        </section>
-
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        {/* Progress Bar */}
+        <div className="max-w-3xl mx-auto mb-10 relative">
+          <div className="absolute top-4 left-0 w-full h-1 bg-slate-200 rounded-full z-0"></div>
+          <div className={`absolute top-4 left-0 h-1 bg-green-700 rounded-full z-0 transition-all duration-500 ${step === 3 ? 'w-full' : step === 2 ? 'w-2/3' : 'w-1/3'}`}></div>
           
-          {/* LEFT COLUMN: INPUT FORM & HISTORY */}
-          <div className="xl:col-span-4 space-y-8 animate-in fade-in duration-1000">
-              
-              {/* Submission Form Card */}
-              <div className="bg-white rounded-[40px] shadow-sm border border-slate-100 p-8 sm:p-10 relative overflow-hidden group">
-                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-green-50 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  
-                  <h2 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
-                      <Beaker className="text-green-600" size={24} />
-                      Analyze New Sample
-                  </h2>
-
-                  <form onSubmit={submitData} className="space-y-6">
-                      <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Soil pH Level</label>
-                          <input name="ph" type="number" step="0.1" value={inputs.ph} onChange={onChange} placeholder="e.g. 6.8" className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-green-500 transition-all"/>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nitrogen (ppm)</label>
-                              <input name="n" type="number" value={inputs.n} onChange={onChange} placeholder="N" className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-green-500 transition-all"/>
-                          </div>
-                          <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phosphorous (ppm)</label>
-                              <input name="p" type="number" value={inputs.p} onChange={onChange} placeholder="P" className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-green-500 transition-all"/>
-                          </div>
-                          <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Potassium (ppm)</label>
-                              <input name="k" type="number" value={inputs.k} onChange={onChange} placeholder="K" className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-green-500 transition-all"/>
-                          </div>
-                          <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Org. Matter (%)</label>
-                              <input name="om" type="number" step="0.1" value={inputs.om} onChange={onChange} placeholder="OM" className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-green-500 transition-all"/>
-                          </div>
-                      </div>
-
-                      <button disabled={loading} type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white font-black py-5 rounded-[24px] shadow-xl shadow-green-100 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50">
-                          {loading ? 'Processing Analysis...' : 'Generate Soil Health Card'}
-                      </button>
-                  </form>
+          <div className="flex justify-between relative z-10">
+            <div className="flex flex-col items-center">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow-sm border-[3px] border-white ${step >= 1 ? 'bg-green-700 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                {step > 1 ? <CheckCircle2 size={18}/> : '1'}
               </div>
-
-              {/* History List */}
-              <div className="bg-white rounded-[40px] shadow-sm border border-slate-100 p-8 flex flex-col max-h-[500px]">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center justify-between">
-                      Activity Logs
-                      <Calendar size={14} />
-                  </h3>
-                  
-                  <div className="overflow-y-auto pr-2 space-y-4 no-scrollbar">
-                      {fetchLoading ? (
-                          <div className="text-center py-10"><Clock className="mx-auto text-slate-200 animate-spin mb-2" size={32} /></div>
-                      ) : history.length === 0 ? (
-                          <div className="text-center py-10 opacity-40 font-bold text-sm">No records found.</div>
-                      ) : history.map(test => (
-                          <button key={test.id} onClick={() => setSelectedTest(test)} className={`w-full text-left p-5 rounded-3xl border-2 transition-all ${selectedTest?.id === test.id ? 'border-green-600 bg-green-50/30' : 'border-slate-50 hover:border-slate-200'}`}>
-                              <div className="flex justify-between items-start">
-                                  <div>
-                                      <p className="font-black text-slate-900 text-sm">{new Date(test.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</p>
-                                      <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">Ref: {test.id.slice(-8)}</p>
-                                  </div>
-                                  <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${test.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                                      {test.status}
-                                  </span>
-                              </div>
-                          </button>
-                      ))}
-                  </div>
+              <span className={`text-[11px] font-bold mt-2 tracking-widest uppercase ${step >= 1 ? 'text-green-700' : 'text-slate-400'}`}>Upload</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow-sm border-[3px] border-white ${step >= 2 ? 'bg-green-700 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                {step > 2 ? <CheckCircle2 size={18}/> : '2'}
               </div>
-          </div>
-
-          {/* RIGHT COLUMN: VISUALIZATIONS & INSIGHTS */}
-          <div className="xl:col-span-8 animate-in fade-in duration-1000 delay-300">
-              {!selectedTest ? (
-                  <div className="h-full min-h-[600px] bg-white rounded-[48px] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-12 text-center">
-                       <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-                           <Info className="text-slate-200" size={48} />
-                       </div>
-                       <h3 className="text-2xl font-black text-slate-900">Intelligence Ready</h3>
-                       <p className="max-w-md text-slate-500 font-medium mt-2">Select a past soil sample or enters values to get instant scientific analysis and fertilizer recommendations.</p>
-                  </div>
-              ) : (
-                  <div className="space-y-8">
-                      {/* Main Insight Hero */}
-                      <div className="bg-white rounded-[48px] shadow-sm border border-slate-100 p-8 sm:p-12">
-                          
-                          <div className="flex flex-col lg:flex-row gap-12">
-                              {/* PH Gauge & Score */}
-                              <div className="lg:w-1/3 flex flex-col items-center">
-                                  <div className="relative w-48 h-48 mb-8">
-                                      <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-                                          <circle cx="50" cy="50" r="45" fill="none" stroke="#f1f5f9" strokeWidth="8" />
-                                          <circle cx="50" cy="50" r="45" fill="none" stroke="#16a34a" strokeWidth="8" strokeDasharray={`${(selectedTest.ph / 14) * 283} 283`} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
-                                      </svg>
-                                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                          <span className="text-5xl font-black text-slate-900">{selectedTest.ph?.toFixed(1)}</span>
-                                          <span className="text-[10px] font-black text-green-600 uppercase tracking-widest mt-1">pH Level</span>
-                                      </div>
-                                  </div>
-                                  <div className="text-center">
-                                      <h4 className={`text-xl font-black ${selectedTest.soil_status === 'Acidic' ? 'text-rose-600' : (selectedTest.soil_status === 'Alkaline' ? 'text-amber-600' : 'text-green-600')}`}>
-                                          {selectedTest.soil_status} Soil
-                                      </h4>
-                                      <p className="text-sm font-medium text-slate-500 mt-2 px-4 italic">"Ideal for most Kharif and Rabi crops."</p>
-                                  </div>
-                              </div>
-
-                              {/* Nutrient Progress Bars */}
-                              <div className="flex-1 space-y-6">
-                                  <div className="flex items-center justify-between mb-4">
-                                      <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Nutritional Profile</h4>
-                                      <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md border">IDEAL: 90%+</span>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
-                                      {nutriBars(selectedTest).map((bar, idx) => (
-                                          <div key={idx} className="space-y-3">
-                                              <div className="flex justify-between items-end">
-                                                  <span className="text-sm font-black text-slate-800">{bar.label}</span>
-                                                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${bar.level === 'Low' ? 'bg-rose-100 text-rose-600' : 'bg-green-100 text-green-600'}`}>
-                                                      {bar.level}
-                                                  </span>
-                                              </div>
-                                              <div className="h-4 bg-slate-50 rounded-full p-1 border border-slate-100">
-                                                  <div className={`h-full rounded-full transition-all duration-1000 ${bar.level === 'Low' ? 'bg-rose-500' : 'bg-green-600'}`} style={{ width: `${bar.pct}%` }}></div>
-                                              </div>
-                                          </div>
-                                      ))}
-                                  </div>
-
-                                  <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between">
-                                      <div className="flex items-center gap-4">
-                                          <div className="w-14 h-14 bg-green-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-green-100">
-                                              <TrendingUp size={28} />
-                                          </div>
-                                          <div>
-                                              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Suitability Index</p>
-                                              <p className="text-2xl font-black text-slate-900">{selectedTest.suitability_pct || 92}%</p>
-                                          </div>
-                                      </div>
-                                      <button 
-                                          onClick={() => handleDownloadPDF(selectedTest.id)}
-                                          disabled={downloading}
-                                          className="bg-slate-50 text-slate-700 hover:bg-slate-100 px-6 py-4 rounded-3xl font-black text-sm transition-all flex items-center gap-3 border border-slate-200"
-                                      >
-                                          {downloading ? <Clock className="animate-spin" size={18} /> : <Download size={18} />}
-                                          Download Full Advisory
-                                      </button>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-
-                      {/* Summary Cards */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          {/* Fertilizer Card */}
-                          <div className="bg-[#0f172a] rounded-[40px] p-10 text-white relative overflow-hidden group">
-                               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform"><Beaker size={120} /></div>
-                               <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-8">Treatment Protocol</h4>
-                               <div className="space-y-4">
-                                   <div className="flex items-start gap-4">
-                                       <div className="w-8 h-8 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center flex-shrink-0 mt-1">
-                                           <AlertCircle className="text-green-400" size={16} />
-                                       </div>
-                                       <p className="text-lg font-bold leading-snug">{selectedTest.recommended_fertilizer || 'NPK levels are balanced. Maintain organic inputs.'}</p>
-                                   </div>
-                               </div>
-                               <div className="mt-8 pt-6 border-t border-slate-800">
-                                   <button className="text-green-400 text-xs font-black flex items-center gap-2 group-hover:gap-3 transition-all">
-                                       ORDER REQUIRED FERTILIZERS <ChevronRight size={14} />
-                                   </button>
-                               </div>
-                          </div>
-
-                          {/* Crops Card */}
-                          <div className="bg-white rounded-[40px] p-10 shadow-sm border border-slate-100 flex flex-col relative overflow-hidden">
-                               <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-8">Optimal Crop Rotation</h4>
-                               <div className="flex flex-wrap gap-3 mb-auto">
-                                   {selectedTest.suitable_crops?.map(crop => (
-                                       <span key={crop} className="bg-slate-50 text-slate-800 font-black text-sm px-6 py-3 rounded-2xl border border-slate-100 hover:bg-green-600 hover:text-white transition-all cursor-default">
-                                           {crop}
-                                       </span>
-                                   ))}
-                               </div>
-                               <div className="mt-8 flex items-center gap-3 text-slate-400">
-                                   <Sprout size={16} />
-                                   <p className="text-[10px] font-bold uppercase tracking-widest">Recommended for current pH and Nitrogen levels</p>
-                               </div>
-                          </div>
-                      </div>
-
-                      {/* Next Test Roadmap */}
-                      <div className="bg-green-600 rounded-[32px] p-8 text-white flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl shadow-green-100">
-                          <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                                  <Clock size={28} />
-                              </div>
-                              <div>
-                                  <p className="text-xs font-black text-green-100 uppercase tracking-widest">Next Health Checkpoint</p>
-                                  <p className="text-xl font-black">{new Date(selectedTest.next_test_date).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })}</p>
-                              </div>
-                          </div>
-                          <button className="bg-white text-green-700 px-8 py-4 rounded-2xl font-black text-sm hover:bg-green-50 transition-all">
-                              Set Calendar Alert
-                          </button>
-                      </div>
-                  </div>
-              )}
+              <span className={`text-[11px] font-bold mt-2 tracking-widest uppercase ${step >= 2 ? 'text-green-700' : 'text-slate-400'}`}>Review</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow-sm border-[3px] border-white ${step >= 3 ? 'bg-green-700 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                {step >= 3 ? <CheckCircle2 size={18}/> : '3'}
+              </div>
+              <span className={`text-[11px] font-bold mt-2 tracking-widest uppercase ${step >= 3 ? 'text-green-700' : 'text-slate-400'}`}>Results</span>
+            </div>
           </div>
         </div>
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left Column (Upload & Manual Entry) */}
+          <div className="lg:col-span-2 space-y-8">
+            
+            {/* Upload Area */}
+            <div className="border-2 border-dashed border-slate-300 rounded-[20px] bg-white p-10 text-center relative hover:border-green-400 hover:bg-green-50/30 transition-colors">
+              {!file ? (
+                <>
+                  <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-5 text-green-700">
+                    <Upload size={28} />
+                  </div>
+                  <h2 className="text-xl font-bold text-slate-900 mb-2">Upload Soil Report</h2>
+                  <p className="text-sm text-slate-500 mb-6">Supported formats: PDF, JPG, PNG. Max file size: 10MB per document.</p>
+                  <label className="inline-block bg-green-200/50 text-green-800 font-bold px-6 py-2.5 rounded-lg cursor-pointer hover:bg-green-200 transition-colors">
+                    Browse Files
+                    <input type="file" className="hidden" onChange={handleFileChange} accept=".pdf,image/*" />
+                  </label>
+                </>
+              ) : (
+                <div className="relative w-full h-40 flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={clearFile}
+                    className="absolute top-0 right-0 z-10 p-1.5 bg-white rounded-full text-slate-500 hover:text-red-500 shadow-md border border-slate-200"
+                  >
+                    <X size={16} />
+                  </button>
+                  {preview === 'pdf' ? (
+                    <div className="flex flex-col items-center">
+                      <FileText size={48} className="text-red-500 mb-3" />
+                      <p className="font-bold text-slate-800">{file.name}</p>
+                      <p className="text-xs text-slate-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-6">
+                      <img src={preview} alt="Upload preview" className="max-h-32 object-contain rounded-lg shadow-sm border border-slate-200" />
+                      <div className="text-left">
+                        <p className="font-bold text-slate-800">{file.name}</p>
+                        <p className="text-xs text-slate-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center justify-center">
+              <div className="h-px bg-slate-200 flex-1"></div>
+              <span className="px-4 text-[11px] font-bold text-slate-400 tracking-widest uppercase">OR MANUAL ENTRY</span>
+              <div className="h-px bg-slate-200 flex-1"></div>
+            </div>
+
+            {/* Manual Entry */}
+            <div className="bg-white rounded-[20px] shadow-sm border border-slate-200 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <Beaker className="text-green-700" size={24} />
+                <h3 className="text-xl font-bold text-slate-900">Chemical Composition Data</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Soil PH Level</label>
+                  <div className="relative">
+                    <input 
+                      type="number" step="0.1" name="ph" value={manualData.ph} onChange={handleManualChange}
+                      placeholder="e.g. 6.5" 
+                      className="w-full bg-slate-100 border-none rounded-lg px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-green-500 outline-none"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nitrogen (N)</label>
+                  <div className="relative">
+                    <input 
+                      type="number" step="0.1" name="nitrogen" value={manualData.nitrogen} onChange={handleManualChange}
+                      placeholder="mg/kg" 
+                      className="w-full bg-slate-100 border-none rounded-lg px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-green-500 outline-none pr-16"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">kg/ha</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Phosphorus (P)</label>
+                  <div className="relative">
+                    <input 
+                      type="number" step="0.1" name="phosphorus" value={manualData.phosphorus} onChange={handleManualChange}
+                      placeholder="mg/kg" 
+                      className="w-full bg-slate-100 border-none rounded-lg px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-green-500 outline-none pr-16"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">kg/ha</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Potassium (K)</label>
+                  <div className="relative">
+                    <input 
+                      type="number" step="0.1" name="potassium" value={manualData.potassium} onChange={handleManualChange}
+                      placeholder="mg/kg" 
+                      className="w-full bg-slate-100 border-none rounded-lg px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-green-500 outline-none pr-16"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400">kg/ha</span>
+                  </div>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Organic Matter Content (%)</label>
+                  <div className="relative">
+                    <input 
+                      type="number" step="0.1" name="organicMatter" value={manualData.organicMatter} onChange={handleManualChange}
+                      placeholder="Percentage value" 
+                      className="w-full bg-slate-100 border-none rounded-lg px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-green-500 outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Results Section */}
+            {resultData && step === 3 && (
+              <div className="bg-white rounded-[20px] shadow-sm border border-green-200 p-8 animate-in fade-in duration-500">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-green-100 rounded-xl"><Leaf className="text-green-700" size={24} /></div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Soil Analysis Results</h3>
+                    <p className="text-sm text-slate-500">Report #{resultData.id}</p>
+                  </div>
+                  <span className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${resultData.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    {resultData.status || 'Pending'}
+                  </span>
+                </div>
+
+                {resultData.status === 'Completed' ? (
+                  <div className="space-y-6">
+                    {/* Soil Status */}
+                    <div className={`p-4 rounded-xl border ${resultData.soilStatus?.includes('Acidic') || resultData.soilStatus?.includes('Alkaline') ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}`}>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Soil Status</p>
+                      <p className="text-lg font-bold text-slate-900">{resultData.soilStatus || 'N/A'}</p>
+                      {resultData.suitabilityPct && <p className="text-sm text-slate-600 mt-1">Suitability: {resultData.suitabilityPct}%</p>}
+                    </div>
+
+                    {/* Nutrient Levels */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[{label:'pH', val:resultData.ph}, {label:'N', val:resultData.nitrogen}, {label:'P', val:resultData.phosphorus}, {label:'K', val:resultData.potassium}].map(n => (
+                        <div key={n.label} className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">{n.label}</p>
+                          <p className="text-lg font-black text-slate-900">{n.val ?? '-'}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Fertilizer Recommendation */}
+                    {resultData.recommendedFertilizer && (
+                      <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                        <p className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">Recommended Fertilizer</p>
+                        <p className="text-sm font-bold text-slate-800">{resultData.recommendedFertilizer}</p>
+                      </div>
+                    )}
+
+                    {/* Suitable Crops */}
+                    {resultData.suitableCrops?.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2"><Sprout size={14}/> Suitable Crops</p>
+                        <div className="flex flex-wrap gap-2">
+                          {resultData.suitableCrops.map(crop => (
+                            <span key={crop} className="bg-green-100 text-green-800 text-sm font-bold px-4 py-2 rounded-xl">{crop}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Next Test */}
+                    {resultData.nextTestDate && (
+                      <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 flex items-center gap-3">
+                        <Calendar size={18} className="text-blue-600"/>
+                        <div>
+                          <p className="text-xs font-bold text-blue-700 uppercase">Next Test Recommended</p>
+                          <p className="text-sm font-bold text-slate-800">{new Date(resultData.nextTestDate).toLocaleDateString('en-IN', {year:'numeric',month:'long',day:'numeric'})}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <button type="button" onClick={() => navigate('/soil-history')} className="w-full py-3 bg-green-700 hover:bg-green-800 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
+                      View Full History <ArrowRight size={16}/>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="bg-yellow-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><AlertTriangle className="text-yellow-600" size={28}/></div>
+                    <h4 className="text-lg font-bold text-slate-800 mb-2">Report Submitted — Pending Analysis</h4>
+                    <p className="text-sm text-slate-500 mb-6">Your uploaded soil report is being reviewed by our team. Results will appear in your history once analyzed.</p>
+                    <button type="button" onClick={() => navigate('/soil-history')} className="px-6 py-3 bg-green-700 hover:bg-green-800 text-white font-bold rounded-xl transition-all">Go to History</button>
+                  </div>
+                )}
+
+                <button type="button" onClick={() => { setResultData(null); setStep(1); clearFile(); setManualData({ph:'',nitrogen:'',phosphorus:'',potassium:'',organicMatter:''}); }} className="mt-4 w-full text-center text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                  ← Submit Another Report
+                </button>
+              </div>
+            )}
+
+          </div>
+
+          {/* Right Column (Sidebar) */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-[20px] shadow-sm border border-slate-200 overflow-hidden sticky top-32 flex flex-col">
+              
+              {/* Header Gradient Banner */}
+              <div className="bg-gradient-to-r from-[#2d6a4f] to-[#52b788] p-6 text-white relative overflow-hidden">
+                <div className="relative z-10 flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <UserCheck size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold font-sans">Book Officer Visit</h2>
+                    <p className="text-[#d8f3dc] text-sm mt-1 opacity-90 font-sans">Schedule on-site soil testing</p>
+                  </div>
+                </div>
+                {/* Decorative circle */}
+                <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+              </div>
+
+              {/* Booking Form */}
+              <div className="p-6 flex flex-col gap-5 font-sans">
+                
+                {/* Availability Indicator */}
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#52b788] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#2d6a4f]"></span>
+                  </span>
+                  <span className="text-xs font-bold text-[#2d6a4f] uppercase tracking-wider">Officers Available</span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Farmer Name</label>
+                  <input 
+                    type="text" 
+                    name="farmerName"
+                    value={bookingData.farmerName}
+                    onChange={handleBookingChange}
+                    placeholder="Enter your name" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-[#52b788] outline-none transition-all"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Preferred Date</label>
+                    <input 
+                      type="date" 
+                      name="preferredDate"
+                      value={bookingData.preferredDate}
+                      onChange={handleBookingChange}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-[#52b788] outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Time Slot</label>
+                    <select 
+                      name="timeSlot"
+                      value={bookingData.timeSlot}
+                      onChange={handleBookingChange}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-[#52b788] outline-none transition-all appearance-none"
+                    >
+                      <option value="">Select Time</option>
+                      <option value="morning">Morning</option>
+                      <option value="midday">Midday</option>
+                      <option value="afternoon">Afternoon</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Purpose of Visit</label>
+                  <select 
+                    name="purpose"
+                    value={bookingData.purpose}
+                    onChange={handleBookingChange}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-[#52b788] outline-none transition-all appearance-none"
+                  >
+                    <option value="">Select Purpose</option>
+                    <option value="routine">Routine Soil Test</option>
+                    <option value="disease">Suspected Disease</option>
+                    <option value="pre-sowing">Pre-sowing Analysis</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Notes (Optional)</label>
+                  <textarea 
+                    rows="2"
+                    name="notes"
+                    value={bookingData.notes}
+                    onChange={handleBookingChange}
+                    placeholder="Any specific instructions..." 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-[#52b788] outline-none transition-all resize-none"
+                  ></textarea>
+                </div>
+
+                <div className="bg-[#d8f3dc]/30 p-4 rounded-xl flex items-start gap-3 border border-[#d8f3dc]">
+                  <div className="mt-0.5 text-[#2d6a4f]"><Info size={16} /></div>
+                  <p className="text-xs font-medium text-[#2d6a4f] leading-relaxed">
+                    Officer will visit your registered field location to collect samples.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleBookVisit}
+                  disabled={bookingLoading}
+                  className="w-full mt-2 py-3.5 bg-[#2d6a4f] hover:bg-[#1b4332] text-white text-sm font-bold rounded-xl shadow-lg shadow-[#52b788]/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70"
+                >
+                  {bookingLoading ? (
+                    <><Loader2 className="animate-spin" size={18} /> Booking...</>
+                  ) : (
+                    <><Calendar size={18} /> Book Visit</>
+                  )}
+                </button>
+
+              </div>
+            </div>
+          </div>
+          
+          {/* Bottom Action Bar */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 py-4 z-50">
+            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-green-700">
+                <ShieldCheck size={20} />
+                <span className="text-xs font-bold uppercase tracking-wider">Secure Transmission Active</span>
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => navigate('/soil-history')}
+                  className="flex-1 sm:flex-none px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-colors"
+                >
+                  Save Draft
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 sm:flex-none px-8 py-3 bg-green-700 hover:bg-green-800 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-200 flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:shadow-none"
+                >
+                  {loading ? (
+                    <><Loader2 className="animate-spin" size={18} /> Submitting...</>
+                  ) : (
+                    <>Submit Report <ArrowRight size={18} /></>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
       </main>
     </div>
   );

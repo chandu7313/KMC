@@ -87,6 +87,11 @@ const CropDiagnosis = sequelize.define('CropDiagnosis', {
     treatment: { type: DataTypes.TEXT }, // JSON stringified array
     prevention: { type: DataTypes.TEXT }, // JSON stringified array
     isHealthy: { type: DataTypes.BOOLEAN, defaultValue: false },
+    scientificName: { type: DataTypes.STRING },
+    cause: { type: DataTypes.STRING },
+    causeClassification: { type: DataTypes.STRING },
+    symptoms: { type: DataTypes.TEXT }, // JSON stringified array
+    similarDiseases: { type: DataTypes.TEXT }, // JSON stringified array
     allSuggestions: { type: DataTypes.TEXT }, // JSON stringified
     rawResponse: { type: DataTypes.TEXT }, // Full API response for debugging
     recommendedProducts: { type: DataTypes.TEXT }, // Gemini generated JSON stringified
