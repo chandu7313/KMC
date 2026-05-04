@@ -1,137 +1,83 @@
-import { useContext, useEffect, useState } from "react";
-import axios from "axios";
-import { AppContext } from "../../../context/AppContext";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Download, Calendar, Ticket, Clock, AlertTriangle, Star, TrendingUp } from "lucide-react";
+import React from 'react';
+import { BarChart3, TrendingUp, TrendingDown, Users, Ticket, Clock, Star } from 'lucide-react';
 
-const COLORS = ['#10b981','#f59e0b','#3b82f6','#ef4444','#8b5cf6','#ec4899'];
-
-const Reports = () => {
-  const { backendUrl } = useContext(AppContext);
-  const [report, setReport] = useState(null);
-  const [agentReport, setAgentReport] = useState([]);
-  const [volumeTrend, setVolumeTrend] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState({ from: '', to: '' });
-
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const [dashRes, agentRes, trendRes] = await Promise.all([
-          axios.get(`${backendUrl}/api/support/reports/dashboard`),
-          axios.get(`${backendUrl}/api/support/reports/agents`),
-          axios.get(`${backendUrl}/api/support/reports/tickets`)
-        ]);
-        if (dashRes.data.success) setReport(dashRes.data.report);
-        if (agentRes.data.success) setAgentReport(agentRes.data.agents);
-        if (trendRes.data.success) setVolumeTrend(trendRes.data.volumeTrend);
-      } catch {
-        setReport({ totalCreated: 247, avgResolutionHrs: 8.4, avgFirstResponseHrs: 1.8, slaBreachCount: 12,
-          byCategory: [{ category: 'Orders', count: 45 },{ category: 'Payments', count: 35 },{ category: 'App', count: 28 },{ category: 'Booking', count: 22 },{ category: 'General', count: 30 }],
-          byStatus: [{ status: 'open', count: 38 },{ status: 'in_progress', count: 24 },{ status: 'resolved', count: 150 },{ status: 'closed', count: 35 }],
-        });
-        setAgentReport([
-          { name: 'Priya', ticketsAssigned: 85, ticketsResolved: 72, rating: 4.7, slaMetPct: 94 },
-          { name: 'Ravi', ticketsAssigned: 65, ticketsResolved: 58, rating: 4.3, slaMetPct: 88 },
-          { name: 'Meera', ticketsAssigned: 97, ticketsResolved: 90, rating: 4.8, slaMetPct: 96 },
-        ]);
-        setVolumeTrend(Array.from({ length: 14 }, (_, i) => ({ date: `Apr ${i+15}`, count: Math.floor(Math.random()*20)+10 })));
-      } finally { setLoading(false); }
-    };
-    fetch();
-  }, [backendUrl]);
-
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /></div>;
-  if (!report) return null;
-
-  const summaryCards = [
-    { label: 'Total Created', value: report.totalCreated, icon: Ticket, color: 'text-blue-400' },
-    { label: 'Avg Response', value: `${report.avgFirstResponseHrs}h`, icon: Clock, color: 'text-emerald-400' },
-    { label: 'Avg Resolution', value: `${report.avgResolutionHrs}h`, icon: TrendingUp, color: 'text-amber-400' },
-    { label: 'SLA Breaches', value: report.slaBreachCount, icon: AlertTriangle, color: 'text-red-400' },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-xl font-bold text-white">Reports & Analytics</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm rounded-lg transition-colors"><Download size={14} /> Export</button>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {summaryCards.map((s, i) => (
-          <div key={i} className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2"><s.icon size={16} className={s.color} /><span className="text-xs text-slate-500">{s.label}</span></div>
-            <p className="text-2xl font-bold text-white">{s.value}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Volume Trend */}
-        <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4">Ticket Volume Trend</h3>
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={volumeTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} />
-                <YAxis tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} />
-                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#e2e8f0' }} />
-                <Line type="monotone" dataKey="count" stroke="#10b981" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+const Reports = () => (
+    <div className="max-w-[1400px] mx-auto space-y-6">
+        <div>
+            <h1 className="text-2xl font-black text-slate-800">Reports</h1>
+            <p className="text-sm text-slate-500 font-medium mt-1">Performance analytics and team metrics</p>
         </div>
 
-        {/* By Status */}
-        <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4">Tickets by Status</h3>
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={report.byStatus}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="status" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} />
-                <YAxis tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} />
-                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#e2e8f0' }} />
-                <Bar dataKey="count" radius={[4,4,0,0]}>
-                  {report.byStatus.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <div className="flex items-center gap-2 mb-3"><TrendingUp size={16} className="text-green-600" /><span className="text-xs font-semibold text-green-600">+12%</span></div>
+                <p className="text-2xl font-black text-slate-800">1,247</p>
+                <p className="text-[10px] text-slate-400 font-semibold mt-1">Tickets This Month</p>
+            </div>
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <div className="flex items-center gap-2 mb-3"><TrendingDown size={16} className="text-green-600" /><span className="text-xs font-semibold text-green-600">-8% (good)</span></div>
+                <p className="text-2xl font-black text-slate-800">2.1h</p>
+                <p className="text-[10px] text-slate-400 font-semibold mt-1">Avg Resolution Time</p>
+            </div>
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <div className="flex items-center gap-2 mb-3"><Star size={16} className="text-amber-500" /></div>
+                <p className="text-2xl font-black text-slate-800">4.6/5</p>
+                <p className="text-[10px] text-slate-400 font-semibold mt-1">Avg CSAT Score</p>
+            </div>
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                <div className="flex items-center gap-2 mb-3"><Users size={16} className="text-blue-500" /></div>
+                <p className="text-2xl font-black text-slate-800">94%</p>
+                <p className="text-[10px] text-slate-400 font-semibold mt-1">First Contact Resolution</p>
+            </div>
         </div>
-      </div>
 
-      {/* Agent Performance Table */}
-      <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-800/50">
-          <h3 className="text-sm font-semibold text-slate-300">Agent Performance</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 className="font-bold text-slate-800 mb-4">Agent Performance</h3>
+                <div className="space-y-4">
+                    {[
+                        { name: 'Sarah', resolved: 48, avg: '1.8h', csat: 4.8 },
+                        { name: 'John', resolved: 42, avg: '2.1h', csat: 4.5 },
+                        { name: 'Priya', resolved: 38, avg: '2.4h', csat: 4.7 },
+                        { name: 'Amit', resolved: 35, avg: '2.6h', csat: 4.3 },
+                    ].map(a => (
+                        <div key={a.name} className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl">
+                            <div className="w-9 h-9 rounded-full bg-[#1a5632] text-white flex items-center justify-center font-bold text-sm">{a.name.charAt(0)}</div>
+                            <div className="flex-1">
+                                <p className="font-semibold text-slate-700 text-sm">{a.name}</p>
+                                <p className="text-[10px] text-slate-400">{a.resolved} resolved • Avg {a.avg}</p>
+                            </div>
+                            <div className="flex items-center gap-1 text-amber-500"><Star size={12} /><span className="text-sm font-bold text-slate-700">{a.csat}</span></div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 className="font-bold text-slate-800 mb-4">Top Issue Categories</h3>
+                <div className="space-y-4">
+                    {[
+                        { cat: 'Order Issues', pct: 35, color: 'bg-[#1a5632]' },
+                        { cat: 'Payment', pct: 25, color: 'bg-green-500' },
+                        { cat: 'Delivery', pct: 15, color: 'bg-emerald-400' },
+                        { cat: 'App Issues', pct: 10, color: 'bg-amber-400' },
+                        { cat: 'Expert', pct: 8, color: 'bg-red-400' },
+                        { cat: 'General', pct: 7, color: 'bg-slate-400' },
+                    ].map(c => (
+                        <div key={c.cat}>
+                            <div className="flex justify-between text-sm mb-1">
+                                <span className="font-semibold text-slate-700">{c.cat}</span>
+                                <span className="font-bold text-slate-800">{c.pct}%</span>
+                            </div>
+                            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div className={`h-full ${c.color} rounded-full`} style={{ width: `${c.pct}%` }} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-slate-800/50">
-              {['Agent','Assigned','Resolved','Resolution Rate','Rating','SLA Met'].map(h => (
-                <th key={h} className="px-5 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/30">
-            {agentReport.map((a, i) => (
-              <tr key={i} className="hover:bg-slate-800/20 transition-colors">
-                <td className="px-5 py-3"><div className="flex items-center gap-2.5"><div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">{a.name.charAt(0)}</div><span className="text-sm text-white">{a.name}</span></div></td>
-                <td className="px-5 py-3 text-sm text-slate-300">{a.ticketsAssigned}</td>
-                <td className="px-5 py-3 text-sm text-slate-300">{a.ticketsResolved}</td>
-                <td className="px-5 py-3"><div className="flex items-center gap-2"><div className="w-20 h-1.5 bg-slate-800 rounded-full"><div className="h-full bg-emerald-500 rounded-full" style={{ width: `${a.ticketsAssigned ? Math.round((a.ticketsResolved/a.ticketsAssigned)*100) : 0}%` }} /></div><span className="text-xs text-slate-400">{a.ticketsAssigned ? Math.round((a.ticketsResolved/a.ticketsAssigned)*100) : 0}%</span></div></td>
-                <td className="px-5 py-3"><span className="flex items-center gap-1 text-sm text-amber-400"><Star size={12} fill="currentColor" />{a.rating}</span></td>
-                <td className="px-5 py-3"><span className={`text-xs font-medium px-2 py-0.5 rounded-full ${a.slaMetPct >= 90 ? 'bg-emerald-500/10 text-emerald-400' : a.slaMetPct >= 70 ? 'bg-amber-500/10 text-amber-400' : 'bg-red-500/10 text-red-400'}`}>{a.slaMetPct}%</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
-  );
-};
+);
 
 export default Reports;
