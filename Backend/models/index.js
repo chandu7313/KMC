@@ -3,6 +3,7 @@ import { Product, Review, MarketplaceOrder, MarketplaceOrderItem } from './Ecomm
 import { Equipment, EquipmentOrder, EquipmentOrderItem, Fertilizer, FertilizerOrder, FertilizerOrderItem } from './Assets.js';
 import { SoilReport, SoilReminder, MarketPrice, MarketHistory, PriceAlert, CropDiagnosis } from './Agri.js';
 import { Blog, SuccessStory, Booking, Notification, OrchardRequest, Order } from './Content.js';
+import { AdminUser, SupportTicket, TicketMessage, ReplyTemplate, NotificationLog, AgentPerformance, SLAConfig } from './Support.js';
 
 // Setup Relationships
 
@@ -72,11 +73,40 @@ Notification.belongsTo(User, { foreignKey: 'sentBy' });
 User.hasMany(OrchardRequest, { foreignKey: 'farmerId', onDelete: 'SET NULL' });
 OrchardRequest.belongsTo(User, { foreignKey: 'farmerId' });
 
+// ─── Support Portal Relationships ───
+
+// Tickets belong to a farmer (User) and an agent (AdminUser)
+User.hasMany(SupportTicket, { foreignKey: 'farmerId', as: 'SupportTickets', onDelete: 'SET NULL' });
+SupportTicket.belongsTo(User, { foreignKey: 'farmerId', as: 'Farmer' });
+
+AdminUser.hasMany(SupportTicket, { foreignKey: 'assignedTo', as: 'AssignedTickets', onDelete: 'SET NULL' });
+SupportTicket.belongsTo(AdminUser, { foreignKey: 'assignedTo', as: 'AssignedAgent' });
+
+AdminUser.hasMany(SupportTicket, { foreignKey: 'escalatedTo', as: 'EscalatedTickets', onDelete: 'SET NULL' });
+SupportTicket.belongsTo(AdminUser, { foreignKey: 'escalatedTo', as: 'EscalatedToAgent' });
+
+// Ticket Messages belong to a Ticket
+SupportTicket.hasMany(TicketMessage, { foreignKey: 'ticketId', as: 'Messages', onDelete: 'CASCADE' });
+TicketMessage.belongsTo(SupportTicket, { foreignKey: 'ticketId' });
+
+// Agent Performance
+AdminUser.hasMany(AgentPerformance, { foreignKey: 'agentId', as: 'Performance', onDelete: 'CASCADE' });
+AgentPerformance.belongsTo(AdminUser, { foreignKey: 'agentId', as: 'Agent' });
+
+// Templates created by admin
+AdminUser.hasMany(ReplyTemplate, { foreignKey: 'createdBy', as: 'Templates', onDelete: 'SET NULL' });
+ReplyTemplate.belongsTo(AdminUser, { foreignKey: 'createdBy', as: 'Creator' });
+
+// Notification logs created by admin
+AdminUser.hasMany(NotificationLog, { foreignKey: 'createdBy', as: 'SentNotifications', onDelete: 'SET NULL' });
+NotificationLog.belongsTo(AdminUser, { foreignKey: 'createdBy', as: 'Sender' });
+
 export {
     User, UserAddress, FarmerSurvey,
     Product, Review, MarketplaceOrder, MarketplaceOrderItem,
     Equipment, EquipmentOrder, EquipmentOrderItem,
     Fertilizer, FertilizerOrder, FertilizerOrderItem,
     SoilReport, SoilReminder, MarketPrice, MarketHistory, PriceAlert, CropDiagnosis,
-    Blog, SuccessStory, Booking, Notification, OrchardRequest, Order
+    Blog, SuccessStory, Booking, Notification, OrchardRequest, Order,
+    AdminUser, SupportTicket, TicketMessage, ReplyTemplate, NotificationLog, AgentPerformance, SLAConfig
 };

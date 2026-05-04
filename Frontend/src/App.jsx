@@ -50,6 +50,18 @@ import GovernmentSchemes from './pages/Farming/GovernmentSchemes'
 import FarmerProfile from './pages/Farming/FarmerProfile'
 import FarmerOnboardingSurvey from './pages/Farming/FarmerOnboardingSurvey'
 import CropDoctor from './pages/Farming/CropDoctor'
+import SupportLayout from './components/Admin/SupportLayout'
+import SupportDashboard from './pages/admin/support/SupportDashboard'
+import SupportTicketList from './pages/admin/support/TicketList'
+import SupportTicketDetail from './pages/admin/support/TicketDetail'
+import SupportFarmerList from './pages/admin/support/FarmerList'
+import SupportFarmerProfile from './pages/admin/support/FarmerProfile'
+import SupportBookingManagement from './pages/admin/support/BookingManagement'
+import SupportTemplates from './pages/admin/support/Templates'
+import SupportNotifications from './pages/admin/support/Notifications'
+import SupportReports from './pages/admin/support/Reports'
+import SupportAgentManagement from './pages/admin/support/AgentManagement'
+import SupportSLASettings from './pages/admin/support/SLASettings'
 
 const App = () => {
   const location = useLocation();

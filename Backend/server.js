@@ -23,6 +23,7 @@ import bookingRouter from "./routes/bookingRoutes.js";
 import surveyRouter from "./routes/surveyRoutes.js";
 import orchardRouter from "./routes/orchardRequestRoutes.js";
 import cropDoctorRouter from "./routes/cropDoctorRoutes.js";
+import supportRouter from "./routes/supportRoutes.js";
 import startCronJobs from "./config/cron.js";
 
 const app = express();
@@ -78,5 +79,6 @@ app.use('/api/booking', bookingRouter);
 app.use('/api/survey', surveyRouter);
 app.use('/api/orchard', orchardRouter);
 app.use('/api/crop-doctor', cropDoctorRouter);
+app.use('/api/support', supportRouter);
 
 app.listen(port, () => console.log(`Server started on PORT:${port}`));

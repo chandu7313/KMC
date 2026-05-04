@@ -22,11 +22,11 @@ const seed = async () => {
     try {
         // 1. Connect and sync all tables
         await sequelize.authenticate();
-        console.log('✅ Database connected.');
+        console.log('Database connected.');
         // Drop all existing tables and recreate from model definitions
         // This ensures the schema perfectly matches our Sequelize models
         await sequelize.sync({ force: true });
-        console.log('✅ All tables dropped and recreated.');
+        console.log('All tables dropped and recreated.');
 
         // Common password hash for demo accounts
         const passwordHash = await bcrypt.hash('password123', 10);
@@ -49,7 +49,7 @@ const seed = async () => {
             { name: 'Padma Kumari', email: 'padma@example.com', phone: '8888888809', role: 'user', district: 'Rangareddy', crops: ['Vegetables', 'Flowers'], isAccountVerified: false, password: passwordHash },
         ], { ignoreDuplicates: true });
 
-        console.log(`✅ Users seeded: ${users.length}`);
+        console.log(`Users seeded: ${users.length}`);
 
         // Fetch user IDs for relationships
         const admin = await User.findOne({ where: { email: 'admin@agridust.com' } });
@@ -67,7 +67,7 @@ const seed = async () => {
             { userId: amit.id, fullName: 'Amit Kumar (Farm)', phone: '8888888801', address: 'Survey No. 45, Kharadi Village, Pune Rural, Maharashtra 412207' },
             { userId: rajesh.id, fullName: 'Rajesh Reddy', phone: '8888888802', address: 'H.No 5-3-12, Main Bazar, Kesamudram, Warangal, Telangana 506142' },
         ]);
-        console.log('✅ User addresses seeded.');
+        console.log(' User addresses seeded.');
 
         // ========================
         // FARMER SURVEYS
@@ -77,7 +77,7 @@ const seed = async () => {
             { userId: rajesh.id, language: 'te', farmName: 'Reddy Farm', farmSize: 8.0, farmSizeUnit: 'acres', landOwnership: 'Self-owned', soilType: 'Red Loamy', waterSource: 'Borewell', primaryCrops: ['Rice', 'Cotton'], farmingExperience: '15+ Years' },
         ]);
         await User.update({ hasCompletedSurvey: true }, { where: { id: [amit.id, rajesh.id] } });
-        console.log('✅ Farmer surveys seeded.');
+        console.log(' Farmer surveys seeded.');
 
         // ========================
         // PRODUCTS (Marketplace)
@@ -94,7 +94,7 @@ const seed = async () => {
             { name: 'Paddy Seeds IR-64 (5kg)', description: 'High-yielding medium-duration paddy variety. Excellent grain quality, resistant to blast and BPH.', shortDescription: 'Medium-duration, blast resistant', category: 'Seeds', subCategory: 'Cereal Seeds', price: 280, discountedPrice: 250, stock: 400, isFeatured: false, images: ['https://res.cloudinary.com/demo/image/upload/v1/seeds/paddy_ir64.jpg'], specifications: { weight: '5 kg', duration: '120-125 days', yield: '6-7 t/ha' } },
             { name: 'Humic Acid Granules (5kg)', description: 'High-quality humic acid granules to improve soil CEC and nutrient uptake.', shortDescription: 'Soil health booster', category: 'Fertilizers', subCategory: 'Organic', price: 890, discountedPrice: 799, stock: 200, isFeatured: false, images: ['https://res.cloudinary.com/demo/image/upload/v1/fertilizers/humic_acid.jpg'], specifications: { weight: '5 kg', humic_acid: '>60%', application: '5-10 kg/acre' } },
         ]);
-        console.log(`✅ Products seeded: ${products.length}`);
+        console.log(` Products seeded: ${products.length}`);
 
         // ========================
         // EQUIPMENTS
@@ -106,7 +106,7 @@ const seed = async () => {
             { name: 'Seed Drill (9 Row)', description: 'Tractor-mounted 9-row seed drill for precise sowing. Adjustable row spacing and seed rate.', price: 65000, image: 'https://res.cloudinary.com/demo/image/upload/v1/equipment/seed_drill.jpg', category: 'Sowing', stock: 5, specifications: { rows: 9, spacing: '20-30cm adjustable', weight: '180kg' } },
             { name: 'Chaff Cutter (Electric)', description: 'Electric chaff cutter for fodder preparation. Cuts straw, hay, and green fodder. 2HP motor.', price: 18000, image: 'https://res.cloudinary.com/demo/image/upload/v1/equipment/chaff_cutter.jpg', category: 'Processing', stock: 20, specifications: { motor: '2 HP', capacity: '500 kg/hr', blades: '3 (HSS)' } },
         ]);
-        console.log(`✅ Equipments seeded: ${equipments.length}`);
+        console.log(`Equipments seeded: ${equipments.length}`);
 
         // ========================
         // FERTILIZERS
@@ -119,7 +119,7 @@ const seed = async () => {
             { name: 'Zinc Sulphate (25kg)', description: 'Zinc sulphate heptahydrate — 21% Zn. Corrects zinc deficiency in rice, wheat, and maize.', price: 750, image: 'https://res.cloudinary.com/demo/image/upload/v1/fertilizers/zinc.jpg', category: 'Micronutrient', stock: 250 },
             { name: 'Bio NPK (1L)', description: 'Liquid bio-fertilizer consortium — Azotobacter + PSB + KMB.', price: 320, image: 'https://res.cloudinary.com/demo/image/upload/v1/fertilizers/bio_npk.jpg', category: 'Biological', stock: 500 },
         ]);
-        console.log(`✅ Fertilizers seeded: ${fertilizers.length}`);
+        console.log(` Fertilizers seeded: ${fertilizers.length}`);
 
         // ========================
         // MARKET PRICES
@@ -143,7 +143,7 @@ const seed = async () => {
             { cropName: 'Mango', district: 'Khammam', mandi: 'Khammam Fruit Market', minPrice: 35000, maxPrice: 55000, modalPrice: 45000, variety: 'Banganapalli', arrivalDate: now },
             { cropName: 'Sunflower', district: 'Medak', mandi: 'Medak APMC', minPrice: 5500, maxPrice: 6300, modalPrice: 5900, variety: 'KBSH-44', arrivalDate: now },
         ]);
-        console.log('✅ Market prices seeded: 16');
+        console.log('Market prices seeded: 16');
 
         // ========================
         // MARKET HISTORY (for trends)
@@ -187,7 +187,7 @@ const seed = async () => {
             { title: 'Government Subsidies for Farm Equipment in 2026', slug: 'govt-subsidies-farm-equipment-2026', excerpt: 'Complete guide to central and state government subsidy schemes for farm machinery.', content: '## Available Schemes\n\n### 1. SMAM\n- Subsidy: 40-50% for SC/ST, 25-40% for others\n\n### 2. PM-KUSUM\n- 60% subsidy on solar pumps up to 10HP\n\n### 3. Telangana State\n- Rythu Bandhu: ₹10,000/acre/season\n- Drip: 90% subsidy for small farmers', author: 'KMC Team', status: 'published', tags: ['subsidy', 'government', 'equipment'], featuredImage: 'https://res.cloudinary.com/demo/image/upload/v1/blogs/subsidies.jpg', views: 512 },
             { title: 'Water Management in Drought-Prone Areas', slug: 'water-management-drought-areas', excerpt: 'Practical water harvesting techniques for areas with less than 700mm rainfall.', content: '## Techniques\n\n### 1. Farm Ponds\n- Size: 10m x 10m x 3m stores 300,000 litres\n- Cost: ₹50,000-80,000 (subsidy available)\n\n### 2. Rainwater Harvesting\n- Recharges groundwater by 20-30%\n\n### 3. Deficit Irrigation\n- Apply 60-80% of crop water requirement\n\n### 4. Mulching\n- Reduces evaporation by 25-30%', author: 'Dr. Lakshmi Narayan', status: 'published', tags: ['water', 'drought', 'irrigation'], featuredImage: 'https://res.cloudinary.com/demo/image/upload/v1/blogs/water_management.jpg', views: 156 },
         ]);
-        console.log('✅ Blogs seeded: 4');
+        console.log(' Blogs seeded: 4');
 
         // ========================
         // SUCCESS STORIES
@@ -198,7 +198,7 @@ const seed = async () => {
             { farmerName: 'Venkat Rao', district: 'Nizamabad', crop: 'Soybean', beforeYield: 6, afterYield: 10.5, description: 'Venkat adopted integrated pest management after his KMC soil test report. Soybean yield improved by 75% while input costs reduced by 20%.', status: 'published', image: 'https://res.cloudinary.com/demo/image/upload/v1/success/venkat_soybean.jpg' },
             { farmerName: 'Mahesh Patil', district: 'Nalgonda', crop: 'Groundnut', beforeYield: 8, afterYield: 14.5, description: 'After installing a drip irrigation system (with 90% subsidy processed through KMC), his groundnut yield jumped from 8 to 14.5 quintals and he added a second vegetable crop.', status: 'published', image: 'https://res.cloudinary.com/demo/image/upload/v1/success/mahesh_groundnut.jpg' },
         ]);
-        console.log('✅ Success stories seeded: 4');
+        console.log(' Success stories seeded: 4');
 
         // ========================
         // SOIL REPORTS
@@ -214,7 +214,7 @@ const seed = async () => {
             { farmerId: rajesh.id, ph: 5.8, nitrogen: 310, phosphorus: 28, potassium: 200, organicMatter: 2.4, recommendedFertilizer: 'NPK 20-20-0 + Lime', suitableCrops: ['Rice', 'Cotton', 'Pulses'], soilStatus: 'Acidic', suitabilityPct: 65, status: 'Completed', nextTestDate: fourMonths },
             { farmerId: sunitha.id, ph: 7.2, nitrogen: 220, phosphorus: 15, potassium: 140, organicMatter: 1.5, recommendedFertilizer: 'Urea + MOP + Humic Acid', suitableCrops: ['Turmeric', 'Chilli', 'Maize'], soilStatus: 'Neutral', suitabilityPct: 72, status: 'Completed', nextTestDate: fiveMonths },
         ]);
-        console.log(`✅ Soil reports seeded: ${soilReports.length}`);
+        console.log(` Soil reports seeded: ${soilReports.length}`);
 
         // ========================
         // SOIL REMINDERS
@@ -224,7 +224,7 @@ const seed = async () => {
             { userId: rajesh.id, reportId: soilReports[2].id, reminderDate: fourMonths, isSent: false },
             { userId: sunitha.id, reportId: soilReports[3].id, reminderDate: fiveMonths, isSent: false },
         ]);
-        console.log('✅ Soil reminders seeded: 3');
+        console.log(' Soil reminders seeded: 3');
 
         // ========================
         // BOOKINGS (Farm Visits)
@@ -236,7 +236,7 @@ const seed = async () => {
             { farmerId: rajesh.id, fullName: 'Rajesh Reddy', phone: '8888888802', village: 'Kesamudram', district: 'Warangal', visitDate: fiveDays, purpose: 'Soil testing and crop planning for Rabi season', assignedOfficerId: john.id, status: 'Confirmed' },
             { farmerId: venkat.id, fullName: 'Venkat Rao', phone: '8888888804', village: 'Bodhan', district: 'Nizamabad', visitDate: tenDays, purpose: 'Drip irrigation installation guidance', status: 'Pending' },
         ]);
-        console.log('✅ Bookings seeded: 2');
+        console.log(' Bookings seeded: 2');
 
         // ========================
         // NOTIFICATIONS
@@ -246,7 +246,7 @@ const seed = async () => {
             { title: 'Cotton MSP Update', message: 'Good news! Cotton MSP for 2026-27 has been increased to ₹7,121/quintal for medium staple.', targetType: 'Crop', targetValue: 'Cotton', recipientCount: 45, sentBy: admin.id },
             { title: 'Farm Pond Subsidy', message: 'Telangana State Govt is accepting applications for farm pond subsidy under Mission Kakatiya. 90% subsidy for SC/ST farmers.', targetType: 'District', targetValue: 'Warangal', recipientCount: 32, sentBy: admin.id },
         ]);
-        console.log('✅ Notifications seeded: 3');
+        console.log(' Notifications seeded: 3');
 
         // ========================
         // PRICE ALERTS
@@ -256,7 +256,7 @@ const seed = async () => {
             { userId: rajesh.id, crop: 'Rice', targetPrice: 2200, condition: 'Above', status: 'Active' },
             { userId: sunitha.id, crop: 'Turmeric', targetPrice: 9000, condition: 'Below', status: 'Active' },
         ]);
-        console.log('✅ Price alerts seeded: 3');
+        console.log(' Price alerts seeded: 3');
 
         // ========================
         // ORCHARD REQUESTS
@@ -265,7 +265,7 @@ const seed = async () => {
             { farmerId: venkat.id, acres: 5, location: 'Bodhan, Nizamabad', waterType: 'Borewell', goal: 'Mango Orchard', skillLevel: 'Intermediate', marketPreference: 'Local + Export', images: [], status: 'pending' },
             { farmerId: rajesh.id, acres: 3, location: 'Kesamudram, Warangal', waterType: 'Canal', goal: 'Mixed Fruit Orchard', skillLevel: 'Beginner', marketPreference: 'Local Market', images: [], status: 'assigned', assignedExpert: 'Dr. Ramesh Agri' },
         ]);
-        console.log('✅ Orchard requests seeded: 2');
+        console.log(' Orchard requests seeded: 2');
 
         // ========================
         // REVIEWS (Product Reviews)
@@ -277,7 +277,7 @@ const seed = async () => {
             { userId: venkat.id, productId: products[4].id, rating: 4, comment: 'Good quality vermicompost. Soil texture improved noticeably after one application.', userName: 'Venkat Rao' },
             { userId: amit.id, productId: products[7].id, rating: 5, comment: 'Very accurate pH meter. Easy to use, no batteries needed for moisture reading.', userName: 'Amit Kumar' },
         ]);
-        console.log('✅ Product reviews seeded: 5');
+        console.log('Product reviews seeded: 5');
 
         // ========================
         // SAMPLE MARKETPLACE ORDER
@@ -294,12 +294,12 @@ const seed = async () => {
             { orderId: sampleOrder.id, productId: products[0].id, quantity: 2, price: 399 },
             { orderId: sampleOrder.id, productId: products[4].id, quantity: 1, price: 580 },
         ]);
-        console.log('✅ Sample marketplace order seeded.');
+        console.log('Sample marketplace order seeded.');
 
-        console.log('\n🎉 ========================================');
+        console.log('\n ========================================');
         console.log('   ALL SEED DATA INSERTED SUCCESSFULLY!');
         console.log('   ========================================');
-        console.log('\n📋 Login Credentials:');
+        console.log('\n Login Credentials:');
         console.log('   Admin:   admin@kmc.com / password123');
         console.log('   Officer: john.fo@kmc.com / password123');
         console.log('   Farmer:  amit@example.com / password123');
@@ -307,7 +307,7 @@ const seed = async () => {
 
         process.exit(0);
     } catch (error) {
-        console.error('❌ Seeding failed:', error);
+        console.error(' Seeding failed:', error);
         process.exit(1);
     }
 };
