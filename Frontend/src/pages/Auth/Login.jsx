@@ -154,7 +154,6 @@ const Login = () => {
             if (role === 'admin') payload = { phone: '9999999999' };
             else if (role === 'farmer') payload = { email: 'amit@example.com' };
             else if (role === 'field-officer') payload = { email: 'john.fo@agridust.com' };
-            else if (role === 'support') payload = { email: 'agent@kissanmithar.com' };
 
             const { data } = await axios.post(backendUrl + "/api/auth/auto-login", payload);
             if (data.success) {
@@ -162,15 +161,7 @@ const Login = () => {
                 getUserData();
                 await syncPreferencesToBackend();
                 toast.success(`Logged in automatically as ${role}`);
-                if (role === 'farmer') {
-                    navigate("/farmer/dashboard");
-                } else if (role === 'support' || role === 'super_admin' || role === 'support_manager') {
-                    navigate("/admin/support");
-                } else if (role === 'admin') {
-                    navigate("/admin/dashboard");
-                } else {
-                    navigate("/");
-                }
+                navigate("/");
             } else {
                 toast.error(data.message);
             }
@@ -238,7 +229,6 @@ const Login = () => {
                                 <button type="button" onClick={() => handleAutoLogin('admin')} className="text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm">Admin</button>
                                 <button type="button" onClick={() => handleAutoLogin('farmer')} className="text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm">Farmer</button>
                                 <button type="button" onClick={() => handleAutoLogin('field-officer')} className="text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm">Field Officer</button>
-                                <button type="button" onClick={() => handleAutoLogin('support')} className="text-xs font-black bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-4 py-2 rounded-xl transition-all shadow-sm border border-emerald-200">Customer Care</button>
                             </div>
                             <div className="border-b border-slate-100 my-6 relative">
                                 <span className="absolute left-1/2 -translate-x-1/2 -top-2.5 bg-white px-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">OR</span>
