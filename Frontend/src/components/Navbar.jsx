@@ -253,6 +253,12 @@ const Navbar = () => {
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Hub</p>
                     </div>
                     <button 
+                        onClick={() => navigate("/farmer/dashboard")}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-green-700 transition-all"
+                    >
+                        <LayoutDashboard size={14} /> Dashboard
+                    </button>
+                    <button 
                         onClick={() => navigate("/cart")}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-green-700 transition-all"
                     >

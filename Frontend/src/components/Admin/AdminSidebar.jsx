@@ -11,8 +11,11 @@ import {
   Sprout, 
   Bell, 
   Home,
-  LogOut
+  LogOut,
+  Headphones
 } from "lucide-react";
+import { useContext } from "react";
+import { AppContext } from "../../context/AppContext";
 
 const AdminSidebar = () => {
   const navItems = [
@@ -29,8 +32,23 @@ const AdminSidebar = () => {
     { to: "/admin/soil-entry", label: "Manual Soil Entry", icon: <FileText size={20} /> },
     { to: "/admin/notifications", label: "Notifications", icon: <Bell size={20} /> },
     { to: "/admin/analytics", label: "Analytics", icon: <TrendingUp size={20} /> },
+    { to: "/admin/support", label: "Support Portal", icon: <Headphones size={20} /> },
     { to: "/", label: "Go to Home", icon: <Home size={20} /> },
   ];
+
+  const { userData } = useContext(AppContext);
+  const userRole = userData?.role || '';
+  const isSupportStaff = ['super_admin', 'support_agent', 'support_manager'].includes(userRole);
+  const isAdmin = userRole === 'admin';
+
+  // Filter items based on role if needed
+  const filteredItems = navItems.filter(item => {
+    if (isSupportStaff && !isAdmin) {
+      // Support staff only sees Support Portal and Home in main sidebar
+      return ['Support Portal', 'Go to Home'].includes(item.label);
+    }
+    return true;
+  });
 
   const linkBase =
     "flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors rounded-lg";
@@ -46,8 +64,8 @@ const AdminSidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        {navItems.map((item) => (
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        {filteredItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

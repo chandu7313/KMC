@@ -111,6 +111,19 @@ export const autoLogin = async (req, res) => {
                  user = await User.create({ name: "Amit Kumar", email: "amit@example.com", phone: "8888888888", role: 'user', district: "Pune", crops: ["Wheat"], isAccountVerified: true });
              } else if (!user && email === 'john.fo@agridust.com') {
                  user = await User.create({ name: "John Officer", email: "john.fo@agridust.com", phone: "7777777777", role: 'field-officer', isAccountVerified: true });
+             } else if (email === 'agent@kissanmithar.com') {
+                 // Check admin_users table for Support Portal agent
+                 const { AdminUser } = await import('../models/index.js');
+                 user = await AdminUser.findOne({ where: { email: 'agent@kissanmithar.com' } });
+                 if (!user) {
+                     user = await AdminUser.create({ 
+                         name: "Support Agent", 
+                         email: "agent@kissanmithar.com", 
+                         password: "hashed_password_here", 
+                         role: 'support_agent', 
+                         status: 'online' 
+                     });
+                 }
              }
         }
         

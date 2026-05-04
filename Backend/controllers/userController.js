@@ -4,16 +4,27 @@ export const getUserData = async (req, res) => {
     try {
         const { userId } = req.body
 
-        const user = await User.findByPk(userId, {
+        let user = await User.findByPk(userId, {
             attributes: ['id', 'name', 'email', 'role', 'isAccountVerified', 'language', 'preferredLanguage', 'hasCompletedTour', 'hasCompletedSurvey', 'simpleMode']
         });
 
+        let isAdmin = false;
+
         if (!user) {
-            return res.json({ success: false, message: "User not found" })
+            // Check admin_users table for support staff
+            const { AdminUser } = await import('../models/index.js');
+            user = await AdminUser.findByPk(userId, {
+                attributes: ['id', 'name', 'email', 'role']
+            });
+
+            if (!user) {
+                return res.json({ success: false, message: "User not found" })
+            }
+            isAdmin = true;
         }
 
-        // Fetch addresses separately from user_addresses table
-        const addresses = await UserAddress.findAll({ where: { userId } });
+        // Fetch addresses separately from user_addresses table (only for regular users)
+        const addresses = !isAdmin ? await UserAddress.findAll({ where: { userId } }) : [];
 
         res.json({
             success: true,
@@ -22,13 +33,14 @@ export const getUserData = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                isAccountVerified: user.isAccountVerified,
-                language: user.language,
-                preferredLanguage: user.preferredLanguage,
-                hasCompletedTour: user.hasCompletedTour,
-                hasCompletedSurvey: user.hasCompletedSurvey,
-                simpleMode: user.simpleMode,
-                addresses: addresses || []
+                isAccountVerified: user.isAccountVerified || false,
+                language: user.language || 'en',
+                preferredLanguage: user.preferredLanguage || 'en',
+                hasCompletedTour: user.hasCompletedTour || false,
+                hasCompletedSurvey: user.hasCompletedSurvey || false,
+                simpleMode: user.simpleMode || false,
+                addresses: addresses || [],
+                isAdminUser: isAdmin
             }
         })
 
