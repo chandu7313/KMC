@@ -51,21 +51,6 @@ import FarmerProfile from './pages/Farming/FarmerProfile'
 import FarmerOnboardingSurvey from './pages/Farming/FarmerOnboardingSurvey'
 import CropDoctor from './pages/Farming/CropDoctor'
 import SupportLayout from './components/Admin/SupportLayout'
-<<<<<<< HEAD
-// import SupportDashboard from './pages/admin/support/SupportDashboard'
-// import SupportTicketList from './pages/admin/support/TicketList'
-// import SupportTicketDetail from './pages/admin/support/TicketDetail'
-// import SupportFarmerList from './pages/admin/support/FarmerList'
-// import SupportFarmerProfile from './pages/admin/support/FarmerProfile'
-// import SupportBookingManagement from './pages/admin/support/BookingManagement'
-// import SupportTemplates from './pages/admin/support/Templates'
-// import SupportNotifications from './pages/admin/support/Notifications'
-// import SupportReports from './pages/admin/support/Reports'
-// import SupportAgentManagement from './pages/admin/support/AgentManagement'
-// import SupportSLASettings from './pages/admin/support/SLASettings'
-import FarmerLayout from './components/Farming/FarmerLayout'
-import FarmerDashboard from './pages/Farming/FarmerDashboard'
-=======
 import SupportDashboard from './pages/Admin/Support/SupportDashboard'
 import SupportTicketList from './pages/Admin/Support/TicketList'
 import SupportTicketDetail from './pages/Admin/Support/TicketDetail'
@@ -77,7 +62,8 @@ import SupportNotifications from './pages/Admin/Support/Notifications'
 import SupportReports from './pages/Admin/Support/Reports'
 import SupportAgentManagement from './pages/Admin/Support/AgentManagement'
 import SupportSLASettings from './pages/Admin/Support/SLASettings'
->>>>>>> customer-care
+import FarmerLayout from './components/Farming/FarmerLayout'
+import FarmerDashboard from './pages/Farming/FarmerDashboard'
 
 const App = () => {
   const location = useLocation();
@@ -120,11 +106,11 @@ const App = () => {
         <Route path="/cart" element={<CartPage/>}/>
         <Route path="/checkout" element={<Checkout/>}/>
 
-<<<<<<< HEAD
         {/* Farmer Dashboard Routes */}
         <Route path="/farmer" element={<FarmerLayout />}>
            <Route path="dashboard" element={<FarmerDashboard />} />
-=======
+        </Route>
+
         {/* Support Portal Routes */}
         <Route path="/admin/support" element={<SupportLayout />}>
            <Route index element={<SupportDashboard />} />
@@ -138,7 +124,6 @@ const App = () => {
            <Route path="reports" element={<SupportReports />} />
            <Route path="agents" element={<SupportAgentManagement />} />
            <Route path="settings" element={<SupportSLASettings />} />
->>>>>>> customer-care
         </Route>
 
         {/* Admin Routes */}
