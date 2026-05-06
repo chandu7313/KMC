@@ -150,18 +150,21 @@ const Login = () => {
         try {
             setLoading(true);
             axios.defaults.withCredentials = true;
-            let payload = {};
-            if (role === 'admin') payload = { phone: '9999999999' };
-            else if (role === 'farmer') payload = { email: 'amit@example.com' };
-            else if (role === 'field-officer') payload = { email: 'john.fo@agridust.com' };
 
-            const { data } = await axios.post(backendUrl + "/api/auth/auto-login", payload);
+            const { data } = await axios.post(backendUrl + "/api/auth/auto-login", { role });
             if (data.success) {
                 setIsLoggedin(true);
                 getUserData();
                 await syncPreferencesToBackend();
                 toast.success(`Logged in automatically as ${role}`);
-                navigate("/");
+                
+                if (['farmer', 'user'].includes(role)) {
+                    navigate('/farmer/dashboard');
+                } else if (role === 'field-officer') {
+                    navigate('/field-officer/dashboard');
+                } else {
+                    navigate('/admin/dashboard');
+                }
             } else {
                 toast.error(data.message);
             }
@@ -225,10 +228,31 @@ const Login = () => {
                     {!showOtpInput && state === 'Login' && (
                         <div className="mb-6">
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center mb-3">Quick Developer Login</p>
-                            <div className="flex flex-wrap gap-2 justify-center">
-                                <button type="button" onClick={() => handleAutoLogin('admin')} className="text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm">Admin</button>
-                                <button type="button" onClick={() => handleAutoLogin('farmer')} className="text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm">Farmer</button>
-                                <button type="button" onClick={() => handleAutoLogin('field-officer')} className="text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm">Field Officer</button>
+                            <div className="flex flex-wrap gap-2 justify-center max-h-32 overflow-y-auto p-3 border border-slate-100 rounded-xl bg-slate-50 scrollbar-thin">
+                                {[
+                                    { id: 'farmer', label: 'Farmer' },
+                                    { id: 'field-officer', label: 'Field Officer' },
+                                    { id: 'super_admin', label: 'Super Admin' },
+                                    { id: 'admin', label: 'Admin' },
+                                    { id: 'tech_admin', label: 'Tech Admin' },
+                                    { id: 'agri_expert', label: 'Agri Expert' },
+                                    { id: 'ecommerce_manager', label: 'E-commerce' },
+                                    { id: 'order_manager', label: 'Order Manager' },
+                                    { id: 'support_agent', label: 'Support Agent' },
+                                    { id: 'support_manager', label: 'Support Manager' },
+                                    { id: 'content_manager', label: 'Content Manager' },
+                                    { id: 'finance_manager', label: 'Finance Manager' },
+                                    { id: 'field_agent', label: 'Field Agent' },
+                                ].map(r => (
+                                    <button 
+                                        key={r.id}
+                                        type="button" 
+                                        onClick={() => handleAutoLogin(r.id)} 
+                                        className="text-[10px] font-black bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition-all border border-slate-200 hover:border-emerald-200 shadow-sm"
+                                    >
+                                        {r.label}
+                                    </button>
+                                ))}
                             </div>
                             <div className="border-b border-slate-100 my-6 relative">
                                 <span className="absolute left-1/2 -translate-x-1/2 -top-2.5 bg-white px-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">OR</span>

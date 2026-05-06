@@ -88,42 +88,38 @@ export const verifyOtp = async (req, res) => {
 
 export const autoLogin = async (req, res) => {
     try {
-        const { email, phone } = req.body;
+        const { role } = req.body;
         let user;
         
-        if (phone === '9999999999') {
-             user = await User.findOne({ where: { phone: '9999999999' } });
+        const adminRoles = [
+            'super_admin', 'admin', 'tech_admin', 'agri_expert', 
+            'ecommerce_manager', 'order_manager', 'support_agent', 
+            'support_manager', 'content_manager', 'finance_manager', 'field_agent'
+        ];
 
+        if (adminRoles.includes(role)) {
+            const { AdminUser } = await import('../models/index.js');
+            const email = `${role}_test@agridust.com`;
+            user = await AdminUser.findOne({ where: { email } });
+            
+            if (!user) {
+                user = await AdminUser.create({ 
+                    name: `${role.replace('_', ' ').toUpperCase()} TEST`, 
+                    email: email, 
+                    password: "hashed_password_here", 
+                    role: role, 
+                    status: 'online' 
+                });
+            }
+        } else if (role === 'farmer') {
+             user = await User.findOne({ where: { email: 'amit@example.com' } });
              if (!user) {
-                 const emailUser = await User.findOne({ where: { email: 'admin@agridust.com' } });
-
-                 if (emailUser) {
-                     await emailUser.update({ phone: '9999999999', role: 'admin', isAccountVerified: true });
-                     user = emailUser;
-                 } else {
-                     user = await User.create({ name: "Admin User", email: "admin@agridust.com", phone: "9999999999", role: 'admin', isAccountVerified: true });
-                 }
-             }
-        } else if (email) {
-             user = await User.findOne({ where: { email } });
-
-             if (!user && email === 'amit@example.com') {
                  user = await User.create({ name: "Amit Kumar", email: "amit@example.com", phone: "8888888888", role: 'user', district: "Pune", crops: ["Wheat"], isAccountVerified: true });
-             } else if (!user && email === 'john.fo@agridust.com') {
+             }
+        } else if (role === 'field-officer') {
+             user = await User.findOne({ where: { email: 'john.fo@agridust.com' } });
+             if (!user) {
                  user = await User.create({ name: "John Officer", email: "john.fo@agridust.com", phone: "7777777777", role: 'field-officer', isAccountVerified: true });
-             } else if (email === 'agent@kissanmithar.com') {
-                 // Check admin_users table for Support Portal agent
-                 const { AdminUser } = await import('../models/index.js');
-                 user = await AdminUser.findOne({ where: { email: 'agent@kissanmithar.com' } });
-                 if (!user) {
-                     user = await AdminUser.create({ 
-                         name: "Support Agent", 
-                         email: "agent@kissanmithar.com", 
-                         password: "hashed_password_here", 
-                         role: 'support_agent', 
-                         status: 'online' 
-                     });
-                 }
              }
         }
         
@@ -138,7 +134,7 @@ export const autoLogin = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
-        return res.json({ success: true, message: "Auto Login Successful", user })
+        return res.json({ success: true, message: "Auto Login Successful", user, role })
     } catch(error) {
         return res.json({ success: false, message: error.message });
     }
