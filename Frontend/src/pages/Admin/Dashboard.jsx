@@ -12,46 +12,12 @@ import {
   Minus, AlertTriangle, Clock, MoreVertical
 } from 'lucide-react';
 
-// ─── Mock data for fields not yet in the API ───
-const MOCK_REVENUE_CHART = [
-  { month: 'Jan', orders: 12, consultations: 8 },
-  { month: 'Feb', orders: 19, consultations: 12 },
-  { month: 'Mar', orders: 15, consultations: 18 },
-  { month: 'Apr', orders: 25, consultations: 22 },
-  { month: 'May', orders: 32, consultations: 28 },
-  { month: 'Jun', orders: 38, consultations: 25 },
-  { month: 'Jul', orders: 45, consultations: 35 },
-];
+// Default empty arrays for fallback
+const DEFAULT_REVENUE_CHART = [];
+const DEFAULT_PLATFORM_ACTIVITY = [];
+const DEFAULT_ALERTS = [];
 
-const MOCK_PLATFORM_ACTIVITY = [
-  { name: 'Market Browsing', value: 45, color: '#1A5319' },
-  { name: 'Support Chat', value: 30, color: '#F59E0B' },
-  { name: 'Advisory Docs', value: 25, color: '#6B7280' },
-];
-
-const MOCK_ALERTS = [
-  {
-    id: 1,
-    title: '#TK-8922: Payment Failure',
-    description: 'Multiple farmers reporting UPI failures in checkout flow.',
-    severity: 'CRITICAL',
-    time: '15 mins ago',
-  },
-  {
-    id: 2,
-    title: 'Order ORD-5541 Delayed',
-    description: 'Fertilizer delivery to Hubli hub is past SLA.',
-    severity: 'WARNING',
-    time: '2 hrs ago',
-  },
-  {
-    id: 3,
-    title: 'SLA Breach: Expert Queue',
-    description: 'Wait times exceeding 4 hours for Agronomy support.',
-    severity: 'CRITICAL',
-    time: '30 mins ago',
-  },
-];
+const ACTIVITY_COLORS = ['#1A5319', '#F59E0B', '#6B7280', '#3B82F6', '#EF4444'];
 
 const Dashboard = () => {
   const { backendUrl, userData } = useContext(AppContext);
@@ -105,6 +71,18 @@ const Dashboard = () => {
   }
 
   const stats = data?.stats || {};
+  
+  const revenueChartData = stats.revenueChart || DEFAULT_REVENUE_CHART;
+  const rawActivityData = stats.platformActivity || DEFAULT_PLATFORM_ACTIVITY;
+  const alertsData = stats.alerts || DEFAULT_ALERTS;
+
+  // Assign colors to platform activity data
+  const platformActivityData = rawActivityData.map((item, index) => ({
+    ...item,
+    color: ACTIVITY_COLORS[index % ACTIVITY_COLORS.length]
+  }));
+
+  const totalActivity = platformActivityData.reduce((acc, curr) => acc + curr.value, 0);
 
   // Build stat cards from real + mock data
   const statCards = [
@@ -140,10 +118,10 @@ const Dashboard = () => {
     },
     {
       label: 'Open Tickets',
-      value: '38',
+      value: (stats.platformActivity?.find(a => a.name === 'Support Tickets')?.value || 0).toString(),
       icon: <Headphones size={20} />,
       trend: 'up',
-      trendText: '5 Critical',
+      trendText: 'Needs attention',
       trendColor: 'text-red-600',
       bgColor: 'bg-white',
       iconBg: 'bg-red-50',
@@ -151,7 +129,7 @@ const Dashboard = () => {
     },
     {
       label: 'Disease Scans',
-      value: '247',
+      value: '247', // Mock for now until diagnosis endpoint is integrated
       icon: <FlaskConical size={20} />,
       trend: 'up',
       trendText: '24% vs last week',
@@ -161,7 +139,7 @@ const Dashboard = () => {
     },
     {
       label: 'Soil Tests',
-      value: '89',
+      value: (stats.platformActivity?.find(a => a.name === 'Soil Reports')?.value || 0).toString(),
       icon: <Sprout size={20} />,
       trend: 'up',
       trendText: 'New requests',
@@ -215,9 +193,9 @@ const Dashboard = () => {
           </div>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={MOCK_REVENUE_CHART}>
+              <LineChart data={revenueChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{
@@ -228,8 +206,8 @@ const Dashboard = () => {
                     fontSize: '12px',
                   }}
                 />
-                <Line type="monotone" dataKey="orders" stroke="#1A5319" strokeWidth={2.5} dot={false} name="Orders" />
-                <Line type="monotone" dataKey="consultations" stroke="#A3A830" strokeWidth={2.5} dot={false} name="Consultations" />
+                <Line type="monotone" dataKey="Orders" stroke="#1A5319" strokeWidth={2.5} dot={false} name="Orders" />
+                <Line type="monotone" dataKey="Consultations" stroke="#A3A830" strokeWidth={2.5} dot={false} name="Consultations" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -254,7 +232,7 @@ const Dashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={MOCK_PLATFORM_ACTIVITY}
+                  data={platformActivityData}
                   cx="50%"
                   cy="50%"
                   innerRadius={55}
@@ -263,7 +241,7 @@ const Dashboard = () => {
                   dataKey="value"
                   stroke="none"
                 >
-                  {MOCK_PLATFORM_ACTIVITY.map((entry, index) => (
+                  {platformActivityData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -271,19 +249,19 @@ const Dashboard = () => {
             </ResponsiveContainer>
             {/* Center Label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-extrabold text-[#1A5319]">1.2k</span>
-              <span className="text-[10px] text-slate-400 font-semibold">Daily Active</span>
+              <span className="text-2xl font-extrabold text-[#1A5319]">{totalActivity}</span>
+              <span className="text-[10px] text-slate-400 font-semibold">Total Actions</span>
             </div>
           </div>
           {/* Legend */}
           <div className="space-y-2 mt-3">
-            {MOCK_PLATFORM_ACTIVITY.map((item, i) => (
+            {platformActivityData.map((item, i) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
                   <span className="text-xs text-slate-600 font-medium">{item.name}</span>
                 </div>
-                <span className="text-xs font-bold text-slate-700">{item.value}%</span>
+                <span className="text-xs font-bold text-slate-700">{item.value}</span>
               </div>
             ))}
           </div>
@@ -297,27 +275,29 @@ const Dashboard = () => {
               <h3 className="text-sm font-extrabold text-slate-800">Needs Attention</h3>
             </div>
             <span className="text-[10px] font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
-              {MOCK_ALERTS.length} Alerts
+              {alertsData.length} Alerts
             </span>
           </div>
           <div className="space-y-3">
-            {MOCK_ALERTS.map((alert) => (
+            {alertsData.length > 0 ? alertsData.map((alert) => (
               <div key={alert.id} className="p-3 rounded-lg border border-slate-100 hover:border-slate-200 transition-colors">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <p className="text-xs font-bold text-slate-800 leading-tight">{alert.title}</p>
-                  <span className={`text-[9px] font-extrabold tracking-wider flex-shrink-0 ${
-                    alert.severity === 'CRITICAL' ? 'text-red-600' : 'text-amber-600'
+                  <span className={`text-[9px] font-extrabold tracking-wider flex-shrink-0 uppercase ${
+                    alert.type === 'critical' ? 'text-red-600' : alert.type === 'warning' ? 'text-amber-600' : 'text-blue-600'
                   }`}>
-                    {alert.severity}
+                    {alert.type}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 leading-snug mb-1.5">{alert.description}</p>
+                <p className="text-[11px] text-slate-500 leading-snug mb-1.5">{alert.desc}</p>
                 <div className="flex items-center gap-1">
                   <Clock size={10} className="text-slate-300" />
-                  <span className="text-[10px] text-slate-400 font-medium">{alert.time}</span>
+                  <span className="text-[10px] text-slate-400 font-medium">Just now</span>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-6 text-slate-400 text-xs font-medium">No active alerts at this time.</div>
+            )}
           </div>
           <button className="w-full text-center text-xs font-bold text-[#1A5319] hover:text-[#2d7a2a] mt-3 py-1.5 transition-colors">
             View All Alerts

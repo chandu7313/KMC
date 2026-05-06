@@ -99,13 +99,13 @@ const AdminInventory = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3">
-                            <Package size={32} className="text-emerald-600"/> Inventory Management
+                            <Package size={32} className="text-[#1A5319]"/> Inventory Management
                         </h1>
                         <p className="text-slate-500 font-medium mt-1">Manage marketplace products, stock levels, and pricing.</p>
                     </div>
                     <button 
                         onClick={() => setIsAddModalOpen(true)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-emerald-200 flex items-center gap-2"
+                        className="bg-[#1A5319] hover:bg-[#133c12] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-[#1A5319]/20 flex items-center gap-2"
                     >
                         <Plus size={20} /> Add New Product
                     </button>
@@ -118,13 +118,13 @@ const AdminInventory = () => {
                         <input 
                             type="text" 
                             placeholder="Search products by name..." 
-                            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-slate-700 transition-colors"
+                            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-[#1A5319] font-medium text-slate-700 transition-colors"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                     <div className="flex items-center gap-4 text-sm font-bold text-slate-500">
-                        <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg">Total Products: {products.length}</span>
+                        <span className="bg-[#1A5319]/10 text-[#133c12] px-3 py-1 rounded-lg">Total Products: {products.length}</span>
                         <span className="bg-rose-50 text-rose-700 px-3 py-1 rounded-lg">Out of Stock: {products.filter(p=>p.stock === 0).length}</span>
                     </div>
                 </div>
@@ -168,7 +168,7 @@ const AdminInventory = () => {
                                             </td>
                                             <td className="p-4">
                                                 <div className="font-black text-slate-900 text-sm">₹{product.price}</div>
-                                                <div className={`text-xs font-bold mt-1 ${product.stock > 10 ? 'text-emerald-600' : product.stock > 0 ? 'text-amber-500' : 'text-rose-500'}`}>
+                                                <div className={`text-xs font-bold mt-1 ${product.stock > 10 ? 'text-[#1A5319]' : product.stock > 0 ? 'text-amber-500' : 'text-rose-500'}`}>
                                                     {product.stock} in stock
                                                 </div>
                                             </td>
@@ -214,11 +214,11 @@ const AdminInventory = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold text-slate-500 uppercase">Product Name</label>
-                                    <input name="name" value={formData.name} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-medium" />
+                                    <input name="name" value={formData.name} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#1A5319] font-medium" />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold text-slate-500 uppercase">Category</label>
-                                    <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-medium text-slate-700">
+                                    <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#1A5319] font-medium text-slate-700">
                                         <option value="Fertilizers">Fertilizers</option>
                                         <option value="Equipments">Equipments</option>
                                         <option value="Seeds">Seeds</option>
@@ -227,28 +227,28 @@ const AdminInventory = () => {
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold text-slate-500 uppercase">Price (₹)</label>
-                                    <input type="number" name="price" value={formData.price} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-medium" />
+                                    <input type="number" name="price" value={formData.price} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#1A5319] font-medium" />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold text-slate-500 uppercase">Initial Stock</label>
-                                    <input type="number" name="stock" value={formData.stock} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-medium" />
+                                    <input type="number" name="stock" value={formData.stock} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#1A5319] font-medium" />
                                 </div>
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-bold text-slate-500 uppercase">Short Description</label>
-                                <input name="shortDescription" value={formData.short_description} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-medium" />
+                                <input name="shortDescription" value={formData.short_description} onChange={handleInputChange} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#1A5319] font-medium" />
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-bold text-slate-500 uppercase">Full Description</label>
-                                <textarea name="description" value={formData.description} onChange={handleInputChange} required rows="3" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-medium resize-none" />
+                                <textarea name="description" value={formData.description} onChange={handleInputChange} required rows="3" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#1A5319] font-medium resize-none" />
                             </div>
                              <div className="flex items-center gap-2 mt-4">
-                                <input type="checkbox" name="isFeatured" checked={formData.is_featured} onChange={handleInputChange} id="feat" className="w-4 h-4 text-emerald-600 rounded border-slate-300"/>
+                                <input type="checkbox" name="isFeatured" checked={formData.is_featured} onChange={handleInputChange} id="feat" className="w-4 h-4 text-[#1A5319] rounded border-slate-300"/>
                                 <label htmlFor="feat" className="text-sm font-bold text-slate-700 cursor-pointer">Mark as Featured Product</label>
                             </div>
                             <div className="pt-6 border-t border-slate-100 flex justify-end gap-3">
                                 <button type="button" onClick={()=>setIsAddModalOpen(false)} className="px-6 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
-                                <button type="submit" className="px-6 py-3 font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-lg transition-colors">Save Product</button>
+                                <button type="submit" className="px-6 py-3 font-bold text-white bg-[#1A5319] hover:bg-[#133c12] rounded-xl shadow-lg transition-colors">Save Product</button>
                             </div>
                         </form>
                     </div>

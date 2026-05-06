@@ -140,7 +140,7 @@ const FertilizerManagement = () => {
                 {activeTab === 'inventory' && (
                     <button 
                         onClick={() => { resetForm(); setShowModal(true); }}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                        className="bg-[#1A5319] hover:bg-[#133c12] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-[#1A5319]/20 transition-all active:scale-95"
                     >
                         <Plus size={18} /> Add Fertilizer
                     </button>
@@ -148,10 +148,10 @@ const FertilizerManagement = () => {
             </div>
 
             <div className="flex gap-4 border-b border-slate-100">
-                <button onClick={() => setActiveTab('inventory')} className={`pb-3 px-2 text-sm font-bold transition-all ${activeTab === 'inventory' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                <button onClick={() => setActiveTab('inventory')} className={`pb-3 px-2 text-sm font-bold transition-all ${activeTab === 'inventory' ? 'text-[#1A5319] border-b-2 border-[#1A5319]' : 'text-slate-400 hover:text-slate-600'}`}>
                     Inventory
                 </button>
-                <button onClick={() => setActiveTab('orders')} className={`pb-3 px-2 text-sm font-bold transition-all ${activeTab === 'orders' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                <button onClick={() => setActiveTab('orders')} className={`pb-3 px-2 text-sm font-bold transition-all ${activeTab === 'orders' ? 'text-[#1A5319] border-b-2 border-[#1A5319]' : 'text-slate-400 hover:text-slate-600'}`}>
                     Orders {orders.filter(o => o.status === 'Pending').length > 0 && <span className="ml-1 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{orders.filter(o => o.status === 'Pending').length}</span>}
                 </button>
             </div>
@@ -169,7 +169,7 @@ const FertilizerManagement = () => {
                             <div className="p-5 space-y-3">
                                 <div className="flex justify-between items-start">
                                     <h3 className="font-bold text-slate-800 line-clamp-1">{item.name}</h3>
-                                    <div className="text-emerald-600 font-bold">₹{item.price}</div>
+                                    <div className="text-[#1A5319] font-bold">₹{item.price}</div>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <Database size={12} />
@@ -216,7 +216,7 @@ const FertilizerManagement = () => {
                                             value={order.status} 
                                             onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
                                             className={`text-[10px] font-bold px-3 py-1.5 rounded-full border-none outline-none ${
-                                                order.status === 'Delivered' ? 'bg-emerald-50 text-emerald-600' : 
+                                                order.status === 'Delivered' ? 'bg-[#1A5319]/10 text-[#1A5319]' : 
                                                 order.status === 'Cancelled' ? 'bg-rose-50 text-rose-500' : 'bg-amber-50 text-amber-600'
                                             }`}
                                         >
@@ -252,7 +252,7 @@ const FertilizerManagement = () => {
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Product Name</label>
                                 <div className="relative">
                                     <Package className="absolute left-4 top-3 text-slate-400" size={16} />
-                                    <input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium" 
+                                    <input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all font-medium" 
                                         value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. NPK Fertilizer" />
                                 </div>
                             </div>
@@ -262,7 +262,7 @@ const FertilizerManagement = () => {
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Price (₹)</label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-4 top-3 text-slate-400" size={16} />
-                                        <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium" 
+                                        <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all font-medium" 
                                             value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="0.00" />
                                     </div>
                                 </div>
@@ -270,7 +270,7 @@ const FertilizerManagement = () => {
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Category</label>
                                     <div className="relative">
                                         <Tag className="absolute left-4 top-3 text-slate-400" size={16} />
-                                        <input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium" 
+                                        <input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all font-medium" 
                                             value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} placeholder="Organic" />
                                     </div>
                                 </div>
@@ -281,15 +281,15 @@ const FertilizerManagement = () => {
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Initial Stock</label>
                                     <div className="relative">
                                         <Database className="absolute left-4 top-3 text-slate-400" size={16} />
-                                        <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium" 
+                                        <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all font-medium" 
                                             value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} placeholder="100" />
                                     </div>
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Image</label>
                                     <label className="cursor-pointer group block">
-                                        <div className="flex items-center gap-3 bg-slate-50 border-2 border-dashed border-slate-200 group-hover:border-emerald-500 group-hover:bg-emerald-50/50 rounded-2xl p-2.5 transition-all">
-                                            <Upload size={16} className="text-slate-400 group-hover:text-emerald-500" />
+                                        <div className="flex items-center gap-3 bg-slate-50 border-2 border-dashed border-slate-200 group-hover:border-[#1A5319] group-hover:bg-[#1A5319]/5 rounded-2xl p-2.5 transition-all">
+                                            <Upload size={16} className="text-slate-400 group-hover:text-[#1A5319]" />
                                             <span className="text-[10px] font-bold text-slate-500 truncate">{image ? image.name : 'Choose Image'}</span>
                                         </div>
                                         <input type="file" hidden onChange={e => setImage(e.target.files[0])} accept="image/*" />
@@ -299,11 +299,11 @@ const FertilizerManagement = () => {
 
                             <div className="space-y-1">
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Description</label>
-                                <textarea required rows="3" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-medium" 
+                                <textarea required rows="3" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all text-sm font-medium" 
                                     value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Describe properties and usage..." />
                             </div>
 
-                            <button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-bold py-4 rounded-2xl shadow-xl shadow-emerald-200 active:scale-95 transition-all">
+                            <button type="submit" disabled={loading} className="w-full bg-[#1A5319] hover:bg-[#133c12] disabled:bg-slate-300 text-white font-bold py-4 rounded-2xl shadow-xl shadow-[#1A5319]/20 active:scale-95 transition-all">
                                 {loading ? 'Saving...' : (editMode ? 'Update Product' : 'Add Product')}
                             </button>
                         </form>

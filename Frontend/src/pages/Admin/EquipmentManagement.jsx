@@ -142,7 +142,7 @@ const EquipmentManagement = () => {
                 {activeTab === 'inventory' && (
                     <button 
                         onClick={() => { resetForm(); setShowModal(true); }}
-                        className="bg-green-700 hover:bg-green-800 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-green-100 transition-all active:scale-95"
+                        className="bg-[#1A5319] hover:bg-[#133c12] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-[#1A5319]/20 transition-all active:scale-95"
                     >
                         <Plus size={18} /> Add Equipment
                     </button>
@@ -150,10 +150,10 @@ const EquipmentManagement = () => {
             </div>
 
             <div className="flex gap-4 border-b border-slate-100">
-                <button onClick={() => setActiveTab('inventory')} className={`pb-3 px-2 text-sm font-bold transition-all ${activeTab === 'inventory' ? 'text-green-700 border-b-2 border-green-700' : 'text-slate-400 hover:text-slate-600'}`}>
+                <button onClick={() => setActiveTab('inventory')} className={`pb-3 px-2 text-sm font-bold transition-all ${activeTab === 'inventory' ? 'text-[#1A5319] border-b-2 border-[#1A5319]' : 'text-slate-400 hover:text-slate-600'}`}>
                     Inventory
                 </button>
-                <button onClick={() => setActiveTab('orders')} className={`pb-3 px-2 text-sm font-bold transition-all ${activeTab === 'orders' ? 'text-green-700 border-b-2 border-green-700' : 'text-slate-400 hover:text-slate-600'}`}>
+                <button onClick={() => setActiveTab('orders')} className={`pb-3 px-2 text-sm font-bold transition-all ${activeTab === 'orders' ? 'text-[#1A5319] border-b-2 border-[#1A5319]' : 'text-slate-400 hover:text-slate-600'}`}>
                     Orders {orders.filter(o => o.status === 'Pending').length > 0 && <span className="ml-1 bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{orders.filter(o => o.status === 'Pending').length}</span>}
                 </button>
             </div>
@@ -171,7 +171,7 @@ const EquipmentManagement = () => {
                             <div className="p-5 space-y-3">
                                 <div className="flex justify-between items-start">
                                     <h3 className="font-bold text-slate-800 line-clamp-1">{item.name}</h3>
-                                    <div className="text-green-700 font-bold">₹{item.price}</div>
+                                    <div className="text-[#1A5319] font-bold">₹{item.price}</div>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <Database size={12} />
@@ -254,7 +254,7 @@ const EquipmentManagement = () => {
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Equipment Name</label>
                                 <div className="relative">
                                     <Settings className="absolute left-4 top-3 text-slate-400" size={16} />
-                                    <input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-600 transition-all font-medium" 
+                                    <input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all font-medium" 
                                         value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Electric Power Tiller" />
                                 </div>
                             </div>
@@ -264,7 +264,7 @@ const EquipmentManagement = () => {
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Price (₹)</label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-4 top-3 text-slate-400" size={16} />
-                                        <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-600 transition-all font-medium" 
+                                        <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all font-medium" 
                                             value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="0.00" />
                                     </div>
                                 </div>
@@ -272,7 +272,7 @@ const EquipmentManagement = () => {
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Category</label>
                                     <div className="relative">
                                         <Tag className="absolute left-4 top-3 text-slate-400" size={16} />
-                                        <input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-600 transition-all font-medium" 
+                                        <input required className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all font-medium" 
                                             value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} placeholder="Harvesting" />
                                     </div>
                                 </div>
@@ -283,15 +283,15 @@ const EquipmentManagement = () => {
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Stock</label>
                                     <div className="relative">
                                         <Database className="absolute left-4 top-3 text-slate-400" size={16} />
-                                        <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-600 transition-all font-medium" 
+                                        <input required type="number" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all font-medium" 
                                             value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} placeholder="10" />
                                     </div>
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Image</label>
                                     <label className="cursor-pointer group block">
-                                        <div className="flex items-center gap-3 bg-slate-50 border-2 border-dashed border-slate-200 group-hover:border-green-600 group-hover:bg-green-50/50 rounded-2xl p-2.5 transition-all">
-                                            <Upload size={16} className="text-slate-400 group-hover:text-green-600" />
+                                        <div className="flex items-center gap-3 bg-slate-50 border-2 border-dashed border-slate-200 group-hover:border-[#1A5319] group-hover:bg-[#1A5319]/5 rounded-2xl p-2.5 transition-all">
+                                            <Upload size={16} className="text-slate-400 group-hover:text-[#1A5319]" />
                                             <span className="text-[10px] font-bold text-slate-500 truncate">{image ? image.name : 'Photo'}</span>
                                         </div>
                                         <input type="file" hidden onChange={e => setImage(e.target.files[0])} accept="image/*" />
@@ -301,17 +301,17 @@ const EquipmentManagement = () => {
 
                             <div className="space-y-1">
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Specifications (JSON)</label>
-                                <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-600 transition-all text-xs font-mono" 
+                                <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all text-xs font-mono" 
                                     rows="3" value={formData.specifications} onChange={e => setFormData({...formData, specifications: e.target.value})} placeholder='{"Power": "10HP", "Weight": "45kg"}' />
                             </div>
 
                             <div className="space-y-1">
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Description</label>
-                                <textarea required rows="2" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 outline-none focus:ring-4 focus:ring-green-500/10 focus:border-green-600 transition-all text-sm font-medium" 
+                                <textarea required rows="2" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 outline-none focus:ring-4 focus:ring-[#1A5319]/10 focus:border-[#1A5319] transition-all text-sm font-medium" 
                                     value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Detailed description..." />
                             </div>
 
-                            <button type="submit" disabled={loading} className="w-full bg-green-700 hover:bg-green-800 disabled:bg-slate-300 text-white font-bold py-4 rounded-2xl shadow-xl shadow-green-100 active:scale-95 transition-all">
+                            <button type="submit" disabled={loading} className="w-full bg-[#1A5319] hover:bg-[#133c12] disabled:bg-slate-300 text-white font-bold py-4 rounded-2xl shadow-xl shadow-[#1A5319]/20 active:scale-95 transition-all">
                                 {loading ? 'Saving...' : (editMode ? 'Update Equipment' : 'Add Equipment')}
                             </button>
                         </form>
