@@ -1,5 +1,5 @@
 import express from 'express';
-import { getDashboardStats, getAllUsers, updateUserRole, getFarmers, updateFarmerStatus, updateFarmerInfo, getBookings, updateBooking, sendNotification, getNotifications, getAnalytics, addUser, updateUser, deleteUser } from '../controllers/adminController.js';
+import { getDashboardStats, getAllUsers, updateUserRole, getFarmers, updateFarmerStatus, updateFarmerInfo, getBookings, updateBooking, sendNotification, getNotifications, getAnalytics, addUser, updateUser, deleteUser, getSuperAdminStats } from '../controllers/adminController.js';
 import adminAuth from '../middleware/adminAuth.js';
 
 const adminRouter = express.Router();
@@ -26,5 +26,8 @@ adminRouter.get('/notifications', adminAuth, getNotifications);
 
 // Analytics
 adminRouter.get('/analytics', adminAuth, getAnalytics);
+
+// Super Admin Tech Dashboard
+adminRouter.get('/super-stats', adminAuth, getSuperAdminStats);
 
 export default adminRouter;

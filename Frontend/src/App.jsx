@@ -64,6 +64,8 @@ import SupportAgentManagement from './pages/Admin/Support/AgentManagement'
 import SupportSLASettings from './pages/Admin/Support/SLASettings'
 import FarmerLayout from './components/Farming/FarmerLayout'
 import FarmerDashboard from './pages/Farming/FarmerDashboard'
+import SuperAdminLayout from './components/Admin/SuperAdminLayout'
+import TechDashboard from './pages/SuperAdmin/TechDashboard'
 
 const App = () => {
   const location = useLocation();
@@ -143,6 +145,12 @@ const App = () => {
            <Route path="soil-tests" element={<SoilTestManagement />} />
            <Route path="soil-entry" element={<AdminSoilEntry />} />
            <Route path="inventory" element={<AdminInventory />} />
+        </Route>
+
+        {/* Super Admin Routes */}
+        <Route path="/super-admin" element={<SuperAdminLayout />}>
+           <Route index element={<TechDashboard />} />
+           <Route path="dashboard" element={<TechDashboard />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage/>}/>

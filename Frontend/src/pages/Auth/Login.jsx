@@ -162,6 +162,8 @@ const Login = () => {
                     navigate('/farmer/dashboard');
                 } else if (role === 'field-officer') {
                     navigate('/field-officer/dashboard');
+                } else if (role === 'super_admin') {
+                    navigate('/super-admin/dashboard');
                 } else {
                     navigate('/admin/dashboard');
                 }

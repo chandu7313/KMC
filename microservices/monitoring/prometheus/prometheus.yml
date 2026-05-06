@@ -1,0 +1,88 @@
+# ============================================================
+# Prometheus Configuration — Kissan Mithar Consultancy
+# ============================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['nginx:80']
+    metrics_path: /health
+
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:3001']
+    metrics_path: /metrics
+
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:3002']
+    metrics_path: /metrics
+
+  - job_name: 'ai-service'
+    static_configs:
+      - targets: ['ai-service:3003']
+    metrics_path: /metrics
+
+  - job_name: 'disease-service'
+    static_configs:
+      - targets: ['disease-service:3004']
+    metrics_path: /metrics
+
+  - job_name: 'soil-service'
+    static_configs:
+      - targets: ['soil-service:3005']
+    metrics_path: /metrics
+
+  - job_name: 'market-service'
+    static_configs:
+      - targets: ['market-service:3006']
+    metrics_path: /metrics
+
+  - job_name: 'ecommerce-service'
+    static_configs:
+      - targets: ['ecommerce-service:3007']
+    metrics_path: /metrics
+
+  - job_name: 'order-service'
+    static_configs:
+      - targets: ['order-service:3008']
+    metrics_path: /metrics
+
+  - job_name: 'payment-service'
+    static_configs:
+      - targets: ['payment-service:3009']
+    metrics_path: /metrics
+
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:3010']
+    metrics_path: /metrics
+
+  - job_name: 'support-service'
+    static_configs:
+      - targets: ['support-service:3011']
+    metrics_path: /metrics
+
+  - job_name: 'expert-service'
+    static_configs:
+      - targets: ['expert-service:3012']
+    metrics_path: /metrics
+
+  - job_name: 'content-service'
+    static_configs:
+      - targets: ['content-service:3013']
+    metrics_path: /metrics
+
+  - job_name: 'analytics-service'
+    static_configs:
+      - targets: ['analytics-service:3014']
+    metrics_path: /metrics
+
+  - job_name: 'field-service'
+    static_configs:
+      - targets: ['field-service:3015']
+    metrics_path: /metrics

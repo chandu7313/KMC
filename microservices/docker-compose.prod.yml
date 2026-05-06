@@ -1,0 +1,211 @@
+# ============================================================
+# Kissan Mithar — Production Docker Compose
+# ============================================================
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+# Adds resource limits, replica counts, and production config.
+# ============================================================
+
+version: '3.9'
+
+x-prod-defaults: &prod-defaults
+  restart: always
+  networks:
+    - kissan-network
+  deploy:
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 512M
+      reservations:
+        cpus: '0.25'
+        memory: 256M
+  logging:
+    driver: json-file
+    options:
+      max-size: "50m"
+      max-file: "5"
+
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: kissan-gateway
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - kissan-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+
+  redis:
+    image: redis:7-alpine
+    container_name: kissan-redis
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - kissan-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: kissan-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - kissan-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+  auth-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-auth:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: auth-service
+      PORT: 3001
+
+  user-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-user:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: user-service
+      PORT: 3002
+
+  ai-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-ai:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: ai-service
+      PORT: 3003
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+  disease-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-disease:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: disease-service
+      PORT: 3004
+
+  soil-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-soil:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: soil-service
+      PORT: 3005
+
+  market-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-market:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: market-service
+      PORT: 3006
+
+  ecommerce-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-ecommerce:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: ecommerce-service
+      PORT: 3007
+
+  order-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-order:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: order-service
+      PORT: 3008
+
+  payment-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-payment:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: payment-service
+      PORT: 3009
+
+  notification-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-notification:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: notification-service
+      PORT: 3010
+
+  support-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-support:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: support-service
+      PORT: 3011
+
+  expert-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-expert:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: expert-service
+      PORT: 3012
+
+  content-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-content:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: content-service
+      PORT: 3013
+
+  analytics-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-analytics:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: analytics-service
+      PORT: 3014
+
+  field-service:
+    <<: *prod-defaults
+    image: ${DOCKER_REGISTRY}/kissan-field:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: field-service
+      PORT: 3015
+
+networks:
+  kissan-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  rabbitmq-data:

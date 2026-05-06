@@ -1,0 +1,19 @@
+{
+  "name": "@kissan/events",
+  "version": "1.0.0",
+  "description": "Event definitions and RabbitMQ helpers for Kissan Mithar microservices",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.4"
+  },
+  "peerDependencies": {
+    "@kissan/shared": "^1.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
