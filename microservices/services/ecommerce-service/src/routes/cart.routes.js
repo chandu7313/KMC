@@ -1,0 +1,10 @@
+import express from 'express';
+import { authenticate } from '@kissan/shared';
+import * as cCtrl from '../controllers/cart.controller.js';
+const router = express.Router();
+router.use(authenticate);
+router.get('/', cCtrl.getCart);
+router.post('/add', cCtrl.addToCart);
+router.post('/update', cCtrl.updateCart);
+router.post('/clear', cCtrl.clearCart);
+export default router;

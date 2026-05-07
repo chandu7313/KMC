@@ -1,0 +1,11 @@
+import express from 'express';
+import { authenticate, authorize } from '@kissan/shared';
+import * as pCtrl from '../controllers/product.controller.js';
+const router = express.Router();
+router.get('/list', pCtrl.listProducts);
+router.post('/single', pCtrl.getProduct);
+router.get('/:id', pCtrl.getProduct);
+router.post('/add', authenticate, authorize(['product:write']), pCtrl.addProduct);
+router.post('/remove', authenticate, authorize(['product:write']), pCtrl.removeProduct);
+router.delete('/:id', authenticate, authorize(['product:write']), pCtrl.removeProduct);
+export default router;
