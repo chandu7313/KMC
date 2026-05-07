@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import { createLogger, requestId } from '@kissan/shared';
 import orderRoutes from './routes/order.routes.js';
+import fertilizerOrderRoutes from './routes/fertilizer-order.routes.js';
+import equipmentOrderRoutes from './routes/equipment-order.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -22,6 +24,8 @@ app.use(morgan('combined', { stream: logger.stream }));
 
 app.get('/health', (req, res) => res.status(200).json({ status: 'healthy', service: 'order-service', uptime: process.uptime() }));
 app.use('/', orderRoutes);
+app.use('/fertilizer', fertilizerOrderRoutes);
+app.use('/equipment', equipmentOrderRoutes);
 app.use((req, res) => res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: `${req.method} ${req.path} not found` } }));
 app.use(errorHandler);
 

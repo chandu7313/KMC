@@ -7,6 +7,8 @@ import morgan from 'morgan';
 import { createLogger, requestId } from '@kissan/shared';
 import productRoutes from './routes/product.routes.js';
 import cartRoutes from './routes/cart.routes.js';
+import fertilizerRoutes from './routes/fertilizer.routes.js';
+import equipmentRoutes from './routes/equipment.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -24,6 +26,8 @@ app.use(morgan('combined', { stream: logger.stream }));
 app.get('/health', (req, res) => res.status(200).json({ status: 'healthy', service: 'ecommerce-service', uptime: process.uptime() }));
 app.use('/products', productRoutes);
 app.use('/cart', cartRoutes);
+app.use('/fertilizers', fertilizerRoutes);
+app.use('/equipments', equipmentRoutes);
 app.use((req, res) => res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: `${req.method} ${req.path} not found` } }));
 app.use(errorHandler);
 
