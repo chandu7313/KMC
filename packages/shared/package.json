@@ -1,0 +1,19 @@
+{
+  "name": "@kissan-mithar/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities for Kissan Mithar microservices",
+  "main": "src/index.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.x",
+    "mongoose": "^7.x",
+    "ioredis": "^5.x",
+    "jsonwebtoken": "^9.x",
+    "bcryptjs": "^2.x",
+    "winston": "^3.x",
+    "winston-daily-rotate-file": "^4.x",
+    "morgan": "^1.x",
+    "joi": "^17.x",
+    "cloudinary": "^1.x",
+    "uuid": "^9.x"
+  }
+}

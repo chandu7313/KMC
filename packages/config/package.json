@@ -1,0 +1,9 @@
+{
+  "name": "@kissan-mithar/config",
+  "version": "1.0.0",
+  "description": "Centralized configuration and environment validation",
+  "main": "src/index.js",
+  "dependencies": {
+    "joi": "^17.x"
+  }
+}
