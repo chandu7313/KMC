@@ -1,24 +1,21 @@
 # ============================================================
-# Kissan Mithar — Production Docker Compose
+# Kissan Mithar Consultancy — Production Docker Compose
 # ============================================================
+# Extends development with strict resource limits, no volume mounts, 
+# and replication strategies for resilience.
 # Usage: docker-compose -f docker-compose.prod.yml up -d
-# Adds resource limits, replica counts, and production config.
 # ============================================================
 
 version: '3.9'
 
-x-prod-defaults: &prod-defaults
-  restart: always
+x-service-defaults: &service-defaults
+  restart: unless-stopped
   networks:
     - kissan-network
-  deploy:
-    resources:
-      limits:
-        cpus: '0.5'
-        memory: 512M
-      reservations:
-        cpus: '0.25'
-        memory: 256M
+  env_file:
+    - .env
+  environment:
+    - NODE_ENV=production
   logging:
     driver: json-file
     options:
@@ -26,8 +23,9 @@ x-prod-defaults: &prod-defaults
       max-file: "5"
 
 services:
+  # ─── Infrastructure ───────────────────
   nginx:
-    image: nginx:1.25-alpine
+    image: nginx:alpine
     container_name: kissan-gateway
     ports:
       - "80:80"
@@ -36,176 +34,159 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - auth-service
     networks:
       - kissan-network
-    restart: always
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: '0.5'
           memory: 256M
 
   redis:
     image: redis:7-alpine
     container_name: kissan-redis
-    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes --requirepass ${REDIS_PASSWORD}
+    # Port not exposed externally in prod
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --appendonly yes
     volumes:
-      - redis-data:/data
+      - redis_data:/data
     networks:
       - kissan-network
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
 
   rabbitmq:
-    image: rabbitmq:3.13-management-alpine
+    image: rabbitmq:3-management-alpine
     container_name: kissan-rabbitmq
+    # Port not exposed externally in prod
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_VHOST: kissan
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     networks:
       - kissan-network
-    restart: always
+
+  # ─── Microservices ────────────────────
+  auth-service:
+    <<: *service-defaults
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+      target: production
     deploy:
+      replicas: 2
       resources:
         limits:
-          cpus: '1.0'
-          memory: 1G
-
-  auth-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-auth:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: auth-service
-      PORT: 3001
-
-  user-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-user:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: user-service
-      PORT: 3002
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   ai-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-ai:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: ai-service
-      PORT: 3003
+    <<: *service-defaults
+    build:
+      context: ./services/ai-service
+      dockerfile: Dockerfile
+      target: production
     deploy:
+      replicas: 2
       resources:
         limits:
-          cpus: '1.0'
+          cpus: '1.0' # Heavy CPU for AI processing
           memory: 1G
-
-  disease-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-disease:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: disease-service
-      PORT: 3004
-
-  soil-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-soil:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: soil-service
-      PORT: 3005
-
-  market-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-market:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: market-service
-      PORT: 3006
-
-  ecommerce-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-ecommerce:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: ecommerce-service
-      PORT: 3007
-
-  order-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-order:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: order-service
-      PORT: 3008
-
-  payment-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-payment:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: payment-service
-      PORT: 3009
-
-  notification-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-notification:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: notification-service
-      PORT: 3010
-
-  support-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-support:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: support-service
-      PORT: 3011
-
-  expert-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-expert:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: expert-service
-      PORT: 3012
-
-  content-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-content:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: content-service
-      PORT: 3013
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
   analytics-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-analytics:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: analytics-service
-      PORT: 3014
+    <<: *service-defaults
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+      target: production
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G # Heavy Memory for Analytics aggregation
 
+  # Add minimal config for remaining services (they inherit defaults)
+  user-service:
+    <<: *service-defaults
+    build: { context: ./services/user-service, target: production }
+  disease-service:
+    <<: *service-defaults
+    build: { context: ./services/disease-service, target: production }
+  soil-service:
+    <<: *service-defaults
+    build: { context: ./services/soil-service, target: production }
+  market-service:
+    <<: *service-defaults
+    build: { context: ./services/market-service, target: production }
+  ecommerce-service:
+    <<: *service-defaults
+    build: { context: ./services/ecommerce-service, target: production }
+  order-service:
+    <<: *service-defaults
+    build: { context: ./services/order-service, target: production }
+  payment-service:
+    <<: *service-defaults
+    build: { context: ./services/payment-service, target: production }
+  notification-service:
+    <<: *service-defaults
+    build: { context: ./services/notification-service, target: production }
+  support-service:
+    <<: *service-defaults
+    build: { context: ./services/support-service, target: production }
+  expert-service:
+    <<: *service-defaults
+    build: { context: ./services/expert-service, target: production }
+  content-service:
+    <<: *service-defaults
+    build: { context: ./services/content-service, target: production }
   field-service:
-    <<: *prod-defaults
-    image: ${DOCKER_REGISTRY}/kissan-field:${IMAGE_TAG:-latest}
-    environment:
-      NODE_ENV: production
-      SERVICE_NAME: field-service
-      PORT: 3015
+    <<: *service-defaults
+    build: { context: ./services/field-service, target: production }
+
+  # ─── Frontend ─────────────────────────
+  frontend:
+    build:
+      context: ./frontend/web
+      dockerfile: Dockerfile
+      target: production
+    restart: unless-stopped
+    networks:
+      - kissan-network
+
+volumes:
+  redis_data:
+  rabbitmq_data:
 
 networks:
   kissan-network:
     driver: bridge
-
-volumes:
-  redis-data:
-  rabbitmq-data:

@@ -1,0 +1,171 @@
+{
+  "vhosts": [
+    { "name": "kissan" }
+  ],
+  "exchanges": [
+    {
+      "name": "kissan.auth",
+      "vhost": "kissan",
+      "type": "topic",
+      "durable": true
+    },
+    {
+      "name": "kissan.orders",
+      "vhost": "kissan",
+      "type": "topic",
+      "durable": true
+    },
+    {
+      "name": "kissan.payments",
+      "vhost": "kissan",
+      "type": "topic",
+      "durable": true
+    },
+    {
+      "name": "kissan.disease",
+      "vhost": "kissan",
+      "type": "topic",
+      "durable": true
+    },
+    {
+      "name": "kissan.soil",
+      "vhost": "kissan",
+      "type": "topic",
+      "durable": true
+    },
+    {
+      "name": "kissan.support",
+      "vhost": "kissan",
+      "type": "topic",
+      "durable": true
+    },
+    {
+      "name": "kissan.content",
+      "vhost": "kissan",
+      "type": "topic",
+      "durable": true
+    },
+    {
+      "name": "kissan.field",
+      "vhost": "kissan",
+      "type": "topic",
+      "durable": true
+    },
+    {
+      "name": "kissan.analytics",
+      "vhost": "kissan",
+      "type": "fanout",
+      "durable": true,
+      "comment": "All events fan out here for analytics tracking"
+    },
+    {
+      "name": "kissan.dlx",
+      "vhost": "kissan",
+      "type": "direct",
+      "durable": true,
+      "comment": "Dead letter exchange for failed messages"
+    }
+  ],
+  "queues": [
+    {
+      "name": "notification.email",
+      "vhost": "kissan",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "kissan.dlx",
+        "x-dead-letter-routing-key": "dlq.email",
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000
+      }
+    },
+    {
+      "name": "notification.sms",
+      "vhost": "kissan",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "kissan.dlx",
+        "x-dead-letter-routing-key": "dlq.sms",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "notification.push",
+      "vhost": "kissan",
+      "durable": true,
+      "arguments": {
+        "x-dead-letter-exchange": "kissan.dlx",
+        "x-dead-letter-routing-key": "dlq.push"
+      }
+    },
+    {
+      "name": "analytics.events",
+      "vhost": "kissan",
+      "durable": true,
+      "arguments": {
+        "x-max-length": 100000
+      }
+    },
+    {
+      "name": "inventory.updates",
+      "vhost": "kissan",
+      "durable": true
+    },
+    {
+      "name": "support.auto_tickets",
+      "vhost": "kissan",
+      "durable": true
+    },
+    {
+      "name": "dlq.failed_notifications",
+      "vhost": "kissan",
+      "durable": true
+    },
+    {
+      "name": "dlq.failed_payments",
+      "vhost": "kissan",
+      "durable": true
+    },
+    {
+      "name": "dlq.failed_events",
+      "vhost": "kissan",
+      "durable": true
+    }
+  ],
+  "bindings": [
+    {
+      "source": "kissan.orders",
+      "vhost": "kissan",
+      "destination": "notification.email",
+      "destination_type": "queue",
+      "routing_key": "order.*"
+    },
+    {
+      "source": "kissan.payments",
+      "vhost": "kissan",
+      "destination": "notification.email",
+      "destination_type": "queue",
+      "routing_key": "payment.*"
+    },
+    {
+      "source": "kissan.analytics",
+      "vhost": "kissan",
+      "destination": "analytics.events",
+      "destination_type": "queue",
+      "routing_key": ""
+    },
+    {
+      "source": "kissan.orders",
+      "vhost": "kissan",
+      "destination": "inventory.updates",
+      "destination_type": "queue",
+      "routing_key": "order.confirmed"
+    },
+    {
+      "source": "kissan.orders",
+      "vhost": "kissan",
+      "destination": "support.auto_tickets",
+      "destination_type": "queue",
+      "routing_key": "order.delayed"
+    }
+  ]
+}

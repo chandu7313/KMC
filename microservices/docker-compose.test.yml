@@ -1,61 +1,58 @@
 # ============================================================
-# Kissan Mithar — Test Docker Compose
+# Kissan Mithar Consultancy — Testing Docker Compose
 # ============================================================
 # Usage: docker-compose -f docker-compose.test.yml up --abort-on-container-exit
-# Spins up infrastructure + runs tests against services.
+# Runs the full test suite in an isolated environment.
 # ============================================================
 
 version: '3.9'
 
+x-service-defaults: &service-defaults
+  networks:
+    - kissan-test-network
+  environment:
+    - NODE_ENV=test
+    - SUPABASE_URL=${TEST_SUPABASE_URL}
+    - MONGODB_URI=${TEST_MONGODB_URI}
+    - REDIS_URL=redis://test-redis:6379
+    - RABBITMQ_URL=amqp://admin:password@test-rabbitmq:5672/kissan
+    - JWT_SECRET=test_secret_do_not_use
+    - JWT_REFRESH_SECRET=test_refresh_secret
+
 services:
-  redis-test:
+  # ─── Isolated Infrastructure ──────────
+  test-redis:
     image: redis:7-alpine
-    container_name: kissan-redis-test
-    ports:
-      - "6380:6379"
-    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
     networks:
       - kissan-test-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  rabbitmq-test:
-    image: rabbitmq:3.13-alpine
-    container_name: kissan-rabbitmq-test
-    ports:
-      - "5673:5672"
+    
+  test-rabbitmq:
+    image: rabbitmq:3-management-alpine
     environment:
-      RABBITMQ_DEFAULT_USER: test
-      RABBITMQ_DEFAULT_PASS: test
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_VHOST: kissan
     networks:
       - kissan-test-network
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
+  # ─── Global Test Runner ───────────────
   test-runner:
     build:
       context: .
-      dockerfile: Dockerfile.test
-    container_name: kissan-test-runner
-    environment:
-      NODE_ENV: test
-      REDIS_URL: redis://redis-test:6379
-      RABBITMQ_URL: amqp://test:test@rabbitmq-test:5672
-      JWT_SECRET: test_secret_key_for_testing
+      dockerfile: ./Dockerfile.template
+      target: dependencies
+    command: npm test --workspaces
+    volumes:
+      - ./:/app
     depends_on:
-      redis-test:
-        condition: service_healthy
-      rabbitmq-test:
-        condition: service_healthy
+      - test-redis
+      - test-rabbitmq
+    environment:
+      - NODE_ENV=test
+      - REDIS_URL=redis://test-redis:6379
+      - RABBITMQ_URL=amqp://admin:password@test-rabbitmq:5672/kissan
     networks:
       - kissan-test-network
-    command: npm test
 
 networks:
   kissan-test-network:

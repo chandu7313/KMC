@@ -1,39 +1,43 @@
-# ── Environment ──
+# ─── Dependencies ───────────────────────
+node_modules/
+**/node_modules/
+
+# ─── Environment ────────────────────────
 .env
-.env.*
+.env.local
+.env.*.local
 !.env.example
 
-# ── Dependencies ──
-node_modules/
-package-lock.json
-
-# ── Logs ──
+# ─── Logs ───────────────────────────────
 logs/
 *.log
 npm-debug.log*
 
-# ── Coverage ──
+# ─── Build ──────────────────────────────
+build/
+dist/
+.next/
+
+# ─── Docker ─────────────────────────────
+docker-compose.override.yml
+
+# ─── SSL Certificates ──────────────────
+nginx/ssl/*.pem
+nginx/ssl/*.key
+nginx/ssl/*.crt
+
+# ─── Coverage ───────────────────────────
 coverage/
 .nyc_output/
 
-# ── Build ──
-dist/
-build/
-
-# ── OS ──
-.DS_Store
-Thumbs.db
-
-# ── IDE ──
+# ─── IDE ────────────────────────────────
 .vscode/
 .idea/
 *.swp
-*.swo
 
-# ── Docker ──
-docker-compose.override.yml
+# ─── OS ─────────────────────────────────
+.DS_Store
+Thumbs.db
 
-# ── Volumes ──
-data/
-redis-data/
-rabbitmq-data/
+# ─── Test ───────────────────────────────
+test-results/

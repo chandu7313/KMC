@@ -23,27 +23,40 @@ services:
   # ──────────────────────────────────────
   # INFRASTRUCTURE
   # ──────────────────────────────────────
-
   nginx:
-    image: nginx:1.25-alpine
+    image: nginx:alpine
     container_name: kissan-gateway
     ports:
-      - "${NGINX_PORT:-80}:80"
+      - "80:80"
+      - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
     depends_on:
-      auth-service:
-        condition: service_healthy
-      user-service:
-        condition: service_healthy
+      - auth-service
+      - user-service
+      - ai-service
+      - disease-service
+      - soil-service
+      - market-service
+      - ecommerce-service
+      - order-service
+      - payment-service
+      - notification-service
+      - support-service
+      - expert-service
+      - content-service
+      - analytics-service
+      - field-service
+    restart: unless-stopped
     networks:
       - kissan-network
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
 
   redis:
@@ -51,55 +64,79 @@ services:
     container_name: kissan-redis
     ports:
       - "6379:6379"
-    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1
+      --loglevel warning
     volumes:
-      - redis-data:/data
+      - redis_data:/data
+    restart: unless-stopped
     networks:
       - kissan-network
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
-      timeout: 3s
+      timeout: 5s
       retries: 5
 
   rabbitmq:
-    image: rabbitmq:3.13-management-alpine
+    image: rabbitmq:3-management-alpine
     container_name: kissan-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-password}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_DEFAULT_VHOST: kissan
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    restart: unless-stopped
     networks:
       - kissan-network
-    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 15s
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
       timeout: 10s
       retries: 5
 
   # ──────────────────────────────────────
-  # MICROSERVICES
+  # ALL 15 MICROSERVICES
   # ──────────────────────────────────────
 
   auth-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/auth-service/Dockerfile
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-auth
     ports:
-      - "${AUTH_SERVICE_PORT:-3001}:3001"
+      - "3001:3001"
     environment:
-      SERVICE_NAME: auth-service
-      PORT: 3001
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3001
+      - SERVICE_NAME=auth-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - FAST2SMS_API_KEY=${FAST2SMS_API_KEY}
+      - ENABLE_SMS=${ENABLE_SMS}
+      - BCRYPT_ROUNDS=12
+    volumes:
+      - ./services/auth-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/auth-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -108,48 +145,74 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   user-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/user-service/Dockerfile
+      context: ./services/user-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-user
     ports:
-      - "${USER_SERVICE_PORT:-3002}:3002"
+      - "3002:3002"
     environment:
-      SERVICE_NAME: user-service
-      PORT: 3002
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3002
+      - SERVICE_NAME=user-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    volumes:
+      - ./services/user-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/user-service:/app/logs
     depends_on:
-      auth-service:
+      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   ai-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/ai-service/Dockerfile
+      context: ./services/ai-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-ai
     ports:
-      - "${AI_SERVICE_PORT:-3003}:3003"
+      - "3003:3003"
     environment:
-      SERVICE_NAME: ai-service
-      PORT: 3003
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3003
+      - SERVICE_NAME=ai-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PLANT_ID_API_KEY=${PLANT_ID_API_KEY}
+    volumes:
+      - ./services/ai-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/ai-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -158,73 +221,118 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   disease-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/disease-service/Dockerfile
+      context: ./services/disease-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-disease
     ports:
-      - "${DISEASE_SERVICE_PORT:-3004}:3004"
+      - "3004:3004"
     environment:
-      SERVICE_NAME: disease-service
-      PORT: 3004
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3004
+      - SERVICE_NAME=disease-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - AI_SERVICE_URL=http://ai-service:3003
+    volumes:
+      - ./services/disease-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/disease-service:/app/logs
     depends_on:
-      ai-service:
+      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   soil-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/soil-service/Dockerfile
+      context: ./services/soil-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-soil
     ports:
-      - "${SOIL_SERVICE_PORT:-3005}:3005"
+      - "3005:3005"
     environment:
-      SERVICE_NAME: soil-service
-      PORT: 3005
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3005
+      - SERVICE_NAME=soil-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - AI_SERVICE_URL=http://ai-service:3003
+    volumes:
+      - ./services/soil-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/soil-service:/app/logs
     depends_on:
-      ai-service:
+      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   market-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/market-service/Dockerfile
+      context: ./services/market-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-market
     ports:
-      - "${MARKET_SERVICE_PORT:-3006}:3006"
+      - "3006:3006"
     environment:
-      SERVICE_NAME: market-service
-      PORT: 3006
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3006
+      - SERVICE_NAME=market-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - DATA_GOV_API_KEY=${DATA_GOV_API_KEY}
+    volumes:
+      - ./services/market-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/market-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -233,23 +341,38 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   ecommerce-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/ecommerce-service/Dockerfile
+      context: ./services/ecommerce-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-ecommerce
     ports:
-      - "${ECOMMERCE_SERVICE_PORT:-3007}:3007"
+      - "3007:3007"
     environment:
-      SERVICE_NAME: ecommerce-service
-      PORT: 3007
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3007
+      - SERVICE_NAME=ecommerce-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    volumes:
+      - ./services/ecommerce-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/ecommerce-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -258,195 +381,379 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3007/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   order-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/order-service/Dockerfile
+      context: ./services/order-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-order
     ports:
-      - "${ORDER_SERVICE_PORT:-3008}:3008"
+      - "3008:3008"
     environment:
-      SERVICE_NAME: order-service
-      PORT: 3008
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3008
+      - SERVICE_NAME=order-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    volumes:
+      - ./services/order-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/order-service:/app/logs
     depends_on:
-      ecommerce-service:
+      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   payment-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/payment-service/Dockerfile
+      context: ./services/payment-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-payment
     ports:
-      - "${PAYMENT_SERVICE_PORT:-3009}:3009"
+      - "3009:3009"
     environment:
-      SERVICE_NAME: payment-service
-      PORT: 3009
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3009
+      - SERVICE_NAME=payment-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+    volumes:
+      - ./services/payment-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/payment-service:/app/logs
     depends_on:
+      redis:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3009/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   notification-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/notification-service/Dockerfile
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-notification
     ports:
-      - "${NOTIFICATION_SERVICE_PORT:-3010}:3010"
+      - "3010:3010"
     environment:
-      SERVICE_NAME: notification-service
-      PORT: 3010
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3010
+      - SERVICE_NAME=notification-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - ENABLE_SMS=${ENABLE_SMS}
+      - FAST2SMS_API_KEY=${FAST2SMS_API_KEY}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PHONE=${ADMIN_PHONE}
+    volumes:
+      - ./services/notification-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/notification-service:/app/logs
     depends_on:
+      redis:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3010/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   support-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/support-service/Dockerfile
+      context: ./services/support-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-support
     ports:
-      - "${SUPPORT_SERVICE_PORT:-3011}:3011"
+      - "3011:3011"
     environment:
-      SERVICE_NAME: support-service
-      PORT: 3011
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3011
+      - SERVICE_NAME=support-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    volumes:
+      - ./services/support-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/support-service:/app/logs
     depends_on:
+      redis:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3011/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   expert-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/expert-service/Dockerfile
+      context: ./services/expert-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-expert
     ports:
-      - "${EXPERT_SERVICE_PORT:-3012}:3012"
+      - "3012:3012"
     environment:
-      SERVICE_NAME: expert-service
-      PORT: 3012
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3012
+      - SERVICE_NAME=expert-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    volumes:
+      - ./services/expert-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/expert-service:/app/logs
     depends_on:
+      redis:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3012/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   content-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/content-service/Dockerfile
+      context: ./services/content-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-content
     ports:
-      - "${CONTENT_SERVICE_PORT:-3013}:3013"
+      - "3013:3013"
     environment:
-      SERVICE_NAME: content-service
-      PORT: 3013
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3013
+      - SERVICE_NAME=content-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    volumes:
+      - ./services/content-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/content-service:/app/logs
     depends_on:
+      redis:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3013/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   analytics-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/analytics-service/Dockerfile
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-analytics
     ports:
-      - "${ANALYTICS_SERVICE_PORT:-3014}:3014"
+      - "3014:3014"
     environment:
-      SERVICE_NAME: analytics-service
-      PORT: 3014
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3014
+      - SERVICE_NAME=analytics-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    volumes:
+      - ./services/analytics-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/analytics-service:/app/logs
     depends_on:
+      redis:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3014/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
 
   field-service:
     <<: *service-defaults
     build:
-      context: .
-      dockerfile: ./services/field-service/Dockerfile
+      context: ./services/field-service
+      dockerfile: Dockerfile
+      target: development
     container_name: kissan-field
     ports:
-      - "${FIELD_SERVICE_PORT:-3015}:3015"
+      - "3015:3015"
     environment:
-      SERVICE_NAME: field-service
-      PORT: 3015
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-password}@rabbitmq:5672
+      - NODE_ENV=development
+      - PORT=3015
+      - SERVICE_NAME=field-service
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/kissan
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    volumes:
+      - ./services/field-service/src:/app/src
+      - /app/node_modules
+      - ./packages:/app/packages
+      - ./logs/field-service:/app/logs
     depends_on:
+      redis:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3015/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 40s
+
+  # ──────────────────────────────────────
+  # FRONTEND SERVICE
+  # ──────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend/web
+      dockerfile: Dockerfile
+      target: development
+    container_name: kissan-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost
+      - REACT_APP_SHOW_DEV_LOGIN=true
+      - REACT_APP_ENV=development
+    volumes:
+      - ./frontend/web/src:/app/src
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - kissan-network
+
+# ──────────────────────────────────────
+# VOLUMES
+# ──────────────────────────────────────
+volumes:
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  logs_auth:
+    driver: local
+  logs_user:
+    driver: local
+  logs_ai:
+    driver: local
+  logs_disease:
+    driver: local
+  logs_soil:
+    driver: local
+  logs_market:
+    driver: local
+  logs_ecommerce:
+    driver: local
+  logs_order:
+    driver: local
+  logs_payment:
+    driver: local
+  logs_notification:
+    driver: local
+  logs_support:
+    driver: local
+  logs_expert:
+    driver: local
+  logs_content:
+    driver: local
+  logs_analytics:
+    driver: local
+  logs_field:
+    driver: local
 
 # ──────────────────────────────────────
 # NETWORKS
@@ -454,13 +761,6 @@ services:
 networks:
   kissan-network:
     driver: bridge
-    name: kissan-network
-
-# ──────────────────────────────────────
-# VOLUMES
-# ──────────────────────────────────────
-volumes:
-  redis-data:
-    name: kissan-redis-data
-  rabbitmq-data:
-    name: kissan-rabbitmq-data
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
