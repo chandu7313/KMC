@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+* {
+    font-family: "Outfit", sans-serif;
+}
+
+@import "tailwindcss";
+
+/* Farmer Simple Mode Global Styles */
+.farmer-mode {
+    font-size: 115%;
+    /* Increase base font size by 15% */
+    line-height: 1.7;
+    /* Increase line height slightly */
+    letter-spacing: 0.02em;
+    /* Increase letter spacing for readability */
+}
+
+/* Hide non-essential dense text when in Farmer Mode to reduce cognitive load */
+.farmer-mode .farmer-hide {
+    display: none !important;
+}
+
+/* Make headers more prominent in Farmer Mode */
+.farmer-mode h1,
+.farmer-mode h2,
+.farmer-mode h3 {
+    line-height: 1.3;
+}
