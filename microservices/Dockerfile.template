@@ -2,17 +2,16 @@
 FROM node:18-alpine AS dependencies
 WORKDIR /app
 
-# Copy package files
+# Copy root package files for workspaces
 COPY package*.json ./
 COPY packages/ ./packages/
+COPY {{SERVICE_PATH}}/package*.json ./{{SERVICE_PATH}}/
 
-# Install production dependencies only
-RUN npm ci --only=production
-# Copy installed packages
+# Install all dependencies using workspaces
+RUN npm install --include=dev && npm cache clean --force
+
+# Copy installed node_modules to a temp dir for production
 RUN cp -R node_modules /tmp/prod_modules
-
-# Install all deps (including dev)
-RUN npm ci
 
 # ─── Stage 2: Development ────────────────
 FROM node:18-alpine AS development
@@ -21,13 +20,13 @@ WORKDIR /app
 # Install dev tools
 RUN apk add --no-cache curl
 
-# Copy deps from previous stage
+# Copy everything from dependencies
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/packages ./packages
+COPY --from=dependencies /app/{{SERVICE_PATH}} ./{{SERVICE_PATH}}
 
 # Copy source
-COPY src ./src
-COPY package*.json ./
+COPY {{SERVICE_PATH}}/src ./{{SERVICE_PATH}}/src
 
 # Create logs directory
 RUN mkdir -p logs
@@ -37,13 +36,15 @@ ARG PORT=3001
 ENV PORT=$PORT
 EXPOSE $PORT
 
+WORKDIR /app/{{SERVICE_PATH}}
+
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s \
   --start-period=40s --retries=3 \
   CMD curl -f http://localhost:$PORT/health || exit 1
 
 # Run with nodemon for hot reload
-CMD ["node_modules/.bin/nodemon", "src/index.js"]
+CMD ["../../node_modules/.bin/nodemon", "src/index.js"]
 
 # ─── Stage 3: Builder ────────────────────
 FROM node:18-alpine AS builder
@@ -51,11 +52,8 @@ WORKDIR /app
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/packages ./packages
-COPY src ./src
-COPY package*.json ./
-
-# Any build steps (TypeScript compile, etc)
-# RUN npm run build
+COPY --from=dependencies /app/{{SERVICE_PATH}} ./{{SERVICE_PATH}}
+COPY {{SERVICE_PATH}}/src ./{{SERVICE_PATH}}/src
 
 # ─── Stage 4: Production ─────────────────
 FROM node:18-alpine AS production
@@ -71,8 +69,7 @@ RUN apk add --no-cache curl
 # Copy only production node_modules
 COPY --from=dependencies /tmp/prod_modules ./node_modules
 COPY --from=dependencies /app/packages ./packages
-COPY --from=builder /app/src ./src
-COPY package*.json ./
+COPY --from=builder /app/{{SERVICE_PATH}} ./{{SERVICE_PATH}}
 
 # Create logs dir with correct permissions
 RUN mkdir -p logs && chown -R nodeuser:nodejs logs
@@ -85,6 +82,8 @@ ENV PORT=$PORT
 ENV NODE_ENV=production
 
 EXPOSE $PORT
+
+WORKDIR /app/{{SERVICE_PATH}}
 
 HEALTHCHECK --interval=30s --timeout=10s \
   --start-period=40s --retries=3 \

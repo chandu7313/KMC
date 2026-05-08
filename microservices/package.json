@@ -1,0 +1,11 @@
+{
+  "name": "kissan-mithar-microservices",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
+  "dependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

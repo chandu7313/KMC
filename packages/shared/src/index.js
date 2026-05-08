@@ -8,6 +8,9 @@ module.exports = {
   supabase: require('./database/supabase'),
   mongodb: require('./database/mongodb'),
   redis: require('./database/redis'),
+  sequelize: require('./database/sequelize').sequelize,
+  connectDB: require('./database/sequelize').connectDB,
+  User: require('./database/User'),
   
   // Errors
   AppError: require('./errors/AppError'),

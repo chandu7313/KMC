@@ -5,7 +5,7 @@ WORKDIR /app
 # Copy root package files for workspaces
 COPY package*.json ./
 COPY packages/ ./packages/
-COPY services/auth-service/package*.json ./services/auth-service/
+COPY services/booking-service/package*.json ./services/booking-service/
 
 # Install all dependencies using workspaces
 RUN npm install --include=dev && npm cache clean --force
@@ -23,10 +23,10 @@ RUN apk add --no-cache curl
 # Copy everything from dependencies
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/packages ./packages
-COPY --from=dependencies /app/services/auth-service ./services/auth-service
+COPY --from=dependencies /app/services/booking-service ./services/booking-service
 
 # Copy source
-COPY services/auth-service/src ./services/auth-service/src
+COPY services/booking-service/src ./services/booking-service/src
 
 # Create logs directory
 RUN mkdir -p logs
@@ -36,7 +36,7 @@ ARG PORT=3001
 ENV PORT=$PORT
 EXPOSE $PORT
 
-WORKDIR /app/services/auth-service
+WORKDIR /app/services/booking-service
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s \
@@ -52,8 +52,8 @@ WORKDIR /app
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/packages ./packages
-COPY --from=dependencies /app/services/auth-service ./services/auth-service
-COPY services/auth-service/src ./services/auth-service/src
+COPY --from=dependencies /app/services/booking-service ./services/booking-service
+COPY services/booking-service/src ./services/booking-service/src
 
 # ─── Stage 4: Production ─────────────────
 FROM node:18-alpine AS production
@@ -69,7 +69,7 @@ RUN apk add --no-cache curl
 # Copy only production node_modules
 COPY --from=dependencies /tmp/prod_modules ./node_modules
 COPY --from=dependencies /app/packages ./packages
-COPY --from=builder /app/services/auth-service ./services/auth-service
+COPY --from=builder /app/services/booking-service ./services/booking-service
 
 # Create logs dir with correct permissions
 RUN mkdir -p logs && chown -R nodeuser:nodejs logs
@@ -83,7 +83,7 @@ ENV NODE_ENV=production
 
 EXPOSE $PORT
 
-WORKDIR /app/services/auth-service
+WORKDIR /app/services/booking-service
 
 HEALTHCHECK --interval=30s --timeout=10s \
   --start-period=40s --retries=3 \
