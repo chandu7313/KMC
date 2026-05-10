@@ -5,6 +5,12 @@
     "packages/*",
     "services/*"
   ],
+  "scripts": {
+    "start": "make up",
+    "stop": "make down",
+    "logs": "make logs",
+    "status": "make status"
+  },
   "dependencies": {
     "nodemon": "^3.1.0"
   }

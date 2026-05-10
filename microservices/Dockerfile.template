@@ -5,10 +5,11 @@ WORKDIR /app
 # Copy root package files for workspaces
 COPY package*.json ./
 COPY packages/ ./packages/
-COPY {{SERVICE_PATH}}/package*.json ./{{SERVICE_PATH}}/
+# Copy all service package files to allow shared layer caching
+COPY services/*/package*.json ./services/
 
 # Install all dependencies using workspaces
-RUN npm install --include=dev && npm cache clean --force
+RUN npm install --include=dev --prefer-offline --no-audit && npm cache clean --force
 
 # Copy installed node_modules to a temp dir for production
 RUN cp -R node_modules /tmp/prod_modules

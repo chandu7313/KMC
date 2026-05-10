@@ -3,7 +3,8 @@ FROM node:18-alpine AS development
 WORKDIR /app
 RUN apk add --no-cache curl
 COPY package*.json ./
-RUN npm ci
+# Remove lockfile to prevent architecture mismatch for native bindings (esbuild/tailwindcss)
+RUN rm -f package-lock.json && npm install
 COPY . .
 EXPOSE 3000
 CMD ["npm", "start"]
