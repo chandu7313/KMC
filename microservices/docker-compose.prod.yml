@@ -138,52 +138,76 @@ services:
   # Add minimal config for remaining services (they inherit defaults)
   user-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/user-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/user-service/Dockerfile
+      target: production
   disease-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/disease-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/disease-service/Dockerfile
+      target: production
   soil-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/soil-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/soil-service/Dockerfile
+      target: production
   market-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/market-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/market-service/Dockerfile
+      target: production
   ecommerce-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/ecommerce-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/ecommerce-service/Dockerfile
+      target: production
   order-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/order-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/order-service/Dockerfile
+      target: production
   payment-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/payment-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/payment-service/Dockerfile
+      target: production
   notification-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/notification-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/notification-service/Dockerfile
+      target: production
   support-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/support-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/support-service/Dockerfile
+      target: production
   expert-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/expert-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/expert-service/Dockerfile
+      target: production
   content-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/content-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/content-service/Dockerfile
+      target: production
   field-service:
     <<: *service-defaults
-    build: { context: .
-      dockerfile: ./services/field-service/Dockerfile, target: production }
+    build:
+      context: .
+      dockerfile: ./services/field-service/Dockerfile
+      target: production
 
   # ─── Frontend ─────────────────────────
   frontend:
