@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
-import Navbar from '../../components/Navbar';
+import Navbar from '../../layouts/components/Navbar';
 const NavItem = ({ icon, label, active = false, muted = false, activeClass = "" }) => (
     <div className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer 
         ${active ? activeClass : 'hover:bg-[#2e6b2e] rounded-[6px] transition-colors'} 

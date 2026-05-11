@@ -1,5 +1,5 @@
 import React from 'react'
-import Navbar from '../../components/Navbar'
+import Navbar from '../../layouts/components/Navbar'
 
 const Card = ({ title, children }) => (
   <div className="rounded-2xl bg-white ring-1 ring-black/10 shadow-sm p-6 min-h-[280px]">

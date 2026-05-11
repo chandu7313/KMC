@@ -1,7 +1,7 @@
 # ─── Stage 1: Development ────────────────
-FROM node:18-alpine AS development
+FROM node:18-slim AS development
 WORKDIR /app
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
 # Remove lockfile to prevent architecture mismatch for native bindings (esbuild/tailwindcss)
 RUN rm -f package-lock.json && npm install
@@ -10,7 +10,7 @@ EXPOSE 3000
 CMD ["npm", "start"]
 
 # ─── Stage 2: Builder ────────────────────
-FROM node:18-alpine AS builder
+FROM node:18-slim AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci

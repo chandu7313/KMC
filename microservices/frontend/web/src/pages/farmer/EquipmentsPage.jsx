@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import Navbar from '../../components/Navbar';
+import Navbar from '../../layouts/components/Navbar';
 import { Search, ShoppingCart, Filter, ArrowRight, Package, Sprout, Tractor, Leaf } from 'lucide-react';
 
 const Equipments = () => {

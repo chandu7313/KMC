@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { assets } from "../assets/assets";
-import { AppContext } from "../context/AppContext";
-import { LanguageContext } from "../context/LanguageContext";
-import { FarmerModeContext } from "../context/FarmerModeContext";
+import { assets } from "../../assets/assets";
+import { AppContext } from "../../context/AppContext";
+import { LanguageContext } from "../../context/LanguageContext";
+import { FarmerModeContext } from "../../context/FarmerModeContext";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { toast } from "react-toastify";

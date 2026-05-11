@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
-import Navbar from "../../components/Navbar";
+import Navbar from "../../layouts/components/Navbar";
 import { Calendar, User, ArrowLeft, Clock, Share2, Facebook, Twitter, Link } from 'lucide-react';
 
 const BlogDetail = () => {

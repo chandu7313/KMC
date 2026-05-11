@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../layouts/components/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Leaf, Droplets, LayoutTemplate, Briefcase, TrendingUp, Check, Microscope, Building, Calendar, CloudLightning } from "lucide-react";
 

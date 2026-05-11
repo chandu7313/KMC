@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import LanguageModal from '../../components/LanguageModal';
+import Navbar from "../../layouts/components/Navbar";
+import Footer from "../../layouts/components/Footer";
+import LanguageModal from '../../shared/components/ui/LanguageModal';
 // Icons
 import { 
   ArrowRight, Sprout, TrendingUp, FlaskConical, CloudSun, Leaf, 

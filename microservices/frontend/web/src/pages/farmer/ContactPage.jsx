@@ -1,5 +1,5 @@
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../layouts/components/Navbar";
 
 const Contact = () => {
   return (

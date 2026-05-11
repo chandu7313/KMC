@@ -10,7 +10,7 @@ import {
   ResponsiveContainer, BarChart, Bar, Legend, Cell, ComposedChart, Line
 } from 'recharts';
 import { AppContext } from "../../context/AppContext";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../layouts/components/Navbar";
 import { toast } from "react-toastify";
 
 const MarketPrices = () => {

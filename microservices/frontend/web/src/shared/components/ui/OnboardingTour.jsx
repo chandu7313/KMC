@@ -1,7 +1,7 @@
 import { useContext, useCallback, useEffect } from 'react';
 import Joyride, { STATUS } from 'react-joyride';
-import { AppContext } from '../context/AppContext';
-import { LanguageContext } from '../context/LanguageContext';
+import { AppContext } from '../../../context/AppContext';
+import { LanguageContext } from '../../../context/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { Zap } from 'lucide-react';
 

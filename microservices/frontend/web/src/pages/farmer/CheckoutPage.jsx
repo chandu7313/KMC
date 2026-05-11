@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import Navbar from '../../components/Navbar';
+import Navbar from '../../layouts/components/Navbar';
 import { ArrowLeft, CheckCircle2, Wallet, Truck, ShoppingBag, Plus } from 'lucide-react';
 
 const Checkout = () => {

@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
-import Navbar from "../../components/Navbar";
+import Navbar from "../../layouts/components/Navbar";
 import { Award, TrendingUp, MapPin, Sprout } from 'lucide-react';
 
 const SuccessStories = () => {

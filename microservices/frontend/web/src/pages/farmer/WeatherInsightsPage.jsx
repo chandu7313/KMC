@@ -1,5 +1,5 @@
 import { CloudSun, CloudRain, Sun, Wind } from "lucide-react";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../layouts/components/Navbar";
 
 const weatherInsights = [
   {

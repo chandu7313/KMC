@@ -1,5 +1,5 @@
 import React from 'react'
-import { assets } from "../assets/assets"
+import { assets } from '../../../assets/assets'
 
 const team = [
   { name: 'Lead Agronomist', role: 'Researcher', img: assets.header_img },

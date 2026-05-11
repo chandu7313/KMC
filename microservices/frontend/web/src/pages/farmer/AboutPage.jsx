@@ -1,4 +1,4 @@
-import Navbar from "../../components/Navbar";
+import Navbar from "../../layouts/components/Navbar";
 
 const About= () => {
   return (

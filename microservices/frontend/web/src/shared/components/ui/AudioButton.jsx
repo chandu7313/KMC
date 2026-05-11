@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
-import { FarmerModeContext } from '../context/FarmerModeContext';
+import { FarmerModeContext } from '../../../context/FarmerModeContext';
 
 const AudioButton = ({ text, className = '' }) => {
     const { isFarmerMode } = useContext(FarmerModeContext);

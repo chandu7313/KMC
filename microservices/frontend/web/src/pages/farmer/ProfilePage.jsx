@@ -12,7 +12,7 @@ import {
   Edit2,
   User
 } from 'lucide-react';
-import Navbar from '../../components/Navbar'; // We'll assume the top Navbar is either the app's default Navbar or we create a custom header.
+import Navbar from '../../layouts/components/Navbar'; // We'll assume the top Navbar is either the app's default Navbar or we create a custom header.
 // Looking at the image, there's a specific simple top header, but we usually embed within the overall layout. 
 
 const FarmerProfile = () => {

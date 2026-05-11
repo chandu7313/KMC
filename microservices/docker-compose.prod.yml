@@ -218,6 +218,14 @@ services:
     networks:
       - kissan-network
 
+  frontend-mobile:
+    build:
+      context: ./frontend/mobile
+      target: production
+    restart: unless-stopped
+    networks:
+      - kissan-network
+
 volumes:
   redis_data:
   rabbitmq_data:
