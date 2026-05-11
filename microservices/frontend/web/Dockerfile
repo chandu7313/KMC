@@ -1,5 +1,5 @@
 # ─── Stage 1: Development ────────────────
-FROM node:18-slim AS development
+FROM node:20-slim AS development
 WORKDIR /app
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
@@ -10,7 +10,7 @@ EXPOSE 3000
 CMD ["npm", "start"]
 
 # ─── Stage 2: Builder ────────────────────
-FROM node:18-slim AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
