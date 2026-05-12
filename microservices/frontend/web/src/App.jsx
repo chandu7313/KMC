@@ -10,9 +10,9 @@
 import { useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
-import AppRouter from './core/router/AppRouter';
-import FloatingSupport from './shared/components/feedback/FloatingSupport';
-import ErrorBoundary from './shared/components/feedback/ErrorBoundary';
+import { AppRouter } from '@/app/router/AppRouter';
+import FloatingSupport from '@/shared/ui/FloatingSupport';
+import ErrorBoundary from '@/shared/ui/ErrorBoundary';
 
 const App = () => {
   const location = useLocation();

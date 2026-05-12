@@ -11,9 +11,9 @@ import './index.css';
 import './core/i18n/index';
 import App from './App.jsx';
 import { BrowserRouter } from 'react-router-dom';
-import { AppContextProvider } from './context/AppContext.jsx';
-import { LanguageProvider } from './context/LanguageContext.jsx';
-import { FarmerModeProvider } from './context/FarmerModeContext.jsx';
+import { AppContextProvider } from '@/app/providers/AppContext.jsx';
+import { LanguageProvider } from '@/app/providers/LanguageContext.jsx';
+import { FarmerModeProvider } from '@/app/providers/FarmerModeContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
