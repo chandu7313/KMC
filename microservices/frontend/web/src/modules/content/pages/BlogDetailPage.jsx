@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import Navbar from '@/app/layouts/Navbar';
 import { Calendar, User, ArrowLeft, Clock, Share2, Facebook, Twitter, Link } from 'lucide-react';
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const BlogDetail = () => {
     const { slug } = useParams();
@@ -15,7 +16,7 @@ const BlogDetail = () => {
 
     const fetchBlog = async () => {
         try {
-            const { data } = await axios.get(`${backendUrl}/api/blog/get/${slug}`);
+            const { data } = await axios.get(`${backendUrl}${API.BLOG}/get/${slug}`);
             if (data.success) {
                 setBlog(data.blog);
             } else {

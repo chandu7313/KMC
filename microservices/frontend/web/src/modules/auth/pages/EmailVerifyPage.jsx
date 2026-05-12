@@ -8,6 +8,7 @@ import { toast } from "react-toastify"
 import axios from "axios"
 import { useTranslation } from "react-i18next"
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const EmailVerify = () => {
   const { t } = useTranslation()
@@ -23,7 +24,7 @@ const EmailVerify = () => {
     try {
       e.preventDefault()
       setLoading(true)
-      const { data } = await axios.post(backendUrl + '/api/auth/verify-account', { otp })
+      const { data } = await axios.post(backendUrl + `${API.AUTH}/verify-account`, { otp })
 
       if (data.success) {
         toast.success(data.message)

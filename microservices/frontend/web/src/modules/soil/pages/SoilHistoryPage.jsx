@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { TrendingUp, Activity, Clipboard, Download, ArrowLeft, Beaker, Sprout } from 'lucide-react';
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const SoilHistory = () => {
   const { backendUrl, userData, navigate } = useGlobalStore();
@@ -15,7 +16,7 @@ const SoilHistory = () => {
     if (!userData) return;
     try {
       axios.defaults.withCredentials = true;
-      const { data } = await axios.get(`${backendUrl}/api/soil/history`);
+      const { data } = await axios.get(`${backendUrl}${API.SOIL}/history`);
       if (data.success) {
         setHistory(data.data.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)));
       }
@@ -33,7 +34,7 @@ const SoilHistory = () => {
   const handleDownload = async (id) => {
     try {
         axios.defaults.withCredentials = true;
-        const response = await axios.get(`${backendUrl}/api/soil/download/${id}`, { responseType: 'blob' });
+        const response = await axios.get(`${backendUrl}${API.SOIL}/download/${id}`, { responseType: 'blob' });
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;

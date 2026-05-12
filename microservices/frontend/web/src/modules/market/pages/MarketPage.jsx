@@ -12,6 +12,7 @@ import {
 import Navbar from '@/app/layouts/Navbar';
 import { toast } from "react-toastify";
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const MarketPrices = () => {
   const { backendUrl, userData } = useGlobalStore();
@@ -36,7 +37,7 @@ const MarketPrices = () => {
       setError(null);
       
       // 1. Fetch current list for dropdowns and general table
-      const { data: priceData } = await axios.get(`${backendUrl}/api/market`);
+      const { data: priceData } = await axios.get(`${backendUrl}${API.MARKET}`);
       if (priceData.success) {
         setPrices(priceData.prices);
         const uniqueDistricts = [...new Set(priceData.prices.map(p => p.district))];
@@ -45,7 +46,7 @@ const MarketPrices = () => {
       }
 
       // 2. Fetch specific Real-Time data
-      const { data: rtData } = await axios.get(`${backendUrl}/api/market/realtime`, {
+      const { data: rtData } = await axios.get(`${backendUrl}${API.MARKET}/realtime`, {
         params: { crop: selectedCrop, district: selectedDistrict }
       });
       if (rtData.success) {
@@ -53,7 +54,7 @@ const MarketPrices = () => {
       }
 
       // 3. Fetch Trend Analytics (Line Chart)
-      const { data: trendData } = await axios.get(`${backendUrl}/api/market/trend`, {
+      const { data: trendData } = await axios.get(`${backendUrl}${API.MARKET}/trend`, {
         params: { crop: selectedCrop, district: selectedDistrict }
       });
       if (trendData.success) {
@@ -61,7 +62,7 @@ const MarketPrices = () => {
       }
 
       // 4. Fetch AI Recommendation
-      const { data: recData } = await axios.get(`${backendUrl}/api/market/recommendation`, {
+      const { data: recData } = await axios.get(`${backendUrl}${API.MARKET}/recommendation`, {
         params: { crop: selectedCrop, district: selectedDistrict }
       });
       if (recData.success) {
@@ -69,7 +70,7 @@ const MarketPrices = () => {
       }
 
       // 5. Fetch comparisons
-      const { data: compData } = await axios.get(`${backendUrl}/api/market/comparison/${selectedCrop}`);
+      const { data: compData } = await axios.get(`${backendUrl}${API.MARKET}/comparison/${selectedCrop}`);
       if (compData.success) {
         setComparisons(compData.prices);
       }

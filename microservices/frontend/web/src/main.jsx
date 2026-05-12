@@ -2,7 +2,7 @@
  * main.jsx — Application Entry Point
  * 
  * Sets up the provider tree:
- * BrowserRouter → AppContextProvider → LanguageProvider → FarmerModeProvider → App
+ * BrowserRouter → LanguageProvider → FarmerModeProvider → App
  * 
  * NOTE: Uses core/i18n for initialization (moved from src/i18n).
  */

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const roles = [
     {
@@ -89,7 +90,7 @@ const DevQuickLogin = () => {
         setError(null);
         try {
             axios.defaults.withCredentials = true;
-            const { data } = await axios.post(backendUrl + '/api/auth/dev-login', { role });
+            const { data } = await axios.post(backendUrl + `${API.AUTH}/auto-login`, { role });
 
             if (data.success) {
                 setIsLoggedin(true);

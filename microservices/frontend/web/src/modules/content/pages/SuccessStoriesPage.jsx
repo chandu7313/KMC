@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import Navbar from '@/app/layouts/Navbar';
 import { Award, TrendingUp, MapPin, Sprout } from 'lucide-react';
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const SuccessStories = () => {
     const { backendUrl } = useGlobalStore();
@@ -12,7 +13,7 @@ const SuccessStories = () => {
 
     const fetchStories = async () => {
         try {
-            const { data } = await axios.get(backendUrl + '/api/success/all');
+            const { data } = await axios.get(backendUrl + `${API.SUCCESS_STORY}/all`);
             if (data.success) {
                 setStories(data.stories);
             }

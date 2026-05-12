@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import axios from "axios"
 import { toast } from "react-toastify"
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const Login = () => {
     const { t } = useTranslation()
@@ -27,7 +28,7 @@ const Login = () => {
             const hasCompletedTour = localStorage.getItem('kmc_tour_completed') === 'true' || localStorage.getItem('tourCompleted') === 'true';
             const simpleMode = localStorage.getItem('kmc_farmer_mode') === 'true';
 
-            await axios.post(backendUrl + "/api/user/update-preferences", {
+            await axios.post(backendUrl + `${API.USER}/update-preferences`, {
                 preferredLanguage,
                 hasCompletedTour,
                 simpleMode
@@ -42,7 +43,7 @@ const Login = () => {
             e.preventDefault()
             setLoading(true)
             axios.defaults.withCredentials = true
-            const { data } = await axios.post(backendUrl + "/api/auth/send-otp", { phone })
+            const { data } = await axios.post(backendUrl + `${API.AUTH}/send-otp`, { phone })
             if (data.success) {
                 setShowOtpInput(true)
                 if (data.isNewUser) {
@@ -64,14 +65,14 @@ const Login = () => {
             e.preventDefault()
             setLoading(true)
             axios.defaults.withCredentials = true
-            const { data } = await axios.post(backendUrl + "/api/auth/verify-otp", { phone, otp })
+            const { data } = await axios.post(backendUrl + `${API.AUTH}/verify-otp`, { phone, otp })
             if (data.success) {
                 setIsLoggedin(true)
                 await getUserData()
                 await syncPreferencesToBackend()
                 // Check if farmer needs to complete onboarding survey
                 try {
-                    const surveyRes = await axios.get(backendUrl + "/api/survey/status")
+                    const surveyRes = await axios.get(backendUrl + `${API.SURVEY}/status`)
                     if (surveyRes.data.success && !surveyRes.data.hasCompletedSurvey) {
                         navigate("/onboarding-survey")
                         return
@@ -95,14 +96,14 @@ const Login = () => {
             axios.defaults.withCredentials = true
             
             if (state === "Sign Up") {
-                const { data } = await axios.post(backendUrl + "/api/auth/register", { name, email, password })
+                const { data } = await axios.post(backendUrl + `${API.AUTH}/register`, { name, email, password })
                 if (data.success) {
                     setIsLoggedin(true)
                     await getUserData()
                     await syncPreferencesToBackend()
                     
                     try {
-                        const surveyRes = await axios.get(backendUrl + "/api/survey/status")
+                        const surveyRes = await axios.get(backendUrl + `${API.SURVEY}/status`)
                         if (surveyRes.data.success && !surveyRes.data.hasCompletedSurvey) {
                             navigate("/onboarding-survey")
                             return
@@ -114,14 +115,14 @@ const Login = () => {
                     toast.error(data.message)
                 }
             } else {
-                const { data } = await axios.post(backendUrl + "/api/auth/login", { email, password })
+                const { data } = await axios.post(backendUrl + `${API.AUTH}/login`, { email, password })
                 if (data.success) {
                     setIsLoggedin(true)
                     await getUserData()
                     await syncPreferencesToBackend()
                     
                     try {
-                        const surveyRes = await axios.get(backendUrl + "/api/survey/status")
+                        const surveyRes = await axios.get(backendUrl + `${API.SURVEY}/status`)
                         if (surveyRes.data.success && !surveyRes.data.hasCompletedSurvey) {
                             navigate("/onboarding-survey")
                             return
@@ -151,7 +152,7 @@ const Login = () => {
             setLoading(true);
             axios.defaults.withCredentials = true;
 
-            const { data } = await axios.post(backendUrl + "/api/auth/auto-login", { role });
+            const { data } = await axios.post(backendUrl + `${API.AUTH}/auto-login`, { role });
             if (data.success) {
                 setIsLoggedin(true);
                 getUserData();

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Upload, X, FileText, Image as ImageIcon, Loader2, Calendar, ShieldCheck, ArrowRight, Beaker, UserCheck, Info, CheckCircle2, Leaf, Sprout, AlertTriangle } from 'lucide-react';
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const SoilTestAndCropAdvice = () => {
   const { backendUrl, userData, navigate } = useGlobalStore();
@@ -124,7 +125,7 @@ const SoilTestAndCropAdvice = () => {
         formData.append('organicMatter', manualData.organicMatter);
       }
 
-      const { data } = await axios.post(`${backendUrl}/api/soil/upload`, formData, {
+      const { data } = await axios.post(`${backendUrl}${API.SOIL}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

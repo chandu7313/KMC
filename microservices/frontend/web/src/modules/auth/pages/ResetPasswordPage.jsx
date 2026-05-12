@@ -6,6 +6,7 @@ import axios from "axios"
 import { toast } from "react-toastify"
 import { useTranslation } from "react-i18next"
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const ResetPassword = () => {
   const { t } = useTranslation()
@@ -25,7 +26,7 @@ const ResetPassword = () => {
     e.preventDefault()
     try {
       setLoading(true)
-      const { data } = await axios.post(backendUrl + '/api/auth/send-reset-otp', { email })
+      const { data } = await axios.post(backendUrl + `${API.AUTH}/send-reset-otp`, { email })
       if (data.success) {
         toast.success(data.message)
         setIsEmailSent(true)
@@ -48,7 +49,7 @@ const ResetPassword = () => {
     e.preventDefault()
     try {
       setLoading(true)
-      const { data } = await axios.post(backendUrl + '/api/auth/reset-password', { email, otp, newPassword })
+      const { data } = await axios.post(backendUrl + `${API.AUTH}/reset-password`, { email, otp, newPassword })
       if (data.success) {
         toast.success(data.message)
         navigate('/login')

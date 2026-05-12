@@ -6,6 +6,7 @@ import Navbar from '@/app/layouts/Navbar';
 import { Trash2, ArrowRight, ShoppingBag, Plus, Minus, ArrowLeft } from 'lucide-react';
 import { useGlobalStore } from '@/app/store/globalStore';
 import { useCartStore } from '@/modules/ecommerce/store/cartStore';
+import API from '@/core/api/api.config';
 
 const CartPage = () => {
     const navigate = useNavigate();
@@ -24,13 +25,13 @@ const CartPage = () => {
 
         try {
             // First get cart content
-            const cartRes = await axios.post(`${backendUrl}/api/cart/get`, { userId: userData.id });
+            const cartRes = await axios.post(`${backendUrl}${API.CART}/get`, { userId: userData.id });
             if (cartRes.data.success) {
                 setCartItems(cartRes.data.cartData);
                 setGlobalCartItems(cartRes.data.cartData);
                 
                 // Then fetch product list to cross-reference (simplified approach, ideally backend returns populated cart)
-                const prodRes = await axios.get(`${backendUrl}/api/product/list`);
+                const prodRes = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
                 if (prodRes.data.success) {
                     setProductsData(prodRes.data.products);
                 }
@@ -53,7 +54,7 @@ const CartPage = () => {
         }
 
         try {
-            const { data } = await axios.post(`${backendUrl}/api/cart/update`, {
+            const { data } = await axios.post(`${backendUrl}${API.CART}/update`, {
                 userId: userData.id,
                 itemId,
                 quantity: newQuantity
@@ -71,7 +72,7 @@ const CartPage = () => {
 
     const removeItem = async (itemId) => {
         try {
-            const { data } = await axios.post(`${backendUrl}/api/cart/update`, {
+            const { data } = await axios.post(`${backendUrl}${API.CART}/update`, {
                 userId: userData.id,
                 itemId,
                 quantity: 0

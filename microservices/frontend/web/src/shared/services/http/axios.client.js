@@ -11,6 +11,8 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
+export default apiClient;
+
 // Request Interceptor: Attach Auth Token if needed
 apiClient.interceptors.request.use(
   (config) => {

@@ -7,6 +7,8 @@ import { Search, ShoppingCart, Filter, ArrowRight, Package, Sprout, Tractor, Lea
 import { useGlobalStore } from '@/app/store/globalStore';
 import { useCartStore } from '@/modules/ecommerce/store/cartStore';
 
+import API from '@/core/api/api.config';
+
 const Equipments = () => {
     const navigate = useNavigate();
     const { backendUrl } = useGlobalStore();
@@ -31,7 +33,7 @@ const Equipments = () => {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.get(`${backendUrl}/api/product/list`);
+            const { data } = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
             if (data.success) {
                 const equipmentCategories = ['Tractors', 'Plows & Harrows', 'Seed Drills', 'Sprayers', 'Combine Harvesters'];
                 const filtered = data.products.filter(p => 

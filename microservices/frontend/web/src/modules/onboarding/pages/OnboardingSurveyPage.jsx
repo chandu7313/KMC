@@ -14,6 +14,7 @@ import blackSoilImg from '@/assets/soil-images/black_soil.png';
 import sandySoilImg from '@/assets/soil-images/sandy_soil.png';
 import claySoilImg from '@/assets/soil-images/clay_soil.png';
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const TOTAL_STEPS = 7;
 
@@ -100,7 +101,7 @@ const FarmerOnboardingSurvey = () => {
                 ...surveyData,
                 farmSize: Number(surveyData.farmSize),
             };
-            const { data } = await axios.post(backendUrl + '/api/survey/submit', { surveyData: payload });
+            const { data } = await axios.post(backendUrl + `${API.SURVEY}/submit`, { surveyData: payload });
             if (data.success) {
                 toast.success('🎉 Profile setup complete! Welcome to KMC.');
                 await getUserData();

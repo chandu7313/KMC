@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const BookFarmVisit = () => {
     const { backendUrl, userData, loading: authLoading } = useGlobalStore();
@@ -26,7 +27,7 @@ const BookFarmVisit = () => {
         if (!userData) return;
         try {
             axios.defaults.withCredentials = true;
-            const { data } = await axios.post(backendUrl + "/api/booking/user-bookings", {
+            const { data } = await axios.post(backendUrl + `${API.BOOKING}/user-bookings`, {
                 userId: userData.id
             });
             if (data.success) {
@@ -69,7 +70,7 @@ const BookFarmVisit = () => {
         try {
             setLoading(true);
             axios.defaults.withCredentials = true;
-            const { data } = await axios.post(backendUrl + "/api/booking/create", {
+            const { data } = await axios.post(backendUrl + `${API.BOOKING}/create`, {
                 farmerId: userData.id,
                 ...formData
             });

@@ -6,17 +6,17 @@
 
 const API = {
   AUTH: '/api/auth',
-  USER: '/api/user',
+  USER: '/api/users',
   CART: '/api/cart',
-  PRODUCT: '/api/product',
-  ORDER: '/api/order',
-  DISEASE: '/api/crop-doctor',
+  PRODUCT: '/api/products',
+  ORDER: '/api/orders',
+  DISEASE: '/api/disease',
   SOIL: '/api/soil',
   MARKET: '/api/market',
   BOOKING: '/api/booking',
-  EXPERT: '/api/expert',
+  EXPERT: '/api/experts',
   SUPPORT: '/api/support',
-  NOTIFICATION: '/api/notification',
+  NOTIFICATION: '/api/notify',
   BLOG: '/api/blog',
   CONTENT: '/api/content',
   SURVEY: '/api/survey',
@@ -25,6 +25,7 @@ const API = {
   EQUIPMENT: '/api/equipment',
   SCHEME: '/api/scheme',
   SUCCESS_STORY: '/api/success-story',
+  FIELD: '/api/field',
 };
 
 export default API;

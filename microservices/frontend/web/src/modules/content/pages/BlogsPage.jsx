@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from '@/app/layouts/Navbar';
 import { BookOpen, Calendar, User, ArrowRight, Search, Hash } from 'lucide-react';
 import { useGlobalStore } from '@/app/store/globalStore';
+import API from '@/core/api/api.config';
 
 const Blogs = () => {
     const { backendUrl } = useGlobalStore();
@@ -15,7 +16,7 @@ const Blogs = () => {
 
     const fetchBlogs = async () => {
         try {
-            const { data } = await axios.get(backendUrl + '/api/blog/all');
+            const { data } = await axios.get(backendUrl + `${API.BLOG}/all`);
             if (data.success) {
                 setBlogs(data.blogs);
             }

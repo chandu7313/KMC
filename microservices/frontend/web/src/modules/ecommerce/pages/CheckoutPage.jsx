@@ -6,6 +6,7 @@ import Navbar from '@/app/layouts/Navbar';
 import { ArrowLeft, CheckCircle2, Wallet, Truck, ShoppingBag, Plus } from 'lucide-react';
 import { useGlobalStore } from '@/app/store/globalStore';
 import { useCartStore } from '@/modules/ecommerce/store/cartStore';
+import API from '@/core/api/api.config';
 
 const Checkout = () => {
     const navigate = useNavigate();
@@ -29,10 +30,10 @@ const Checkout = () => {
                 return;
             }
             try {
-                const cartRes = await axios.post(`${backendUrl}/api/cart/get`, { userId: userData.id });
+                const cartRes = await axios.post(`${backendUrl}${API.CART}/get`, { userId: userData.id });
                 if (cartRes.data.success) {
                     setCartItems(cartRes.data.cartData);
-                    const prodRes = await axios.get(`${backendUrl}/api/product/list`);
+                    const prodRes = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
                     if (prodRes.data.success) {
                         setProductsData(prodRes.data.products);
                     }
@@ -103,7 +104,7 @@ const Checkout = () => {
         try {
             // Save address if new
             if (isAddingNewAddress) {
-                await axios.post(`${backendUrl}/api/user/save-address`, {
+                await axios.post(`${backendUrl}${API.USER}/addresses`, {
                     userId: userData.id,
                     address: addressObj
                 });
@@ -117,7 +118,7 @@ const Checkout = () => {
             }));
 
             if (paymentMethod === 'ONLINE') {
-                const { data } = await axios.post(`${backendUrl}/api/order/razorpay`, {
+                const { data } = await axios.post(`${backendUrl}${API.ORDER}/razorpay`, {
                     userId: userData.id,
                     items: orderItems,
                     amount: total,
@@ -135,7 +136,7 @@ const Checkout = () => {
                         order_id: rzpOrder.id,
                         handler: async (response) => {
                             try {
-                                const verifyRes = await axios.post(`${backendUrl}/api/order/verifyRazorpay`, {
+                                const verifyRes = await axios.post(`${backendUrl}${API.ORDER}/verify-razorpay`, {
                                     razorpay_order_id: response.razorpay_order_id,
                                     razorpay_payment_id: response.razorpay_payment_id,
                                     razorpay_signature: response.razorpay_signature,
@@ -176,7 +177,7 @@ const Checkout = () => {
                 }
             } else {
                 // COD Flow
-                const { data } = await axios.post(`${backendUrl}/api/order/place`, {
+                const { data } = await axios.post(`${backendUrl}${API.ORDER}/place`, {
                     userId: userData.id,
                     items: orderItems,
                     amount: total,

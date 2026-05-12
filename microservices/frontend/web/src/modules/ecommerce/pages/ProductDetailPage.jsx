@@ -7,6 +7,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Navbar from '@/app/layouts/Navbar';
+import { useGlobalStore } from '@/app/store/globalStore';
+import { useCartStore } from '@/modules/ecommerce/store/cartStore';
+import API from '@/core/api/api.config';
+
 const NavItem = ({ icon, label, active = false, muted = false, activeClass = "" }) => (
     <div className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer 
         ${active ? activeClass : 'hover:bg-[#2e6b2e] rounded-[6px] transition-colors'} 
@@ -21,7 +25,8 @@ const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [qty, setQty] = useState(1);
-    const { backendUrl, getCartCount, setCartItems, cartItems, getCartData, isLoggedin } = React.useContext(AppContext);
+    const { backendUrl, isLoggedin } = useGlobalStore();
+    const { getCartCount, setCartItems, cartItems, getCartData } = useCartStore();
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -30,7 +35,7 @@ const ProductDetail = () => {
     const fetchProductData = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.post(`${backendUrl}/api/product/single`, { productId: id });
+            const { data } = await axios.post(`${backendUrl}${API.PRODUCT}/single`, { productId: id });
             if (data.success) {
                 setProduct(data.product);
                 if (data.product.images && data.product.images.length > 0) {
@@ -50,7 +55,7 @@ const ProductDetail = () => {
 
     const fetchRelatedProducts = async (category, currentId) => {
         try {
-            const { data } = await axios.get(`${backendUrl}/api/product/list`);
+            const { data } = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
             if (data.success) {
                 // Filter by category and exclude current product, then limit to 4
                 const related = data.products
@@ -72,7 +77,7 @@ const ProductDetail = () => {
             const currentQty = cartItems[product?.id] || 0;
             const newQty = currentQty + qty;
 
-            const { data } = await axios.post(`${backendUrl}/api/cart/update`, {
+            const { data } = await axios.post(`${backendUrl}${API.CART}/update`, {
                 itemId: product.id,
                 quantity: newQty
             });
