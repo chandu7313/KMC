@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from '@/app/providers/AppContext';
 import { 
     LayoutDashboard, Sprout, Package, Landmark, 
     LineChart, HeadphonesIcon, Settings, LogOut, 

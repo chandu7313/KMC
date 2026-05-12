@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Outlet, Navigate, NavLink } from "react-router-dom";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "@/app/providers/AppContext";
 import {
   LayoutDashboard, Ticket, Users, Phone, FileText,
   Bell, BarChart3, UserCog, Settings, ChevronLeft,

@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
 import AdminSidebar from '@/app/layouts/AdminSidebar';
-import { AppContext } from "../context/AppContext";
-import { ALLOWED_ADMIN_ROLES, ROLE_LABELS } from "../config/permissions";
+import { AppContext } from "@/app/providers/AppContext";
+import { ALLOWED_ADMIN_ROLES, ROLE_LABELS } from "@/app/config/permissions";
 import { Search, Bell, HelpCircle, ChevronDown } from "lucide-react";
 
 // Roles and labels now imported from config/permissions.js
