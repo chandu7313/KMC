@@ -2,8 +2,8 @@
  * Disease Detection API Layer
  * All crop doctor / disease detection API calls.
  */
-import api from '../../../core/api/axios.instance';
-import API from '../../../core/api/api.config';
+import api from '@/shared/services/http/axios.client';
+import API from '@/core/api/api.config';
 
 export const diagnose = async (formData) => {
   const { data } = await api.post(`${API.DISEASE}/diagnose`, formData, {

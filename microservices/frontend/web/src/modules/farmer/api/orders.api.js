@@ -1,5 +1,5 @@
-import api from '../../../core/api/axios.instance';
-import API from '../../../core/api/api.config';
+import api from '@/shared/services/http/axios.client';
+import API from '@/core/api/api.config';
 
 export const getOrders = async () => {
   const { data } = await api.get(`${API.ORDER}/my-orders`);

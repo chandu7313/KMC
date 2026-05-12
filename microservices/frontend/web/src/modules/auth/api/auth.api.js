@@ -3,8 +3,8 @@
  * All authentication-related API calls extracted from Login.jsx and AppContext.
  * Uses the centralized Axios instance.
  */
-import api from '../../../core/api/axios.instance';
-import API from '../../../core/api/api.config';
+import api from '@/shared/services/http/axios.client';
+import API from '@/core/api/api.config';
 
 /**
  * Check if the user is currently authenticated
