@@ -1,6 +1,5 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppContext } from '@/app/providers/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import {
@@ -14,12 +13,13 @@ import redSoilImg from '@/assets/soil-images/red_soil.png';
 import blackSoilImg from '@/assets/soil-images/black_soil.png';
 import sandySoilImg from '@/assets/soil-images/sandy_soil.png';
 import claySoilImg from '@/assets/soil-images/clay_soil.png';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const TOTAL_STEPS = 7;
 
 const FarmerOnboardingSurvey = () => {
     const navigate = useNavigate();
-    const { backendUrl, getUserData, setUserData } = useContext(AppContext);
+    const { backendUrl, getUserData, setUserData } = useGlobalStore();
     const [currentStep, setCurrentStep] = useState(1);
     const [submitting, setSubmitting] = useState(false);
     const [slideDirection, setSlideDirection] = useState('next');

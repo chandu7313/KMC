@@ -1,14 +1,14 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AppContext } from '@/app/providers/AppContext';
 import { toast } from 'react-toastify';
 import Navbar from '@/app/layouts/Navbar';
 import { Calendar, User, ArrowLeft, Clock, Share2, Facebook, Twitter, Link } from 'lucide-react';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const BlogDetail = () => {
     const { slug } = useParams();
-    const { backendUrl } = useContext(AppContext);
+    const { backendUrl } = useGlobalStore();
     const [blog, setBlog] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();

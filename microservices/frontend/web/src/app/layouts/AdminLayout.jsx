@@ -1,14 +1,14 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
 import AdminSidebar from '@/app/layouts/AdminSidebar';
-import { AppContext } from "@/app/providers/AppContext";
 import { ALLOWED_ADMIN_ROLES, ROLE_LABELS } from "@/app/config/permissions";
 import { Search, Bell, HelpCircle, ChevronDown } from "lucide-react";
+import { useGlobalStore } from '@/app/store/globalStore';
 
 // Roles and labels now imported from config/permissions.js
 
 const AdminLayout = () => {
-  const { isLoggedin, userData, loading } = useContext(AppContext);
+  const { isLoggedin, userData, loading } = useGlobalStore();
   const [searchQuery, setSearchQuery] = useState('');
 
   if (loading) {

@@ -1,8 +1,7 @@
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AppContext } from '@/app/providers/AppContext';
 import { toast } from 'react-toastify';
 import { 
     Package, 
@@ -19,10 +18,11 @@ import {
     ShieldCheck 
 } from 'lucide-react';
 import Navbar from '@/app/layouts/Navbar';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const MyOrders = () => {
     const navigate = useNavigate();
-    const { backendUrl, userData, loading: authLoading } = useContext(AppContext);
+    const { backendUrl, userData, loading: authLoading } = useGlobalStore();
     const [orders, setOrders] = useState([]);
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [loading, setLoading] = useState(true);

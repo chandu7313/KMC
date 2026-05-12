@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/app/layouts/Navbar';
-import { AppContext } from '@/app/providers/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import heroImage from '@/assets/hero_agronomist.png';
+import { useGlobalStore } from '@/app/store/globalStore';
 import { 
     Camera, 
     Image as ImageIcon, 
@@ -68,7 +68,7 @@ const EFFECTIVENESS_BADGE = {
 };
 
 const CropDoctor = () => {
-    const { backendUrl, userData, navigate } = useContext(AppContext);
+    const { backendUrl, userData, navigate } = useGlobalStore();
     
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);

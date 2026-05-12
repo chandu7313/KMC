@@ -1,12 +1,12 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { AppContext } from '@/app/providers/AppContext';
 import { toast } from 'react-toastify';
 import Navbar from '@/app/layouts/Navbar';
 import { Award, TrendingUp, MapPin, Sprout } from 'lucide-react';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const SuccessStories = () => {
-    const { backendUrl } = useContext(AppContext);
+    const { backendUrl } = useGlobalStore();
     const [stories, setStories] = useState([]);
     const [loading, setLoading] = useState(true);
 

@@ -1,8 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useContext, useState } from "react";
-import { AppContext } from '@/app/providers/AppContext';
+import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useGlobalStore } from '@/app/store/globalStore';
 import {
   LayoutDashboard,
   Users,
@@ -25,7 +25,7 @@ import {
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
-  const { userData, backendUrl, setIsLoggedin, setUserData } = useContext(AppContext);
+  const { userData, backendUrl, setIsLoggedin, setUserData } = useGlobalStore();
   const [collapsed, setCollapsed] = useState(false);
 
   const userRole = userData?.role || '';

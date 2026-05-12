@@ -1,13 +1,13 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import Navbar from '@/app/layouts/Navbar';
-import { AppContext } from '@/app/providers/AppContext';
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const BookFarmVisit = () => {
-    const { backendUrl, userData, loading: authLoading } = useContext(AppContext);
+    const { backendUrl, userData, loading: authLoading } = useGlobalStore();
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({

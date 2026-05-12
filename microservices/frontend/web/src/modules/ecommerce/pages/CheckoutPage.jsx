@@ -1,14 +1,16 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppContext } from '@/app/providers/AppContext';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import Navbar from '@/app/layouts/Navbar';
 import { ArrowLeft, CheckCircle2, Wallet, Truck, ShoppingBag, Plus } from 'lucide-react';
+import { useGlobalStore } from '@/app/store/globalStore';
+import { useCartStore } from '@/modules/ecommerce/store/cartStore';
 
 const Checkout = () => {
     const navigate = useNavigate();
-    const { backendUrl, userData, isLoggedin, setCartItems: setGlobalCartItems, getUserData } = useContext(AppContext);
+    const { backendUrl, userData, isLoggedin, getUserData } = useGlobalStore();
+  const { setCartItems: setGlobalCartItems } = useCartStore();
     const [loading, setLoading] = useState(false);
     const [cartItems, setCartItems] = useState({});
     const [productsData, setProductsData] = useState([]);

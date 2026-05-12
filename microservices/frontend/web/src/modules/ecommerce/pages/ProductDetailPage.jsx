@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { AppContext } from '@/app/providers/AppContext';
 import { toast } from 'react-toastify';
 import Navbar from '@/app/layouts/Navbar';
 const NavItem = ({ icon, label, active = false, muted = false, activeClass = "" }) => (

@@ -1,15 +1,15 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from "react-router-dom"
 import { assets } from '@/assets/assets'
-import React, { useContext, useState } from "react"
-import { AppContext } from '@/app/providers/AppContext'
+import React, { useState } from "react"
 import axios from "axios"
 import { toast } from "react-toastify"
 import { useTranslation } from "react-i18next"
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const ResetPassword = () => {
   const { t } = useTranslation()
-  const { backendUrl } = useContext(AppContext)
+  const { backendUrl } = useGlobalStore();
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')

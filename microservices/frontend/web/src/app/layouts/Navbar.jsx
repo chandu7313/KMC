@@ -1,12 +1,12 @@
 import { useContext, useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { assets } from '@/assets/assets';
-import { AppContext } from '@/app/providers/AppContext';
 import { LanguageContext } from '@/app/providers/LanguageContext';
 import { FarmerModeContext } from '@/app/providers/FarmerModeContext';
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useGlobalStore } from '@/app/store/globalStore';
 import { 
   Menu, 
   X, 
@@ -32,8 +32,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
-  const { userData, backendUrl, setUserData, setIsLoggedin } =
-    useContext(AppContext);
+  const { userData, backendUrl, setUserData, setIsLoggedin } = useGlobalStore();
   const { language, changeLanguage } = useContext(LanguageContext);
   const { isFarmerMode, toggleFarmerMode } = useContext(FarmerModeContext);
   const { t } = useTranslation();

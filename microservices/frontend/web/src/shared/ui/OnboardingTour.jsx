@@ -1,12 +1,12 @@
 import { useContext, useCallback, useEffect } from 'react';
 import Joyride, { STATUS } from 'react-joyride';
-import { AppContext } from '@/app/providers/AppContext';
 import { LanguageContext } from '@/app/providers/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { Zap } from 'lucide-react';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const OnboardingTour = () => {
-    const { runTour, completeTour, voiceEnabled, toggleVoice } = useContext(AppContext);
+    const { runTour, completeTour, voiceEnabled, toggleVoice } = useGlobalStore();
     const { language } = useContext(LanguageContext);
     const { t } = useTranslation();
 

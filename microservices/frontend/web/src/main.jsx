@@ -11,18 +11,15 @@ import './index.css';
 import './core/i18n/index';
 import App from './App.jsx';
 import { BrowserRouter } from 'react-router-dom';
-import { AppContextProvider } from '@/app/providers/AppContext.jsx';
 import { LanguageProvider } from '@/app/providers/LanguageContext.jsx';
 import { FarmerModeProvider } from '@/app/providers/FarmerModeContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-    <AppContextProvider>
-      <LanguageProvider>
-        <FarmerModeProvider>
-          <App />
-        </FarmerModeProvider>
-      </LanguageProvider>
-    </AppContextProvider>
+    <LanguageProvider>
+      <FarmerModeProvider>
+        <App />
+      </FarmerModeProvider>
+    </LanguageProvider>
   </BrowserRouter>,
 );

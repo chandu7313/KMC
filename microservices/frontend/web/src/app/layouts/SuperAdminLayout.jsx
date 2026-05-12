@@ -1,8 +1,8 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Outlet, Navigate, NavLink, useNavigate } from "react-router-dom";
-import { AppContext } from "@/app/providers/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useGlobalStore } from '@/app/store/globalStore';
 import {
   LayoutDashboard,
   Server,
@@ -103,7 +103,7 @@ const SuperAdminSidebar = ({ collapsed, setCollapsed, handleLogout }) => {
 };
 
 const SuperAdminLayout = () => {
-  const { isLoggedin, userData, loading, backendUrl, setIsLoggedin, setUserData } = useContext(AppContext);
+  const { isLoggedin, userData, loading, backendUrl, setIsLoggedin, setUserData } = useGlobalStore();
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
 

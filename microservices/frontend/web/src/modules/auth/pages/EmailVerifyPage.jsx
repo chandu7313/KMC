@@ -1,18 +1,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
-import React, { useContext, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { assets } from '@/assets/assets'
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import { AppContext } from '@/app/providers/AppContext'
 import axios from "axios"
 import { useTranslation } from "react-i18next"
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const EmailVerify = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { backendUrl, isLoggedin, userData, getUserData } = useContext(AppContext)
+  const { backendUrl, isLoggedin, userData, getUserData } = useGlobalStore();
   
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)

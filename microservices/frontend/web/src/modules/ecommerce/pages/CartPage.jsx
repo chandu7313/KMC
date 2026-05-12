@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppContext } from '@/app/providers/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Navbar from '@/app/layouts/Navbar';
 import { Trash2, ArrowRight, ShoppingBag, Plus, Minus, ArrowLeft } from 'lucide-react';
+import { useGlobalStore } from '@/app/store/globalStore';
+import { useCartStore } from '@/modules/ecommerce/store/cartStore';
 
 const CartPage = () => {
     const navigate = useNavigate();
-    const { backendUrl, isLoggedin, userData, setCartItems: setGlobalCartItems } = useContext(AppContext);
+    const { backendUrl, isLoggedin, userData } = useGlobalStore();
+  const { setCartItems: setGlobalCartItems } = useCartStore();
     const [cartItems, setCartItems] = useState({});
     const [productsData, setProductsData] = useState([]);
     const [loading, setLoading] = useState(true);

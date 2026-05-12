@@ -1,7 +1,7 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AppContext } from '../../context/AppContext';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const roles = [
     {
@@ -82,7 +82,7 @@ const DevQuickLogin = () => {
     const [loadingRole, setLoadingRole] = useState(null);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext);
+    const { backendUrl, setIsLoggedin, getUserData } = useGlobalStore();
 
     const handleDevLogin = async (role) => {
         setLoadingRole(role);

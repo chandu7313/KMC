@@ -2,14 +2,14 @@
  * Protected Route Guard
  * Redirects unauthenticated users to the login page.
  */
-import React, { useContext } from 'react';
+import React, {} from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { AppContext } from '../../../context/AppContext';
 import Spinner from '../../../shared/components/ui/Spinner';
 import ROUTES from '../../../core/router/routeConfig';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const ProtectedRoute = ({ children }) => {
-  const { isLoggedin, loading } = useContext(AppContext);
+  const { isLoggedin, loading } = useGlobalStore();
   const location = useLocation();
 
   if (loading) {

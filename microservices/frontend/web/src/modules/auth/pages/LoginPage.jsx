@@ -1,15 +1,15 @@
-import { useContext, useState } from "react"
+import { useState } from "react"
 import { assets } from '@/assets/assets'
 import { useNavigate } from "react-router-dom"
-import { AppContext } from '@/app/providers/AppContext'
 import { useTranslation } from "react-i18next"
 import axios from "axios"
 import { toast } from "react-toastify"
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const Login = () => {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext)
+    const { backendUrl, setIsLoggedin, getUserData } = useGlobalStore();
 
     const [state, setState] = useState('Login')
     const [authMethod, setAuthMethod] = useState('mobile')

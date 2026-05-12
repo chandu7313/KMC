@@ -1,13 +1,13 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { AppContext } from './AppContext';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 export const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
     const { i18n } = useTranslation();
-    const { isLoggedin, backendUrl, userData } = useContext(AppContext);
+    const { isLoggedin, backendUrl, userData } = useGlobalStore();
     
     // Check if language has been set previously
     const isLanguageSet = localStorage.getItem('languageSet') === 'true';

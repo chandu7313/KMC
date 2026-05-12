@@ -1,6 +1,6 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Outlet, Navigate, NavLink } from "react-router-dom";
-import { AppContext } from "@/app/providers/AppContext";
+import { useGlobalStore } from '@/app/store/globalStore';
 import {
   LayoutDashboard, Ticket, Users, Phone, FileText,
   Bell, BarChart3, UserCog, Settings, ChevronLeft,
@@ -20,7 +20,7 @@ const navItems = [
 ];
 
 const SupportLayout = () => {
-  const { isLoggedin, userData, loading } = useContext(AppContext);
+  const { isLoggedin, userData, loading } = useGlobalStore();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 

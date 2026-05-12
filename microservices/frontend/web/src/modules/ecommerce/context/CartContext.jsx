@@ -5,14 +5,14 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react/prop-types */
 
-import { createContext, useState, useCallback, useContext } from 'react';
+import { createContext, useState, useCallback } from 'react';
 import * as cartApi from '../api/cart.api';
-import { AppContext } from '../../../context/AppContext';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const { userData } = useContext(AppContext);
+  const { userData } = useGlobalStore();
   const [cartItems, setCartItems] = useState({});
 
   const getCartData = useCallback(async () => {

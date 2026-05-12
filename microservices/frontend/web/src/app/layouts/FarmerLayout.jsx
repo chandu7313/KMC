@@ -1,6 +1,5 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { AppContext } from '@/app/providers/AppContext';
 import { 
     LayoutDashboard, Sprout, Package, Landmark, 
     LineChart, HeadphonesIcon, Settings, LogOut, 
@@ -8,10 +7,11 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const FarmerLayout = () => {
     const navigate = useNavigate();
-    const { userData, backendUrl, setIsLoggedin, setUserData } = useContext(AppContext);
+    const { userData, backendUrl, setIsLoggedin, setUserData } = useGlobalStore();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const logout = async () => {

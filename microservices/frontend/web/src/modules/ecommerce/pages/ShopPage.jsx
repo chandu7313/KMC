@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppContext } from '@/app/providers/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Navbar from '@/app/layouts/Navbar';
 import { Search, ShoppingCart, Filter, ArrowRight, Package, Sprout, Tractor, Leaf } from 'lucide-react';
+import { useGlobalStore } from '@/app/store/globalStore';
+import { useCartStore } from '@/modules/ecommerce/store/cartStore';
 
 const Marketplace = () => {
     const navigate = useNavigate();
-    const { backendUrl, getCartCount } = useContext(AppContext);
+    const { backendUrl } = useGlobalStore();
+  const { getCartCount } = useCartStore();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');

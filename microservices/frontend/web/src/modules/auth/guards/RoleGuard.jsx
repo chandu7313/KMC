@@ -3,14 +3,14 @@
  * Checks if the current user has one of the allowed roles.
  * Redirects to home if unauthorized.
  */
-import React, { useContext } from 'react';
+import React, {} from 'react';
 import { Navigate } from 'react-router-dom';
-import { AppContext } from '../../../context/AppContext';
 import Spinner from '../../../shared/components/ui/Spinner';
 import ROUTES from '../../../core/router/routeConfig';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const RoleGuard = ({ allowedRoles = [], children }) => {
-  const { isLoggedin, userData, loading } = useContext(AppContext);
+  const { isLoggedin, userData, loading } = useGlobalStore();
 
   if (loading) {
     return (

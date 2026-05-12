@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { 
   RefreshCcw, ArrowUp, ArrowDown, TrendingUp, AlertTriangle, 
@@ -9,12 +9,12 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, BarChart, Bar, Legend, Cell, ComposedChart, Line
 } from 'recharts';
-import { AppContext } from '@/app/providers/AppContext';
 import Navbar from '@/app/layouts/Navbar';
 import { toast } from "react-toastify";
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const MarketPrices = () => {
-  const { backendUrl, userData } = useContext(AppContext);
+  const { backendUrl, userData } = useGlobalStore();
   const [prices, setPrices] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { assets } from '@/assets/assets'
-import { AppContext } from '@/app/providers/AppContext'
+import { useGlobalStore } from '@/app/store/globalStore';
 import { 
   FlaskConical, 
   Sprout, 
@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 
 const Header = () => {
-  const {userData} = useContext(AppContext)
+  const { userData } = useGlobalStore();
   const navigate = useNavigate()
   const [headerIndex, setHeaderIndex] = useState(0)
   const headerImages = assets.header_images || ["/bg_img.png"]

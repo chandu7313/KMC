@@ -1,13 +1,13 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { AppContext } from '@/app/providers/AppContext';
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import Navbar from '@/app/layouts/Navbar';
 import { BookOpen, Calendar, User, ArrowRight, Search, Hash } from 'lucide-react';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const Blogs = () => {
-    const { backendUrl } = useContext(AppContext);
+    const { backendUrl } = useGlobalStore();
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');

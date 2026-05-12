@@ -1,12 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/app/layouts/Navbar';
-import { AppContext } from '@/app/providers/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Upload, X, FileText, Image as ImageIcon, Loader2, Calendar, ShieldCheck, ArrowRight, Beaker, UserCheck, Info, CheckCircle2, Leaf, Sprout, AlertTriangle } from 'lucide-react';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const SoilTestAndCropAdvice = () => {
-  const { backendUrl, userData, navigate } = useContext(AppContext);
+  const { backendUrl, userData, navigate } = useGlobalStore();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);

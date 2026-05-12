@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/app/layouts/Navbar';
-import { AppContext } from '@/app/providers/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { TrendingUp, Activity, Clipboard, Download, ArrowLeft, Beaker, Sprout } from 'lucide-react';
+import { useGlobalStore } from '@/app/store/globalStore';
 
 const SoilHistory = () => {
-  const { backendUrl, userData, navigate } = useContext(AppContext);
+  const { backendUrl, userData, navigate } = useGlobalStore();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 

@@ -1,26 +1,67 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { toast } from 'react-toastify';
+import { checkAuthState, getUserData as fetchUserData } from '@/modules/auth/api/auth.api';
 
-export const useGlobalStore = create(
-  persist(
-    (set) => ({
-      // Theme State
-      theme: 'light',
-      toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
-      setTheme: (theme) => set({ theme }),
+export const useGlobalStore = create((set, get) => ({
+  // State
+  isLoggedin: false,
+  userData: false,
+  loading: true,
+  runTour: false,
+  voiceEnabled: localStorage.getItem('voiceEnabled') !== 'false',
 
-      // Language State
-      language: 'en',
-      setLanguage: (language) => set({ language }),
+  // Basic Setters
+  setIsLoggedin: (status) => set({ isLoggedin: status }),
+  setUserData: (data) => set({ userData: data }),
+  setLoading: (status) => set({ loading: status }),
+  setRunTour: (status) => set({ runTour: status }),
 
-      // User Context (Simple auth state, full auth belongs in auth module)
-      isAuthenticated: false,
-      userRole: null,
-      setAuth: (isAuthenticated, userRole) => set({ isAuthenticated, userRole }),
-      logout: () => set({ isAuthenticated: false, userRole: null }),
-    }),
-    {
-      name: 'kmc-global-storage', // unique name for localStorage key
+  // Actions
+  getAuthState: async () => {
+    try {
+      set({ loading: true });
+      const data = await checkAuthState();
+      if (data.success) {
+        set({ isLoggedin: true });
+        await get().getUserData();
+      } else {
+        set({ loading: false });
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to check authentication");
+      set({ loading: false });
     }
-  )
-);
+  },
+
+  getUserData: async () => {
+    try {
+      const data = await fetchUserData();
+      if (data.success) {
+        set({ userData: data.userData });
+        // NOTE: cartData is now handled by cartStore, so we'll need to trigger it separately
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to fetch user data");
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  completeTour: () => {
+    set({ runTour: false });
+    localStorage.setItem('tourCompleted', 'true');
+  },
+
+  toggleVoice: () => {
+    set((state) => {
+      const newValue = !state.voiceEnabled;
+      localStorage.setItem('voiceEnabled', String(newValue));
+      if (!newValue && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      return { voiceEnabled: newValue };
+    });
+  }
+}));
