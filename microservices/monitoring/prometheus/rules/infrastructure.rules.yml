@@ -1,0 +1,130 @@
+# ============================================================
+# Infrastructure Alert Rules
+# ============================================================
+
+groups:
+  - name: infrastructure
+    interval: 30s
+    rules:
+
+      # ── High CPU ───────────────────────────────────
+      - alert: HighCPUUsage
+        expr: >
+          100 - (avg by(instance)
+            (rate(node_cpu_seconds_total{mode="idle"}[5m]))
+          * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 High CPU usage: {{ $value | humanize }}%"
+          description: "CPU usage above 80% for 5 minutes. Consider scaling."
+
+      # ── Critical CPU ──────────────────────────────
+      - alert: CriticalCPUUsage
+        expr: >
+          100 - (avg by(instance)
+            (rate(node_cpu_seconds_total{mode="idle"}[5m]))
+          * 100) > 95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "🔴 Critical CPU usage: {{ $value | humanize }}%"
+          description: "CPU above 95%! Services may be unresponsive."
+
+      # ── High Memory ───────────────────────────────
+      - alert: HighMemoryUsage
+        expr: >
+          (1 - (node_memory_MemAvailable_bytes
+            / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 High memory usage: {{ $value | humanize }}%"
+          description: "Memory usage above 85%."
+
+      # ── Critical Memory ───────────────────────────
+      - alert: CriticalMemoryUsage
+        expr: >
+          (1 - (node_memory_MemAvailable_bytes
+            / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "🔴 Critical memory: {{ $value | humanize }}%"
+          description: "Memory above 95%! OOM kill risk."
+
+      # ── Low Disk Space ────────────────────────────
+      - alert: LowDiskSpace
+        expr: >
+          (node_filesystem_avail_bytes{mountpoint="/"}
+            / node_filesystem_size_bytes{mountpoint="/"})
+          * 100 < 20
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 Low disk space: {{ $value | humanize }}% free"
+          description: "Only {{ $value | humanize }}% disk space remaining."
+
+      # ── Critical Disk Space ───────────────────────
+      - alert: CriticalDiskSpace
+        expr: >
+          (node_filesystem_avail_bytes{mountpoint="/"}
+            / node_filesystem_size_bytes{mountpoint="/"})
+          * 100 < 10
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "🔴 Critical disk: {{ $value | humanize }}% free"
+          description: "Less than 10% disk remaining! Services will crash."
+
+      # ── Redis Down ────────────────────────────────
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "🔴 Redis is DOWN!"
+          description: >
+            Redis is down. OTP verification, cart,
+            and session management will all fail.
+
+      # ── RabbitMQ Queue Depth High ─────────────────
+      - alert: RabbitMQQueueDepthHigh
+        expr: kissan_rabbitmq_queue_depth > 1000
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 RabbitMQ queue backing up"
+          description: >
+            Queue {{ $labels.queue }} has {{ $value }} messages.
+            Consumer may be down or slow.
+
+      # ── Container Restarting ──────────────────────
+      - alert: ContainerRestarting
+        expr: >
+          increase(container_start_time_seconds[15m]) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 Container restarting: {{ $labels.name }}"
+          description: >
+            Container {{ $labels.name }} has restarted
+            more than 2 times in 15 minutes.

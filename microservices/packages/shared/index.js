@@ -34,3 +34,6 @@ export { authorize, authorizeAny, authorizeOwnerOrAdmin } from './middleware/aut
 export { rateLimiter, authRateLimiter, otpRateLimiter, userRateLimiter } from './middleware/rateLimiter.js';
 export { default as requestId } from './middleware/requestId.js';
 export { validate, validateAll } from './middleware/validator.js';
+
+// Metrics (Prometheus)
+export * as metrics from './metrics/metrics.js';

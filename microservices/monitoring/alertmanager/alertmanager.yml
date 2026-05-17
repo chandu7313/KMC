@@ -1,0 +1,128 @@
+# ============================================================
+# AlertManager Configuration — Kissan Mithar Consultancy
+# ============================================================
+
+global:
+  resolve_timeout: 5m
+  smtp_from: 'alerts@kissanmithar.com'
+  smtp_smarthost: 'smtp-brevo.com:587'
+  smtp_auth_username: '8638f9001@smtp-brevo.com'
+  smtp_auth_password: 'LBv4TJ8tgRMr26nY'
+  smtp_require_tls: false
+
+templates:
+  - /etc/alertmanager/templates/*.tmpl
+
+# ─── Routing ─────────────────────────────────────────────────
+route:
+  group_by: ['alertname', 'service', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: default-receiver
+
+  routes:
+    # Critical alerts → immediate
+    - match:
+        severity: critical
+      receiver: critical-receiver
+      group_wait: 10s
+      repeat_interval: 1h
+
+    # Business: finance
+    - match:
+        team: finance
+      receiver: finance-receiver
+      repeat_interval: 2h
+
+    # Business: ecommerce
+    - match:
+        team: ecommerce
+      receiver: ecommerce-receiver
+      repeat_interval: 2h
+
+    # Support team
+    - match:
+        team: support
+      receiver: support-receiver
+      repeat_interval: 2h
+
+    # AI/Tech team
+    - match:
+        team: ai
+      receiver: tech-receiver
+      repeat_interval: 1h
+
+    # Info (low priority)
+    - match:
+        severity: info
+      receiver: info-receiver
+      repeat_interval: 24h
+
+# ─── Receivers ───────────────────────────────────────────────
+receivers:
+
+  - name: default-receiver
+    email_configs:
+      - to: 'g.chandu7313@gmail.com'
+        subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }} - Kissan Mithar'
+        html: '{{ template "email.html" . }}'
+        send_resolved: true
+
+  - name: critical-receiver
+    email_configs:
+      - to: 'g.chandu7313@gmail.com'
+        subject: '🔴 CRITICAL: {{ .GroupLabels.alertname }} - Kissan Mithar'
+        html: '{{ template "email.critical.html" . }}'
+        send_resolved: true
+
+  - name: finance-receiver
+    email_configs:
+      - to: 'g.chandu7313@gmail.com'
+        subject: '[Finance Alert] {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.html" . }}'
+        send_resolved: true
+
+  - name: ecommerce-receiver
+    email_configs:
+      - to: 'g.chandu7313@gmail.com'
+        subject: '[E-Commerce Alert] {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.html" . }}'
+        send_resolved: true
+
+  - name: support-receiver
+    email_configs:
+      - to: 'g.chandu7313@gmail.com'
+        subject: '[Support Alert] {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.html" . }}'
+        send_resolved: true
+
+  - name: tech-receiver
+    email_configs:
+      - to: 'g.chandu7313@gmail.com'
+        subject: '[Tech Alert] {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.html" . }}'
+        send_resolved: true
+
+  - name: info-receiver
+    email_configs:
+      - to: 'g.chandu7313@gmail.com'
+        subject: '[Info] {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.html" . }}'
+        send_resolved: false
+
+# ─── Inhibition Rules ────────────────────────────────────────
+inhibit_rules:
+  # If service is down, suppress other alerts for it
+  - source_match:
+      alertname: ServiceDown
+    target_match_re:
+      alertname: HighErrorRate|HighResponseTime
+    equal: ['service']
+
+  # If critical fires, suppress warning for same alert
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: ['alertname', 'service']

@@ -1,0 +1,114 @@
+# ============================================================
+# Business Metrics Alert Rules
+# ============================================================
+
+groups:
+  - name: business_metrics
+    interval: 60s
+    rules:
+
+      # ── Payment Failure Rate High ──────────────────
+      - alert: HighPaymentFailureRate
+        expr: >
+          (
+            rate(kissan_payments_total{status="failed"}[10m])
+            / rate(kissan_payments_total[10m])
+          ) > 0.10
+        for: 5m
+        labels:
+          severity: critical
+          team: finance
+        annotations:
+          summary: "🔴 High payment failure rate!"
+          description: >
+            Payment failure rate is {{ $value | humanizePercentage }}.
+            This is directly impacting farmer purchases.
+
+      # ── No Orders Coming In ────────────────────────
+      - alert: NoOrdersAlert
+        expr: rate(kissan_orders_total[30m]) == 0
+        for: 30m
+        labels:
+          severity: warning
+          team: ecommerce
+        annotations:
+          summary: "🟡 No orders in last 30 minutes"
+          description: >
+            Zero orders received in the last 30 minutes.
+            Check ecommerce-service and payment-service.
+
+      # ── Disease Scan AI Failures ───────────────────
+      - alert: AIDetectionFailures
+        expr: >
+          (
+            rate(kissan_disease_scans_total{result="failed"}[10m])
+            / rate(kissan_disease_scans_total[10m])
+          ) > 0.20
+        for: 5m
+        labels:
+          severity: critical
+          team: ai
+        annotations:
+          summary: "🔴 AI disease detection failing!"
+          description: >
+            {{ $value | humanizePercentage }} of disease scans are failing.
+            Gemini API may be down. Check ai-service logs immediately.
+
+      # ── Slow AI Detection ──────────────────────────
+      - alert: SlowAIDetection
+        expr: >
+          histogram_quantile(0.95,
+            rate(kissan_disease_detection_duration_seconds_bucket[5m])
+          ) > 15
+        for: 5m
+        labels:
+          severity: warning
+          team: ai
+        annotations:
+          summary: "🟡 AI detection is very slow"
+          description: >
+            P95 detection time: {{ $value | humanizeDuration }}.
+            Farmers may be waiting too long for results.
+
+      # ── SLA Breach Rate ────────────────────────────
+      - alert: HighSLABreachRate
+        expr: rate(kissan_sla_breaches_total[1h]) > 5
+        for: 10m
+        labels:
+          severity: warning
+          team: support
+        annotations:
+          summary: "🟡 High SLA breach rate in support"
+          description: >
+            {{ $value }} SLA breaches per hour.
+            Support team needs more agents.
+
+      # ── Refund Rate Too High ───────────────────────
+      - alert: HighRefundRate
+        expr: >
+          (
+            rate(kissan_refunds_total[1h])
+            / rate(kissan_orders_total[1h])
+          ) > 0.15
+        for: 15m
+        labels:
+          severity: warning
+          team: ecommerce
+        annotations:
+          summary: "🟡 High refund rate detected"
+          description: >
+            Refund rate: {{ $value | humanizePercentage }}.
+            Check product quality and delivery issues.
+
+      # ── Low Consultation Bookings ──────────────────
+      - alert: LowConsultationBookings
+        expr: rate(kissan_consultations_total[1h]) == 0
+        for: 2h
+        labels:
+          severity: info
+          team: agri
+        annotations:
+          summary: "ℹ️  No consultation bookings in 2 hours"
+          description: >
+            No expert consultations booked in 2 hours.
+            Check expert-service and availability slots.

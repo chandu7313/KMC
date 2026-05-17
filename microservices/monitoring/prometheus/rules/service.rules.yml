@@ -1,0 +1,85 @@
+# ============================================================
+# Service Availability Alert Rules
+# ============================================================
+
+groups:
+  - name: service_availability
+    interval: 30s
+    rules:
+
+      # ── Service Down ───────────────────────────────
+      - alert: ServiceDown
+        expr: up{job="kissan-services"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "🔴 Service DOWN: {{ $labels.service }}"
+          description: >
+            Service {{ $labels.service }} has been down
+            for more than 1 minute.
+            Instance: {{ $labels.instance }}
+          runbook: "Check: docker-compose logs {{ $labels.service }}"
+
+      # ── High Error Rate (>5%) ──────────────────────
+      - alert: HighErrorRate
+        expr: >
+          (
+            rate(kissan_http_errors_total[5m])
+            / rate(kissan_http_requests_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "🔴 High error rate on {{ $labels.service }}"
+          description: >
+            Error rate is {{ $value | humanizePercentage }}
+            on {{ $labels.service }}.
+            Route: {{ $labels.route }}
+
+      # ── High Response Time (P95 > 2s) ──────────────
+      - alert: HighResponseTime
+        expr: >
+          histogram_quantile(0.95,
+            rate(kissan_http_request_duration_seconds_bucket[5m])
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 Slow response on {{ $labels.service }}"
+          description: >
+            P95 response time is {{ $value | humanizeDuration }}
+            on {{ $labels.service }}.
+
+      # ── Critical Response Time (P95 > 5s) ──────────
+      - alert: CriticalResponseTime
+        expr: >
+          histogram_quantile(0.95,
+            rate(kissan_http_request_duration_seconds_bucket[5m])
+          ) > 5
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "🔴 Critical response time: {{ $labels.service }}"
+          description: >
+            P95 response time is {{ $value | humanizeDuration }}.
+            This is critically slow for farmers on mobile.
+
+      # ── Too Many Active Connections ────────────────
+      - alert: TooManyConnections
+        expr: kissan_active_connections > 500
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 High connections: {{ $labels.service }}"
+          description: >
+            {{ $value }} active connections on {{ $labels.service }}.

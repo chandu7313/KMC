@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import { createLogger, requestId } from '@kissan/shared';
+import { createLogger, requestId, metrics } from '@kissan/shared';
 import productRoutes from './routes/product.routes.js';
 import cartRoutes from './routes/cart.routes.js';
 import fertilizerRoutes from './routes/fertilizer.routes.js';
@@ -21,9 +21,13 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 app.use(requestId);
+app.use(metrics.metricsMiddleware);
 app.use(morgan('combined', { stream: logger.stream }));
 
 app.get('/health', (req, res) => res.status(200).json({ status: 'healthy', service: 'ecommerce-service', uptime: process.uptime() }));
+
+// ── Prometheus Metrics ──
+app.get('/metrics', metrics.metricsRoute);
 app.use('/products', productRoutes);
 app.use('/cart', cartRoutes);
 app.use('/fertilizers', fertilizerRoutes);

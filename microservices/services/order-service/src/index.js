@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import { createLogger, requestId } from '@kissan/shared';
+import { createLogger, requestId, metrics } from '@kissan/shared';
 import orderRoutes from './routes/order.routes.js';
 import fertilizerOrderRoutes from './routes/fertilizer-order.routes.js';
 import equipmentOrderRoutes from './routes/equipment-order.routes.js';
@@ -20,9 +20,13 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(requestId);
+app.use(metrics.metricsMiddleware);
 app.use(morgan('combined', { stream: logger.stream }));
 
 app.get('/health', (req, res) => res.status(200).json({ status: 'healthy', service: 'order-service', uptime: process.uptime() }));
+
+// ── Prometheus Metrics ──
+app.get('/metrics', metrics.metricsRoute);
 app.use('/', orderRoutes);
 app.use('/fertilizer', fertilizerOrderRoutes);
 app.use('/equipment', equipmentOrderRoutes);

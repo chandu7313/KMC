@@ -5,84 +5,105 @@
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  scrape_timeout: 10s
+  external_labels:
+    cluster: kissan-mithar
+    environment: production
 
+# ─── Alerting ────────────────────────────────────────────────
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+      timeout: 10s
+
+# ─── Alert Rules ─────────────────────────────────────────────
+rule_files:
+  - /etc/prometheus/rules/service.rules.yml
+  - /etc/prometheus/rules/business.rules.yml
+  - /etc/prometheus/rules/infrastructure.rules.yml
+  - /etc/prometheus/rules/nodejs.rules.yml
+
+# ─── Scrape Targets ──────────────────────────────────────────
 scrape_configs:
-  - job_name: 'api-gateway'
-    static_configs:
-      - targets: ['nginx:80']
-    metrics_path: /health
 
-  - job_name: 'auth-service'
+  # Prometheus itself
+  - job_name: prometheus
     static_configs:
-      - targets: ['auth-service:3001']
-    metrics_path: /metrics
+      - targets: ['localhost:9090']
+        labels:
+          service: prometheus
 
-  - job_name: 'user-service'
-    static_configs:
-      - targets: ['user-service:3002']
+  # All 15 Kissan Mithar microservices
+  - job_name: kissan-services
+    scrape_interval: 15s
     metrics_path: /metrics
+    static_configs:
+      - targets:
+          - auth-service:3001
+          - user-service:3002
+          - ai-service:3003
+          - disease-service:3004
+          - soil-service:3005
+          - market-service:3006
+          - ecommerce-service:3007
+          - order-service:3008
+          - payment-service:3009
+          - notification-service:3010
+          - support-service:3011
+          - expert-service:3012
+          - content-service:3013
+          - analytics-service:3014
+          - field-service:3015
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '([^:]+):.*'
+        target_label: service
+        replacement: '$1'
 
-  - job_name: 'ai-service'
+  # Nginx gateway (via nginx-exporter)
+  - job_name: nginx
+    scrape_interval: 15s
     static_configs:
-      - targets: ['ai-service:3003']
-    metrics_path: /metrics
+      - targets: ['nginx-exporter:9113']
+        labels:
+          service: nginx-gateway
 
-  - job_name: 'disease-service'
+  # Node Exporter (host system metrics)
+  - job_name: node-exporter
+    scrape_interval: 15s
     static_configs:
-      - targets: ['disease-service:3004']
-    metrics_path: /metrics
+      - targets: ['node-exporter:9100']
+        labels:
+          service: host-system
 
-  - job_name: 'soil-service'
+  # cAdvisor (container metrics)
+  - job_name: cadvisor
+    scrape_interval: 15s
     static_configs:
-      - targets: ['soil-service:3005']
-    metrics_path: /metrics
+      - targets: ['cadvisor:8080']
+        labels:
+          service: docker-containers
 
-  - job_name: 'market-service'
+  # Redis
+  - job_name: redis
+    scrape_interval: 15s
     static_configs:
-      - targets: ['market-service:3006']
-    metrics_path: /metrics
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: redis
 
-  - job_name: 'ecommerce-service'
+  # RabbitMQ (built-in Prometheus plugin)
+  - job_name: rabbitmq
+    scrape_interval: 15s
     static_configs:
-      - targets: ['ecommerce-service:3007']
-    metrics_path: /metrics
+      - targets: ['rabbitmq:15692']
+        labels:
+          service: rabbitmq
 
-  - job_name: 'order-service'
+  # Pushgateway (for batch jobs / cron metrics)
+  - job_name: pushgateway
+    honor_labels: true
     static_configs:
-      - targets: ['order-service:3008']
-    metrics_path: /metrics
-
-  - job_name: 'payment-service'
-    static_configs:
-      - targets: ['payment-service:3009']
-    metrics_path: /metrics
-
-  - job_name: 'notification-service'
-    static_configs:
-      - targets: ['notification-service:3010']
-    metrics_path: /metrics
-
-  - job_name: 'support-service'
-    static_configs:
-      - targets: ['support-service:3011']
-    metrics_path: /metrics
-
-  - job_name: 'expert-service'
-    static_configs:
-      - targets: ['expert-service:3012']
-    metrics_path: /metrics
-
-  - job_name: 'content-service'
-    static_configs:
-      - targets: ['content-service:3013']
-    metrics_path: /metrics
-
-  - job_name: 'analytics-service'
-    static_configs:
-      - targets: ['analytics-service:3014']
-    metrics_path: /metrics
-
-  - job_name: 'field-service'
-    static_configs:
-      - targets: ['field-service:3015']
-    metrics_path: /metrics
+      - targets: ['pushgateway:9091']

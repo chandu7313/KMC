@@ -1,0 +1,115 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "panels": [
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "id": 100, "title": "🔍 $service", "type": "row" },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "mappings": [{ "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } }, "type": "value" }] } },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 }, "id": 1,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Status", "type": "stat",
+      "targets": [{ "expr": "up{job=\"kissan-services\", service=~\"$service\"}" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.01 }, { "color": "red", "value": 0.05 }] } } },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 }, "id": 2,
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Error Rate", "type": "stat",
+      "targets": [{ "expr": "sum(rate(kissan_http_errors_total{service=~\"$service\"}[5m])) / sum(rate(kissan_http_requests_total{service=~\"$service\"}[5m])) or vector(0)" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 3 }] } } },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 }, "id": 3,
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "P95 Latency", "type": "stat",
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(kissan_http_request_duration_seconds_bucket{service=~\"$service\"}[5m])) by (le))" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 }, "id": 4,
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Requests/sec", "type": "stat",
+      "targets": [{ "expr": "sum(rate(kissan_http_requests_total{service=~\"$service\"}[5m]))" }]
+    },
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 }, "id": 101, "title": "📈 Request Metrics", "type": "row" },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 15 } } },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 }, "id": 5,
+      "title": "Request Rate by Method", "type": "timeseries",
+      "targets": [{ "expr": "sum(rate(kissan_http_requests_total{service=~\"$service\"}[5m])) by (method)", "legendFormat": "{{ method }}" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 6 }, "id": 6,
+      "title": "Response Time Percentiles", "type": "timeseries",
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum(rate(kissan_http_request_duration_seconds_bucket{service=~\"$service\"}[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(kissan_http_request_duration_seconds_bucket{service=~\"$service\"}[5m])) by (le))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum(rate(kissan_http_request_duration_seconds_bucket{service=~\"$service\"}[5m])) by (le))", "legendFormat": "p99" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "bars", "fillOpacity": 50 } } },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 }, "id": 7,
+      "title": "Errors by Route", "type": "timeseries",
+      "targets": [{ "expr": "sum(rate(kissan_http_errors_total{service=~\"$service\"}[5m])) by (route, status_code)", "legendFormat": "{{ route }} ({{ status_code }})" }]
+    },
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 }, "id": 102, "title": "⚙️ Node.js Internals", "type": "row" },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "fillOpacity": 20 } } },
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 15 }, "id": 8,
+      "title": "Heap Memory", "type": "timeseries",
+      "targets": [
+        { "expr": "kissan_nodejs_heap_size_used_bytes{service=~\"$service\"}", "legendFormat": "Used" },
+        { "expr": "kissan_nodejs_heap_size_total_bytes{service=~\"$service\"}", "legendFormat": "Total" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 15 }, "id": 9,
+      "title": "Event Loop Lag", "type": "timeseries",
+      "targets": [{ "expr": "kissan_nodejs_eventloop_lag_seconds{service=~\"$service\"}", "legendFormat": "Lag" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 15 }, "id": 10,
+      "title": "Active Handles", "type": "timeseries",
+      "targets": [
+        { "expr": "kissan_nodejs_active_handles_total{service=~\"$service\"}", "legendFormat": "Handles" },
+        { "expr": "kissan_nodejs_active_requests_total{service=~\"$service\"}", "legendFormat": "Requests" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 15 }, "id": 11,
+      "title": "GC Duration", "type": "timeseries",
+      "targets": [{ "expr": "rate(kissan_nodejs_gc_duration_seconds_sum{service=~\"$service\"}[5m])", "legendFormat": "{{ kind }}" }]
+    },
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 }, "id": 103, "title": "📝 Logs", "type": "row" },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 24 }, "id": 12,
+      "options": { "showTime": true, "showLabels": true, "wrapLogMessage": true, "enableLogDetails": true, "sortOrder": "Descending" },
+      "title": "Service Logs", "type": "logs",
+      "targets": [{ "expr": "{service=~\"$service\"}" }]
+    }
+  ],
+  "refresh": "30s", "schemaVersion": 38, "style": "dark",
+  "tags": ["kissan-mithar", "services"],
+  "templating": { "list": [{ "current": { "text": "auth-service", "value": "auth-service" }, "datasource": { "type": "prometheus", "uid": "prometheus" }, "definition": "label_values(up{job=\"kissan-services\"}, service)", "name": "service", "query": { "query": "label_values(up{job=\"kissan-services\"}, service)" }, "refresh": 2, "type": "query" }] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "Asia/Kolkata",
+  "title": "🔍 Service Details",
+  "uid": "kissan-services", "version": 1
+}

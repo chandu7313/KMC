@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import { createLogger, requestId } from '@kissan/shared';
+import { createLogger, requestId, metrics } from '@kissan/shared';
 import ticketRoutes from './routes/ticket.routes.js';
 import managementRoutes from './routes/management.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -19,9 +19,13 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(requestId);
+app.use(metrics.metricsMiddleware);
 app.use(morgan('combined', { stream: logger.stream }));
 
 app.get('/health', (req, res) => res.status(200).json({ status: 'healthy', service: 'support-service', uptime: process.uptime() }));
+
+// ── Prometheus Metrics ──
+app.get('/metrics', metrics.metricsRoute);
 
 // Core ticket operations
 app.use('/tickets', ticketRoutes);

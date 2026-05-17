@@ -1,0 +1,53 @@
+# ============================================================
+# Node.js Runtime Alert Rules
+# ============================================================
+
+groups:
+  - name: nodejs_metrics
+    interval: 30s
+    rules:
+
+      # ── High Event Loop Lag ────────────────────────
+      - alert: NodeJSEventLoopLag
+        expr: kissan_nodejs_eventloop_lag_seconds > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 High event loop lag: {{ $labels.service }}"
+          description: >
+            Event loop lag: {{ $value | humanizeDuration }}
+            on {{ $labels.service }}.
+            Check for blocking synchronous operations.
+
+      # ── High Heap Usage ────────────────────────────
+      - alert: NodeJSHighHeapUsage
+        expr: >
+          (kissan_nodejs_heap_size_used_bytes
+            / kissan_nodejs_heap_size_total_bytes) > 0.90
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 High Node.js heap: {{ $labels.service }}"
+          description: >
+            Heap usage at {{ $value | humanizePercentage }}
+            on {{ $labels.service }}.
+            Memory leak possible.
+
+      # ── Many Open File Descriptors ─────────────────
+      - alert: NodeJSTooManyOpenFiles
+        expr: >
+          (kissan_process_open_fds
+            / kissan_process_max_fds) > 0.80
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "🟡 Many open FDs: {{ $labels.service }}"
+          description: >
+            {{ $value | humanizePercentage }} of max file descriptors
+            in use on {{ $labels.service }}.

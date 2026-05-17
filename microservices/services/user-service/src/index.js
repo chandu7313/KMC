@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import { createLogger, requestId } from '@kissan/shared';
+import { createLogger, requestId, metrics } from '@kissan/shared';
 import userRoutes from './routes/user.routes.js';
 import adminUserRoutes from './routes/admin-user.routes.js';
 import addressRoutes from './routes/address.routes.js';
@@ -22,6 +22,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(requestId);
+app.use(metrics.metricsMiddleware);
 app.use(morgan('combined', { stream: logger.stream }));
 
 // ── Health ──
@@ -32,7 +33,11 @@ app.get('/health', (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
+
 });
+
+// ── Prometheus Metrics ──
+app.get('/metrics', metrics.metricsRoute);
 
 // ── Routes ──
 app.use('/profile', userRoutes);

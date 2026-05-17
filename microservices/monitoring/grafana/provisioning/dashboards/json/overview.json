@@ -1,0 +1,220 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "🌾 Service Health",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0 }] },
+          "mappings": [{ "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } }, "type": "value" }]
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Total Services",
+      "type": "stat",
+      "targets": [{ "expr": "count(up{job=\"kissan-services\"})", "legendFormat": "Total" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 15 }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Services UP",
+      "type": "stat",
+      "targets": [{ "expr": "count(up{job=\"kissan-services\"} == 1)", "legendFormat": "Up" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Services DOWN",
+      "type": "stat",
+      "targets": [{ "expr": "count(up{job=\"kissan-services\"} == 0) or vector(0)", "legendFormat": "Down" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "green", "value": 0.99 }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "id": 4,
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Overall Uptime",
+      "type": "stat",
+      "targets": [{ "expr": "count(up{job=\"kissan-services\"} == 1) / count(up{job=\"kissan-services\"})", "legendFormat": "Uptime" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 101,
+      "title": "📊 Traffic Overview",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 15, "gradientMode": "scheme" } } },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 },
+      "id": 5,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "title": "Total Requests/sec",
+      "type": "timeseries",
+      "targets": [{ "expr": "sum(rate(kissan_http_requests_total[5m])) by (service)", "legendFormat": "{{ service }}" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "custom": { "drawStyle": "line", "fillOpacity": 10 }, "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 6 },
+      "id": 6,
+      "title": "Error Rate %",
+      "type": "timeseries",
+      "targets": [{ "expr": "sum(rate(kissan_http_errors_total[5m])) by (service) / sum(rate(kissan_http_requests_total[5m])) by (service)", "legendFormat": "{{ service }}" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "drawStyle": "line", "fillOpacity": 10 } } },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+      "id": 7,
+      "title": "P95 Response Time",
+      "type": "timeseries",
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(kissan_http_request_duration_seconds_bucket[5m])) by (le, service))", "legendFormat": "{{ service }}" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "id": 102,
+      "title": "💼 Business KPIs",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 15 },
+      "id": 8,
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Orders Today",
+      "type": "stat",
+      "targets": [{ "expr": "sum(increase(kissan_orders_total[24h])) or vector(0)", "legendFormat": "Orders" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "currencyINR", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 15 },
+      "id": 9,
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Revenue Today (₹)",
+      "type": "stat",
+      "targets": [{ "expr": "sum(increase(kissan_revenue_total_rupees[24h])) or vector(0)", "legendFormat": "Revenue" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "purple", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 15 },
+      "id": 10,
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Disease Scans Today",
+      "type": "stat",
+      "targets": [{ "expr": "sum(increase(kissan_disease_scans_total[24h])) or vector(0)", "legendFormat": "Scans" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "orange", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 15 },
+      "id": 11,
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Active Farmers",
+      "type": "stat",
+      "targets": [{ "expr": "sum(kissan_active_users{user_type=\"farmer\"}) or vector(0)", "legendFormat": "Active" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 15 },
+      "id": 12,
+      "options": { "colorMode": "value", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Open Tickets",
+      "type": "stat",
+      "targets": [{ "expr": "sum(increase(kissan_support_tickets_total[24h])) or vector(0)", "legendFormat": "Tickets" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "super-light-blue", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 15 },
+      "id": 13,
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Consultations Today",
+      "type": "stat",
+      "targets": [{ "expr": "sum(increase(kissan_consultations_total[24h])) or vector(0)", "legendFormat": "Consults" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 },
+      "id": 103,
+      "title": "📋 Service Status Table",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Status" }, "properties": [{ "id": "mappings", "value": [{ "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } }, "type": "value" }] }] }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
+      "id": 14,
+      "options": { "showHeader": true, "sortBy": [{ "displayName": "Service", "desc": false }] },
+      "title": "All Services Status",
+      "type": "table",
+      "targets": [
+        { "expr": "up{job=\"kissan-services\"}", "legendFormat": "{{ service }}", "format": "table", "instant": true, "refId": "A" }
+      ],
+      "transformations": [
+        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true }, "renameByName": { "service": "Service", "Value": "Status" } } }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["kissan-mithar", "overview"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Kolkata",
+  "title": "🌾 Kissan Mithar — Platform Overview",
+  "uid": "kissan-overview",
+  "version": 1
+}

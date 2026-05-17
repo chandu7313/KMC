@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { createLogger, requestId } from '@kissan/shared';
+import { createLogger, requestId, metrics } from '@kissan/shared';
 import notificationRoutes from './routes/notification.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { startNotificationConsumers } from './events/consumers/notification.consumer.js';
@@ -19,6 +19,7 @@ app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || true, credentials: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(requestId);
+app.use(metrics.metricsMiddleware);
 app.use(morgan('combined', { stream: logger.stream }));
 
 // ── Health Check ──
@@ -29,7 +30,11 @@ app.get('/health', (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
+
 });
+
+// ── Prometheus Metrics ──
+app.get('/metrics', metrics.metricsRoute);
 
 // ── Routes ──
 app.use('/', notificationRoutes);

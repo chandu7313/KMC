@@ -81,3 +81,52 @@ status:
 clean:
 	docker-compose down -v --remove-orphans
 	docker system prune -f
+
+# ─── Monitoring Stack ───────────────────
+monitoring-up:
+	docker-compose -f monitoring/docker-compose.monitoring.yml up -d
+
+monitoring-down:
+	docker-compose -f monitoring/docker-compose.monitoring.yml down
+
+monitoring-logs:
+	docker-compose -f monitoring/docker-compose.monitoring.yml logs -f
+
+monitoring-restart:
+	docker-compose -f monitoring/docker-compose.monitoring.yml restart
+
+monitoring-status:
+	docker-compose -f monitoring/docker-compose.monitoring.yml ps
+
+monitoring-rebuild:
+	docker-compose -f monitoring/docker-compose.monitoring.yml up -d --build
+
+monitoring-clean:
+	docker-compose -f monitoring/docker-compose.monitoring.yml down -v --remove-orphans
+
+monitoring-health:
+	@echo "\n📊 Monitoring Stack Health:"
+	@echo "─────────────────────────────"
+	@printf "Prometheus:   " && (curl -sf http://localhost:9090/-/healthy && echo "✅ UP") || echo "❌ DOWN"
+	@printf "Grafana:      " && (curl -sf http://localhost:3100/api/health > /dev/null && echo "✅ UP") || echo "❌ DOWN"
+	@printf "AlertManager: " && (curl -sf http://localhost:9093/-/healthy > /dev/null && echo "✅ UP") || echo "❌ DOWN"
+	@printf "Loki:         " && (curl -sf http://localhost:3200/ready > /dev/null && echo "✅ UP") || echo "❌ DOWN"
+	@printf "Promtail:     " && (curl -sf http://localhost:9080/ready > /dev/null && echo "✅ UP") || echo "❌ DOWN"
+	@printf "Pushgateway:  " && (curl -sf http://localhost:9091/-/healthy > /dev/null && echo "✅ UP") || echo "❌ DOWN"
+	@echo "─────────────────────────────"
+	@echo "Grafana UI:   http://localhost:3100"
+	@echo "Prometheus:   http://localhost:9090"
+	@echo "AlertManager: http://localhost:9093"
+
+prometheus-reload:
+	curl -X POST http://localhost:9090/-/reload
+
+# ─── Full Stack ─────────────────────────
+all-up: up monitoring-up
+	@echo "✅ All services + monitoring started"
+
+all-down: monitoring-down down
+	@echo "✅ All services + monitoring stopped"
+
+all-status: status monitoring-status
+
