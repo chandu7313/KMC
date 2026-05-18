@@ -7,6 +7,7 @@
 networks:
   kissan-network:
     external: true
+    name: microservices_kissan-network
   monitoring-network:
     driver: bridge
 

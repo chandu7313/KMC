@@ -65,49 +65,56 @@ receivers:
   - name: default-receiver
     email_configs:
       - to: 'g.chandu7313@gmail.com'
-        subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }} - Kissan Mithar'
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }} - Kissan Mithar'
         html: '{{ template "email.html" . }}'
         send_resolved: true
 
   - name: critical-receiver
     email_configs:
       - to: 'g.chandu7313@gmail.com'
-        subject: '🔴 CRITICAL: {{ .GroupLabels.alertname }} - Kissan Mithar'
+        headers:
+          Subject: '🔴 CRITICAL: {{ .GroupLabels.alertname }} - Kissan Mithar'
         html: '{{ template "email.critical.html" . }}'
         send_resolved: true
 
   - name: finance-receiver
     email_configs:
       - to: 'g.chandu7313@gmail.com'
-        subject: '[Finance Alert] {{ .GroupLabels.alertname }}'
+        headers:
+          Subject: '[Finance Alert] {{ .GroupLabels.alertname }}'
         html: '{{ template "email.html" . }}'
         send_resolved: true
 
   - name: ecommerce-receiver
     email_configs:
       - to: 'g.chandu7313@gmail.com'
-        subject: '[E-Commerce Alert] {{ .GroupLabels.alertname }}'
+        headers:
+          Subject: '[E-Commerce Alert] {{ .GroupLabels.alertname }}'
         html: '{{ template "email.html" . }}'
         send_resolved: true
 
   - name: support-receiver
     email_configs:
       - to: 'g.chandu7313@gmail.com'
-        subject: '[Support Alert] {{ .GroupLabels.alertname }}'
+        headers:
+          Subject: '[Support Alert] {{ .GroupLabels.alertname }}'
         html: '{{ template "email.html" . }}'
         send_resolved: true
 
   - name: tech-receiver
     email_configs:
       - to: 'g.chandu7313@gmail.com'
-        subject: '[Tech Alert] {{ .GroupLabels.alertname }}'
+        headers:
+          Subject: '[Tech Alert] {{ .GroupLabels.alertname }}'
         html: '{{ template "email.html" . }}'
         send_resolved: true
 
   - name: info-receiver
     email_configs:
       - to: 'g.chandu7313@gmail.com'
-        subject: '[Info] {{ .GroupLabels.alertname }}'
+        headers:
+          Subject: '[Info] {{ .GroupLabels.alertname }}'
         html: '{{ template "email.html" . }}'
         send_resolved: false
 
