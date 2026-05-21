@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Get API URL from environment variable, default to localhost for development
-const baseURL = import.meta.env.REACT_APP_API_URL || 'http://localhost';
+// Get API URL from environment variable, default to localhost (Nginx gateway)
+const baseURL = import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_API_URL || 'http://localhost';
 
 export const apiClient = axios.create({
   baseURL,

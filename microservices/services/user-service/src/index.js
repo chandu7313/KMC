@@ -55,8 +55,8 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // ── Server ──
-const server = app.listen(PORT, () => {
-  logger.info(`User service running on port ${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`User service running on 0.0.0.0:${PORT}`);
 });
 
 const gracefulShutdown = async (signal) => {

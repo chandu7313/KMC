@@ -4,6 +4,7 @@ import { checkAuthState, getUserData as fetchUserData } from '@/modules/auth/api
 
 export const useGlobalStore = create((set, get) => ({
   // State
+  backendUrl: import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_API_URL || 'http://localhost',
   isLoggedin: false,
   userData: false,
   loading: true,

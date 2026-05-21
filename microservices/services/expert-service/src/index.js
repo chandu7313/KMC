@@ -39,7 +39,7 @@ app.use((req, res) =>
 
 app.use(errorHandler);
 
-const server = app.listen(PORT, () => logger.info(`Expert service running on port ${PORT}`));
+const server = app.listen(PORT, '0.0.0.0', () => logger.info(`Expert service running on 0.0.0.0:${PORT}`));
 
 const gracefulShutdown = (signal) => {
   logger.info(`${signal} received. Shutting down...`);

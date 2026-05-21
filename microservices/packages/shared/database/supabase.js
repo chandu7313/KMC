@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import ws from 'ws';
 
 let supabaseClient = null;
 
@@ -25,6 +26,9 @@ const getSupabaseClient = (options = {}) => {
     },
     db: {
       schema: 'public',
+    },
+    realtime: {
+      transport: ws,
     },
   });
 

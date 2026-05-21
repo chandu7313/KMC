@@ -50,6 +50,7 @@ services:
       - content-service
       - analytics-service
       - field-service
+      - frontend
     restart: unless-stopped
     networks:
       - kissan-network
@@ -133,7 +134,7 @@ services:
       - ENABLE_SMS=${ENABLE_SMS}
       - BCRYPT_ROUNDS=12
     volumes:
-      - ./services/auth-service/src:/app/src
+      - ./services/auth-service/src:/app/services/auth-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/auth-service:/app/logs
@@ -170,7 +171,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
-      - ./services/user-service/src:/app/src
+      - ./services/user-service/src:/app/services/user-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/user-service:/app/logs
@@ -209,7 +210,7 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - PLANT_ID_API_KEY=${PLANT_ID_API_KEY}
     volumes:
-      - ./services/ai-service/src:/app/src
+      - ./services/ai-service/src:/app/services/ai-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/ai-service:/app/logs
@@ -250,7 +251,7 @@ services:
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - AI_SERVICE_URL=http://ai-service:3003
     volumes:
-      - ./services/disease-service/src:/app/src
+      - ./services/disease-service/src:/app/services/disease-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/disease-service:/app/logs
@@ -291,7 +292,7 @@ services:
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - AI_SERVICE_URL=http://ai-service:3003
     volumes:
-      - ./services/soil-service/src:/app/src
+      - ./services/soil-service/src:/app/services/soil-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/soil-service:/app/logs
@@ -329,7 +330,7 @@ services:
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - DATA_GOV_API_KEY=${DATA_GOV_API_KEY}
     volumes:
-      - ./services/market-service/src:/app/src
+      - ./services/market-service/src:/app/services/market-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/market-service:/app/logs
@@ -369,7 +370,7 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     volumes:
-      - ./services/ecommerce-service/src:/app/src
+      - ./services/ecommerce-service/src:/app/services/ecommerce-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/ecommerce-service:/app/logs
@@ -406,7 +407,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
-      - ./services/order-service/src:/app/src
+      - ./services/order-service/src:/app/services/order-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/order-service:/app/logs
@@ -445,7 +446,7 @@ services:
       - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
       - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
     volumes:
-      - ./services/payment-service/src:/app/src
+      - ./services/payment-service/src:/app/services/payment-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/payment-service:/app/logs
@@ -490,7 +491,7 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PHONE=${ADMIN_PHONE}
     volumes:
-      - ./services/notification-service/src:/app/src
+      - ./services/notification-service/src:/app/services/notification-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/notification-service:/app/logs
@@ -527,7 +528,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
-      - ./services/support-service/src:/app/src
+      - ./services/support-service/src:/app/services/support-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/support-service:/app/logs
@@ -564,7 +565,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
-      - ./services/expert-service/src:/app/src
+      - ./services/expert-service/src:/app/services/expert-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/expert-service:/app/logs
@@ -604,7 +605,7 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     volumes:
-      - ./services/content-service/src:/app/src
+      - ./services/content-service/src:/app/services/content-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/content-service:/app/logs
@@ -641,7 +642,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
-      - ./services/analytics-service/src:/app/src
+      - ./services/analytics-service/src:/app/services/analytics-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/analytics-service:/app/logs
@@ -678,7 +679,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     volumes:
-      - ./services/field-service/src:/app/src
+      - ./services/field-service/src:/app/services/field-service/src
       - /app/node_modules
       - ./packages:/app/packages
       - ./logs/field-service:/app/logs
@@ -708,7 +709,6 @@ services:
       - REACT_APP_API_URL=http://localhost
       - REACT_APP_SHOW_DEV_LOGIN=true
       - REACT_APP_ENV=development
-    command: sh -c "npm install --include=optional && npm start"
     volumes:
       - ./frontend/web:/app
       - /app/node_modules
@@ -716,18 +716,18 @@ services:
     networks:
       - kissan-network
 
-  frontend-mobile:
-    build:
-      context: ./frontend/mobile
-      target: development
-    container_name: kissan-mobile
-    ports:
-      - "3016:3000"
-    volumes:
-      - ./frontend/mobile:/app
-    restart: unless-stopped
-    networks:
-      - kissan-network
+#   frontend-mobile:
+#     build:
+#       context: ./frontend/mobile
+#       target: development
+#     container_name: kissan-mobile
+#     ports:
+#       - "3016:3000"
+#     volumes:
+#       - ./frontend/mobile:/app
+#     restart: unless-stopped
+#     networks:
+#       - kissan-network
 
 # ──────────────────────────────────────
 # VOLUMES
@@ -774,6 +774,8 @@ volumes:
 networks:
   kissan-network:
     driver: bridge
+    name: kissan-network
     ipam:
       config:
         - subnet: 172.25.0.0/16
+

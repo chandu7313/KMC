@@ -34,7 +34,7 @@ app.use((req, res) => {
 });
 app.use(errorHandler);
 
-const server = app.listen(PORT, () => logger.info(`AI service running on port ${PORT}`));
+const server = app.listen(PORT, '0.0.0.0', () => logger.info(`AI service running on 0.0.0.0:${PORT}`));
 const gracefulShutdown = (signal) => { logger.info(`${signal} received`); server.close(() => process.exit(0)); setTimeout(() => process.exit(1), 10000); };
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));

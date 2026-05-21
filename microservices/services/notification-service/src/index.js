@@ -62,8 +62,8 @@ const startConsumers = async () => {
 };
 
 // ── Server ──
-const server = app.listen(PORT, async () => {
-  logger.info(`Notification service running on port ${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', async () => {
+  logger.info(`Notification service running on 0.0.0.0:${PORT}`);
   await startConsumers();
 });
 
