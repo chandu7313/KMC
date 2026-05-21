@@ -37,12 +37,15 @@ const ProductDetail = () => {
             setLoading(true);
             const { data } = await axios.post(`${backendUrl}${API.PRODUCT}/single`, { productId: id });
             if (data.success) {
-                setProduct(data.product);
-                if (data.product.images && data.product.images.length > 0) {
-                    setImage(data.product.images[0]);
+                const productData = data.product || data.data?.product;
+                setProduct(productData);
+                if (productData && productData.images && productData.images.length > 0) {
+                    setImage(productData.images[0]);
                 }
                 // Once we have product category, fetch related products
-                fetchRelatedProducts(data.product.category, id);
+                if (productData) {
+                    fetchRelatedProducts(productData.category, id);
+                }
             } else {
                 toast.error(data.message);
             }
@@ -57,8 +60,9 @@ const ProductDetail = () => {
         try {
             const { data } = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
             if (data.success) {
+                const productsList = data.products || data.data?.products || [];
                 // Filter by category and exclude current product, then limit to 4
-                const related = data.products
+                const related = productsList
                     .filter(p => p.category === category && p.id !== currentId)
                     .slice(0, 4);
                 setRelatedProducts(related);

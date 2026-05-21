@@ -66,7 +66,10 @@ export const logout = async () => {
  * Get current user data
  */
 export const getUserData = async () => {
-  const { data } = await api.get(`${API.USER}/data`);
+  const { data } = await api.get(`${API.USER}/profile/data`, {
+    timeout: 10000,
+    _retry: false
+  });
   return data;
 };
 
@@ -82,7 +85,7 @@ export const checkSurveyStatus = async () => {
  * Sync user preferences to backend after login
  */
 export const syncPreferences = async (preferences) => {
-  const { data } = await api.post(`${API.USER}/update-preferences`, preferences);
+  const { data } = await api.post(`${API.USER}/profile/preferences`, preferences);
   return data;
 };
 
@@ -90,6 +93,6 @@ export const syncPreferences = async (preferences) => {
  * Update user language preference
  */
 export const updateLanguage = async (language) => {
-  const { data } = await api.post(`${API.USER}/update-language`, { language });
+  const { data } = await api.post(`${API.USER}/profile/language`, { language });
   return data;
 };

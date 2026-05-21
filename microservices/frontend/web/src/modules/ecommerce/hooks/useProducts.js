@@ -9,12 +9,11 @@ const useProducts = (options = {}) => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const data = category
+      const res = category
         ? await productsApi.getProducts({ category })
         : await productsApi.getProducts();
-      if (data.success) {
-        setProducts(data.products);
-      }
+      const productsList = res?.products || res?.data?.products || (Array.isArray(res) ? res : []);
+      setProducts(productsList);
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {

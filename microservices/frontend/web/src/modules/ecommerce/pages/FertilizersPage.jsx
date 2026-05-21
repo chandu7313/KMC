@@ -34,7 +34,8 @@ const Fertilizers = () => {
             const { data } = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
             if (data.success) {
                 const targetCategories = ['Fertilizers', 'Seeds', 'Pesticides'];
-                const filtered = data.products.filter(p => 
+                const productsList = data.products || data.data?.products || [];
+                const filtered = productsList.filter(p => 
                     targetCategories.includes(p.category) || 
                     targetCategories.includes(p.sub_category)
                 );

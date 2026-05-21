@@ -36,7 +36,8 @@ const Equipments = () => {
             const { data } = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
             if (data.success) {
                 const equipmentCategories = ['Tractors', 'Plows & Harrows', 'Seed Drills', 'Sprayers', 'Combine Harvesters'];
-                const filtered = data.products.filter(p => 
+                const productsList = data.products || data.data?.products || [];
+                const filtered = productsList.filter(p => 
                     p.category === 'Equipments' || 
                     equipmentCategories.includes(p.category) || 
                     equipmentCategories.includes(p.sub_category)

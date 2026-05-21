@@ -27,13 +27,15 @@ const CartPage = () => {
             // First get cart content
             const cartRes = await axios.post(`${backendUrl}${API.CART}/get`, { userId: userData.id });
             if (cartRes.data.success) {
-                setCartItems(cartRes.data.cartData);
-                setGlobalCartItems(cartRes.data.cartData);
+                const cartData = cartRes.data.cartData || cartRes.data.data?.cartData || {};
+                setCartItems(cartData);
+                setGlobalCartItems(cartData);
                 
-                // Then fetch product list to cross-reference (simplified approach, ideally backend returns populated cart)
+                // Then fetch product list to cross-reference
                 const prodRes = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
                 if (prodRes.data.success) {
-                    setProductsData(prodRes.data.products);
+                    const productsList = prodRes.data.products || prodRes.data.data?.products || [];
+                    setProductsData(productsList);
                 }
             }
         } catch (error) {

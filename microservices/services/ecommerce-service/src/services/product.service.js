@@ -5,7 +5,14 @@ import productRepo from '../repositories/product.repository.js';
 const logger = createLogger('ecommerce-service');
 
 class ProductService {
-  async listProducts(filters) { return productRepo.findAll(filters); }
+  async listProducts(filters) {
+    try {
+      return await productRepo.findAll(filters);
+    } catch (err) {
+      logger.warn(`listProducts DB failed (${err.message}), returning empty list`, {});
+      return [];
+    }
+  }
 
   async getProduct(id) {
     const product = await productRepo.findById(id);

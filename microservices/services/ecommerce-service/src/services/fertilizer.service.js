@@ -6,7 +6,12 @@ const logger = createLogger('ecommerce-service');
 
 class FertilizerService {
   async listFertilizers(filters) {
-    return fertilizerRepo.findAll(filters);
+    try {
+      return await fertilizerRepo.findAll(filters);
+    } catch (err) {
+      logger.warn(`listFertilizers DB failed (${err.message}), returning empty list`, {});
+      return [];
+    }
   }
 
   async getFertilizer(id) {

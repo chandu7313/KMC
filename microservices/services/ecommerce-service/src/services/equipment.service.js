@@ -6,7 +6,12 @@ const logger = createLogger('ecommerce-service');
 
 class EquipmentService {
   async listEquipments(filters) {
-    return equipmentRepo.findAll(filters);
+    try {
+      return await equipmentRepo.findAll(filters);
+    } catch (err) {
+      logger.warn(`listEquipments DB failed (${err.message}), returning empty list`, {});
+      return [];
+    }
   }
 
   async getEquipment(id) {

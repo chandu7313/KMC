@@ -32,10 +32,12 @@ const Checkout = () => {
             try {
                 const cartRes = await axios.post(`${backendUrl}${API.CART}/get`, { userId: userData.id });
                 if (cartRes.data.success) {
-                    setCartItems(cartRes.data.cartData);
+                    const cartData = cartRes.data.cartData || cartRes.data.data?.cartData || {};
+                    setCartItems(cartData);
                     const prodRes = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
                     if (prodRes.data.success) {
-                        setProductsData(prodRes.data.products);
+                        const productsList = prodRes.data.products || prodRes.data.data?.products || [];
+                        setProductsData(productsList);
                     }
                 }
             } catch (error) {

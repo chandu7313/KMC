@@ -8,7 +8,7 @@ import userService from '../services/user.service.js';
 export const getUserData = async (req, res, next) => {
   try {
     const userId = req.user?.id || req.body.userId;
-    const userData = await userService.getUserData(userId);
+    const userData = await userService.getUserData(userId, req.user);
     return successResponse(res, { userData }, 'User data retrieved');
   } catch (error) {
     next(error);

@@ -28,7 +28,7 @@ const Login = () => {
             const hasCompletedTour = localStorage.getItem('kmc_tour_completed') === 'true' || localStorage.getItem('tourCompleted') === 'true';
             const simpleMode = localStorage.getItem('kmc_farmer_mode') === 'true';
 
-            await axios.post(backendUrl + `${API.USER}/update-preferences`, {
+            await axios.post(backendUrl + `${API.USER}/profile/preferences`, {
                 preferredLanguage,
                 hasCompletedTour,
                 simpleMode
@@ -69,7 +69,7 @@ const Login = () => {
             if (data.success) {
                 setIsLoggedin(true)
                 await getUserData()
-                await syncPreferencesToBackend()
+                syncPreferencesToBackend().catch(err => console.warn('Preferences sync skipped', err));
                 // Check if farmer needs to complete onboarding survey
                 try {
                     const surveyRes = await axios.get(backendUrl + `${API.SURVEY}/status`)
@@ -100,7 +100,7 @@ const Login = () => {
                 if (data.success) {
                     setIsLoggedin(true)
                     await getUserData()
-                    await syncPreferencesToBackend()
+                    syncPreferencesToBackend().catch(err => console.warn('Preferences sync skipped', err));
                     
                     try {
                         const surveyRes = await axios.get(backendUrl + `${API.SURVEY}/status`)
@@ -119,7 +119,7 @@ const Login = () => {
                 if (data.success) {
                     setIsLoggedin(true)
                     await getUserData()
-                    await syncPreferencesToBackend()
+                    syncPreferencesToBackend().catch(err => console.warn('Preferences sync skipped', err));
                     
                     try {
                         const surveyRes = await axios.get(backendUrl + `${API.SURVEY}/status`)
@@ -156,7 +156,7 @@ const Login = () => {
             if (data.success) {
                 setIsLoggedin(true);
                 getUserData();
-                await syncPreferencesToBackend();
+                syncPreferencesToBackend().catch(err => console.warn('Preferences sync skipped', err));
                 toast.success(`Logged in automatically as ${role}`);
                 
                 if (['farmer', 'user'].includes(role)) {

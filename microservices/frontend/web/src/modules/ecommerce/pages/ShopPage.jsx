@@ -34,7 +34,7 @@ const Marketplace = () => {
             setLoading(true);
             const { data } = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
             if (data.success) {
-                setProducts(data.products);
+                setProducts(data.products || data.data?.products || []);
             } else {
                 toast.error(data.message);
             }
