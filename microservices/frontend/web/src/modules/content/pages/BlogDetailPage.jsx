@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Navbar from '@/app/layouts/Navbar';
-import { Calendar, User, ArrowLeft, Clock, Share2, Facebook, Twitter, Link } from 'lucide-react';
+import Footer from '@/app/layouts/Footer';
+import { Calendar, User, ArrowLeft, Clock, Share2, Facebook, Twitter, Link, BookOpen } from 'lucide-react';
 import { useGlobalStore } from '@/app/store/globalStore';
 import API from '@/core/api/api.config';
 
