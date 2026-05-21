@@ -1,61 +1,39 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+import { Op } from 'sequelize';
+
+const { User } = models;
 
 /**
- * User repository — Supabase queries for users table.
+ * User repository — Sequelize queries for users table.
  */
 class UserRepository {
-  constructor() {
-    this.db = getSupabaseClient();
-    this.table = 'users';
-  }
-
-  async findById(id, fields = '*') {
-    const { data, error } = await this.db
-      .from(this.table)
-      .select(fields)
-      .eq('id', id)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+  async findById(id, fields = null) {
+    const options = { raw: true };
+    if (fields && fields !== '*') {
+      options.attributes = fields.split(',').map(f => f.trim());
+    }
+    return User.findByPk(id, options);
   }
 
   async findByEmail(email) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .select('*')
-      .eq('email', email)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return User.findOne({ where: { email }, raw: true });
   }
 
   async findByPhone(phone) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .select('*')
-      .eq('phone', phone)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return User.findOne({ where: { phone }, raw: true });
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedUser]] = await User.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedUser;
   }
 
   async delete(id) {
-    const { error } = await this.db
-      .from(this.table)
-      .delete()
-      .eq('id', id);
-    if (error) throw error;
+    await User.destroy({ where: { id } });
     return true;
   }
 
@@ -63,31 +41,36 @@ class UserRepository {
    * List users with pagination, filters, and search.
    */
   async findAll({ page = 1, limit = 20, role, search, district, isVerified } = {}) {
-    let query = this.db
-      .from(this.table)
-      .select('id, name, email, phone, role, district, crops, isAccountVerified, created_at', { count: 'exact' });
-
-    if (role) query = query.eq('role', role);
-    if (district) query = query.eq('district', district);
-    if (isVerified !== undefined) query = query.eq('isAccountVerified', isVerified);
+    const where = {};
+    if (role) where.role = role;
+    if (district) where.district = district;
+    if (isVerified !== undefined) where.isAccountVerified = isVerified;
     if (search) {
-      query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`);
+      where[Op.or] = [
+        { name: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } },
+        { phone: { [Op.iLike]: `%${search}%` } }
+      ];
     }
 
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    query = query.order('created_at', { ascending: false }).range(from, to);
+    const offset = (page - 1) * limit;
 
-    const { data, error, count } = await query;
-    if (error) throw error;
+    const { rows, count } = await User.findAndCountAll({
+      where,
+      attributes: ['id', 'name', 'email', 'phone', 'role', 'district', 'crops', 'isAccountVerified', 'created_at'],
+      order: [['created_at', 'DESC']],
+      limit,
+      offset,
+      raw: true
+    });
 
     return {
-      users: data || [],
+      users: rows,
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
+        total: count,
+        totalPages: Math.ceil(count / limit),
       },
     };
   }
@@ -96,13 +79,17 @@ class UserRepository {
    * Get distinct districts for filter dropdowns.
    */
   async getDistinctDistricts() {
-    const { data, error } = await this.db
-      .from(this.table)
-      .select('district')
-      .eq('role', 'user')
-      .not('district', 'is', null);
-    if (error) throw error;
-    const unique = [...new Set((data || []).map(d => d.district).filter(Boolean))];
+    const districts = await User.findAll({
+      attributes: ['district'],
+      where: {
+        role: 'user',
+        district: { [Op.not]: null }
+      },
+      group: ['district'],
+      raw: true
+    });
+    
+    const unique = districts.map(d => d.district).filter(Boolean);
     return unique.sort();
   }
 
@@ -110,12 +97,7 @@ class UserRepository {
    * Count users by role.
    */
   async countByRole(role) {
-    const { count, error } = await this.db
-      .from(this.table)
-      .select('*', { count: 'exact', head: true })
-      .eq('role', role);
-    if (error) throw error;
-    return count || 0;
+    return User.count({ where: { role } });
   }
 }
 

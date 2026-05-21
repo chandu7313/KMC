@@ -1,53 +1,87 @@
 import bcrypt from 'bcryptjs';
-import { HttpError, getSupabaseClient, createLogger } from '@kissan/shared';
+import { HttpError, models, createLogger } from '@kissan/shared';
+import { Op } from 'sequelize';
 import ticketRepo from '../repositories/ticket.repository.js';
 import agentRepo from '../repositories/agent.repository.js';
 
+const { User, Booking } = models;
 const logger = createLogger('support-service');
-const db = getSupabaseClient();
 
 class ManagementService {
   // ── Farmers ──
   async getFarmers(filters) {
-    let q = db.from('users').select('id,name,email,phone,district,language,isAccountVerified,created_at', { count: 'exact' }).eq('role', 'user');
-    if (filters.search) q = q.or(`name.ilike.%${filters.search}%,phone.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
-    if (filters.district) q = q.eq('district', filters.district);
-    const offset = (parseInt(filters.page || 1) - 1) * parseInt(filters.limit || 25);
-    q = q.order('created_at', { ascending: false }).range(offset, offset + parseInt(filters.limit || 25) - 1);
-    const { data, count, error } = await q;
-    if (error) throw error;
-    return { farmers: data || [], total: count || 0 };
+    const where = { role: 'user' };
+    
+    if (filters.search) {
+      where[Op.or] = [
+        { name: { [Op.iLike]: `%${filters.search}%` } },
+        { phone: { [Op.iLike]: `%${filters.search}%` } },
+        { email: { [Op.iLike]: `%${filters.search}%` } }
+      ];
+    }
+    if (filters.district) where.district = filters.district;
+
+    const limit = parseInt(filters.limit || 25);
+    const offset = (parseInt(filters.page || 1) - 1) * limit;
+
+    const { rows, count } = await User.findAndCountAll({
+      where,
+      attributes: ['id', 'name', 'email', 'phone', 'district', 'language', 'isAccountVerified', 'created_at'],
+      order: [['created_at', 'DESC']],
+      limit,
+      offset,
+      raw: true
+    });
+
+    return { farmers: rows, total: count };
   }
 
   async getFarmerProfile(id) {
-    const { data: farmer, error } = await db.from('users').select('*').eq('id', id).single();
-    if (error) throw HttpError.notFound('Farmer not found');
+    const farmer = await User.findByPk(id, { raw: true });
+    if (!farmer) throw HttpError.notFound('Farmer not found');
     return farmer;
   }
 
   async blockFarmer(id) {
     const farmer = await this.getFarmerProfile(id);
     const newStatus = !farmer.isAccountVerified;
-    await db.from('users').update({ isAccountVerified: newStatus }).eq('id', id);
+    await User.update({ isAccountVerified: newStatus }, { where: { id } });
     return { blocked: !newStatus };
   }
 
   // ── Bookings ──
   async getBookings(filters) {
-    let q = db.from('bookings').select('*', { count: 'exact' });
-    if (filters.status) q = q.eq('status', filters.status);
-    if (filters.search) q = q.or(`fullName.ilike.%${filters.search}%,phone.ilike.%${filters.search}%`);
-    const offset = (parseInt(filters.page || 1) - 1) * parseInt(filters.limit || 25);
-    q = q.order('visitDate').range(offset, offset + parseInt(filters.limit || 25) - 1);
-    const { data, count, error } = await q;
-    if (error) throw error;
-    return { bookings: data || [], total: count || 0 };
+    const where = {};
+    if (filters.status) where.status = filters.status;
+    if (filters.search) {
+      where[Op.or] = [
+        { full_name: { [Op.iLike]: `%${filters.search}%` } },
+        { phone: { [Op.iLike]: `%${filters.search}%` } }
+      ];
+    }
+
+    const limit = parseInt(filters.limit || 25);
+    const offset = (parseInt(filters.page || 1) - 1) * limit;
+
+    const { rows, count } = await Booking.findAndCountAll({
+      where,
+      order: [['visit_date', 'ASC']],
+      limit,
+      offset,
+      raw: true
+    });
+
+    return { bookings: rows, total: count };
   }
 
   async updateBooking(id, updates) {
-    const { data, error } = await db.from('bookings').update(updates).eq('id', id).select().single();
-    if (error) throw HttpError.notFound('Booking not found');
-    return data;
+    const [_, [updatedBooking]] = await Booking.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    if (!updatedBooking) throw HttpError.notFound('Booking not found');
+    return updatedBooking;
   }
 
   // ── Templates ──
@@ -77,7 +111,7 @@ class ManagementService {
 
   async getAgentPerformance() {
     const agents = await agentRepo.findActive();
-    return agents.map(a => ({ ...a, ticketsAssigned: 0, ticketsResolved: 0 })); // Stats populated via aggregation
+    return agents.map(a => ({ ...a, ticketsAssigned: 0, ticketsResolved: 0 }));
   }
 
   // ── Agents ──

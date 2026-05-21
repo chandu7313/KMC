@@ -1,40 +1,66 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+import { Op } from 'sequelize';
+
+const { Product } = models;
 
 class ProductRepository {
-  constructor() { this.db = getSupabaseClient(); this.table = 'products'; }
+  async findAll({ page = 1, limit = 20, category, sub_category, minPrice, maxPrice, search, sort = 'newest' } = {}) {
+    const where = {};
+    if (category) where.category = category;
+    if (sub_category) where.sub_category = sub_category;
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price[Op.gte] = minPrice;
+      if (maxPrice) where.price[Op.lte] = maxPrice;
+    }
+    if (search) {
+      where.name = { [Op.iLike]: `%${search}%` };
+    }
 
-  async findAll(filters = {}) {
-    let q = this.db.from(this.table).select('*');
-    if (filters.category) q = q.eq('category', filters.category);
-    if (filters.isFeatured) q = q.eq('isFeatured', true);
-    if (filters.search) q = q.ilike('name', `%${filters.search}%`);
-    q = q.order('created_at', { ascending: false });
-    const { data, error } = await q;
-    if (error) throw error;
-    return data || [];
+    const order = [];
+    if (sort === 'price_asc') order.push(['price', 'ASC']);
+    else if (sort === 'price_desc') order.push(['price', 'DESC']);
+    else if (sort === 'rating') order.push(['ratings', 'DESC']);
+    else order.push(['created_at', 'DESC']); // newest
+
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await Product.findAndCountAll({
+      where,
+      order,
+      limit,
+      offset,
+      raw: true
+    });
+
+    return {
+      products: rows,
+      total: count,
+      page: Number(page),
+      totalPages: Math.ceil(count / limit)
+    };
   }
 
   async findById(id) {
-    const { data, error } = await this.db.from(this.table).select('*').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return Product.findByPk(id, { raw: true });
   }
 
   async create(product) {
-    const { data, error } = await this.db.from(this.table).insert(product).select().single();
-    if (error) throw error;
-    return data;
+    const p = await Product.create(product);
+    return p.get({ plain: true });
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db.from(this.table).update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedProduct]] = await Product.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedProduct;
   }
 
   async delete(id) {
-    const { error } = await this.db.from(this.table).delete().eq('id', id);
-    if (error) throw error;
+    await Product.destroy({ where: { id } });
     return true;
   }
 }

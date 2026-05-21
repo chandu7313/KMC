@@ -1,42 +1,43 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+
+const { AdminUser } = models;
 
 class AgentRepository {
-  constructor() { this.db = getSupabaseClient(); this.table = 'admin_users'; }
-
   async findAll() {
-    const { data, error } = await this.db.from(this.table).select('*').order('name');
-    if (error) throw error;
-    return data || [];
+    return AdminUser.findAll({
+      order: [['name', 'ASC']],
+      raw: true
+    });
   }
 
   async findActive() {
-    const { data, error } = await this.db.from(this.table).select('id,name,avatar,status,role,email,phone').eq('isActive', true);
-    if (error) throw error;
-    return data || [];
+    return AdminUser.findAll({
+      attributes: ['id', 'name', 'avatar', 'status', 'role', 'email', 'phone'],
+      where: { isActive: true },
+      raw: true
+    });
   }
 
   async findById(id) {
-    const { data, error } = await this.db.from(this.table).select('*').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return AdminUser.findByPk(id, { raw: true });
   }
 
   async findByEmail(email) {
-    const { data, error } = await this.db.from(this.table).select('*').eq('email', email).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return AdminUser.findOne({ where: { email }, raw: true });
   }
 
   async create(data) {
-    const { data: agent, error } = await this.db.from(this.table).insert(data).select().single();
-    if (error) throw error;
-    return agent;
+    const agent = await AdminUser.create(data);
+    return agent.get({ plain: true });
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db.from(this.table).update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedAgent]] = await AdminUser.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedAgent;
   }
 }
 

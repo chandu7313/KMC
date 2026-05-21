@@ -1,62 +1,76 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+import { Op } from 'sequelize';
+
+const { MarketPrice } = models;
 
 class MarketPriceRepository {
-  constructor() { this.db = getSupabaseClient(); this.table = 'market_prices'; }
-
   async findAll({ crop, district } = {}) {
-    let q = this.db.from(this.table).select('*').order('arrivalDate', { ascending: false });
-    if (crop) q = q.ilike('cropName', `%${crop}%`);
-    if (district) q = q.ilike('district', `%${district}%`);
-    const { data, error } = await q;
-    if (error) throw error;
-    return data || [];
+    const where = {};
+    if (crop) where.cropName = { [Op.iLike]: `%${crop}%` };
+    if (district) where.district = { [Op.iLike]: `%${district}%` };
+
+    return MarketPrice.findAll({
+      where,
+      order: [['arrivalDate', 'DESC']],
+      raw: true
+    });
   }
 
   async findById(id) {
-    const { data, error } = await this.db.from(this.table).select('*').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return MarketPrice.findByPk(id, { raw: true });
   }
 
   async create(priceData) {
-    const { data, error } = await this.db.from(this.table).insert(priceData).select().single();
-    if (error) throw error;
-    return data;
+    const price = await MarketPrice.create(priceData);
+    return price.get({ plain: true });
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db.from(this.table).update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedPrice]] = await MarketPrice.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedPrice;
   }
 
   async delete(id) {
-    const { error } = await this.db.from(this.table).delete().eq('id', id);
-    if (error) throw error;
+    await MarketPrice.destroy({ where: { id } });
     return true;
   }
 
   async findByCrop(crop) {
-    const { data, error } = await this.db.from(this.table).select('*').ilike('cropName', crop).order('modalPrice', { ascending: false });
-    if (error) throw error;
-    return data || [];
+    return MarketPrice.findAll({
+      where: { cropName: { [Op.iLike]: crop } },
+      order: [['modalPrice', 'DESC']],
+      raw: true
+    });
   }
 
   async findLatest(crop, district) {
-    const { data, error } = await this.db.from(this.table).select('*')
-      .ilike('cropName', `%${crop}%`).ilike('district', `%${district}%`)
-      .order('arrivalDate', { ascending: false }).limit(1).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return MarketPrice.findOne({
+      where: {
+        cropName: { [Op.iLike]: `%${crop}%` },
+        district: { [Op.iLike]: `%${district}%` }
+      },
+      order: [['arrivalDate', 'DESC']],
+      raw: true
+    });
   }
 
   async findTrend(crop, district, days = 30) {
-    const since = new Date(); since.setDate(since.getDate() - days);
-    const { data, error } = await this.db.from(this.table).select('*')
-      .ilike('cropName', `%${crop}%`).ilike('district', `%${district}%`)
-      .gte('arrivalDate', since.toISOString()).order('arrivalDate', { ascending: true });
-    if (error) throw error;
-    return data || [];
+    const since = new Date(); 
+    since.setDate(since.getDate() - days);
+
+    return MarketPrice.findAll({
+      where: {
+        cropName: { [Op.iLike]: `%${crop}%` },
+        district: { [Op.iLike]: `%${district}%` },
+        arrivalDate: { [Op.gte]: since }
+      },
+      order: [['arrivalDate', 'ASC']],
+      raw: true
+    });
   }
 }
 

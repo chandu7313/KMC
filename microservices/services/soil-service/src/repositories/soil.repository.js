@@ -1,59 +1,58 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+
+const { SoilReport, SoilReminder } = models;
 
 class SoilReportRepository {
-  constructor() {
-    this.db = getSupabaseClient();
-    this.table = 'soil_reports';
-    this.reminderTable = 'soil_reminders';
-  }
-
   async create(data) {
-    const { data: record, error } = await this.db.from(this.table).insert(data).select().single();
-    if (error) throw error;
-    return record;
+    const report = await SoilReport.create(data);
+    return report.get({ plain: true });
   }
 
   async findById(id) {
-    const { data, error } = await this.db.from(this.table).select('*').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return SoilReport.findByPk(id, { raw: true });
   }
 
   async findByFarmer(farmerId) {
-    const { data, error } = await this.db.from(this.table).select('*').eq('farmerId', farmerId).order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+    return SoilReport.findAll({
+      where: { farmerId },
+      order: [['created_at', 'DESC']],
+      raw: true
+    });
   }
 
   async findAll() {
-    const { data, error } = await this.db.from(this.table).select('*').order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+    return SoilReport.findAll({
+      order: [['created_at', 'DESC']],
+      raw: true
+    });
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db.from(this.table).update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedReport]] = await SoilReport.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedReport;
   }
 
   // Soil Reminders
   async createReminder(data) {
-    const { data: record, error } = await this.db.from(this.reminderTable).insert(data).select().single();
-    if (error) throw error;
-    return record;
+    const reminder = await SoilReminder.create(data);
+    return reminder.get({ plain: true });
   }
 
   async findReminderByReport(reportId) {
-    const { data, error } = await this.db.from(this.reminderTable).select('*').eq('reportId', reportId).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return SoilReminder.findOne({ where: { reportId }, raw: true });
   }
 
   async updateReminder(id, updates) {
-    const { data, error } = await this.db.from(this.reminderTable).update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedReminder]] = await SoilReminder.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedReminder;
   }
 }
 

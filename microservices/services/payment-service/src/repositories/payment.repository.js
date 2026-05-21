@@ -1,36 +1,40 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+
+const { Payment } = models;
 
 class PaymentRepository {
-  constructor() { this.db = getSupabaseClient(); this.table = 'payments'; }
-
   async create(data) {
-    const { data: record, error } = await this.db.from(this.table).insert(data).select().single();
-    if (error) throw error;
-    return record;
+    const payment = await Payment.create(data);
+    return payment.get({ plain: true });
   }
 
   async findById(id) {
-    const { data, error } = await this.db.from(this.table).select('*').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return Payment.findByPk(id, { raw: true });
   }
 
   async findByOrder(orderId) {
-    const { data, error } = await this.db.from(this.table).select('*').eq('orderId', orderId).order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+    return Payment.findAll({
+      where: { orderId },
+      order: [['created_at', 'DESC']],
+      raw: true
+    });
   }
 
   async findByUser(userId) {
-    const { data, error } = await this.db.from(this.table).select('*').eq('userId', userId).order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+    return Payment.findAll({
+      where: { userId },
+      order: [['created_at', 'DESC']],
+      raw: true
+    });
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db.from(this.table).update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedPayment]] = await Payment.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedPayment;
   }
 }
 

@@ -1,121 +1,137 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+import { Op } from 'sequelize';
+
+const { SupportTicket, TicketMessage, ReplyTemplate, NotificationLog, SLAConfig } = models;
 
 class TicketRepository {
-  constructor() { this.db = getSupabaseClient(); }
-
   // ── Tickets ──
   async createTicket(data) {
-    const { data: ticket, error } = await this.db.from('support_tickets').insert(data).select().single();
-    if (error) throw error;
-    return ticket;
+    const ticket = await SupportTicket.create(data);
+    return ticket.get({ plain: true });
   }
 
   async findTicketById(id) {
-    const { data, error } = await this.db.from('support_tickets').select('*').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return SupportTicket.findByPk(id, { raw: true });
   }
 
   async findTickets({ page = 1, limit = 25, status, priority, category, assignedTo, search } = {}) {
-    let q = this.db.from('support_tickets').select('*', { count: 'exact' });
-    if (status && status !== 'all') q = q.eq('status', status);
-    if (priority && priority !== 'all') q = q.eq('priority', priority);
-    if (category) q = q.eq('category', category);
-    if (assignedTo) q = q.eq('assignedTo', assignedTo);
-    if (search) q = q.or(`ticketRef.ilike.%${search}%,subject.ilike.%${search}%`);
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-    q = q.order('created_at', { ascending: false }).range(offset, offset + parseInt(limit) - 1);
-    const { data, count, error } = await q;
-    if (error) throw error;
-    return { tickets: data || [], total: count || 0 };
+    const where = {};
+    if (status && status !== 'all') where.status = status;
+    if (priority && priority !== 'all') where.priority = priority;
+    if (category) where.category = category;
+    if (assignedTo) where.assignedTo = assignedTo;
+    
+    if (search) {
+      where[Op.or] = [
+        { ticketRef: { [Op.iLike]: `%${search}%` } },
+        { subject: { [Op.iLike]: `%${search}%` } }
+      ];
+    }
+
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await SupportTicket.findAndCountAll({
+      where,
+      order: [['created_at', 'DESC']],
+      limit,
+      offset,
+      raw: true
+    });
+
+    return { tickets: rows, total: count };
   }
 
   async updateTicket(id, updates) {
-    const { data, error } = await this.db.from('support_tickets').update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedTicket]] = await SupportTicket.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedTicket;
   }
 
   async deleteTicket(id) {
-    const { error } = await this.db.from('support_tickets').delete().eq('id', id);
-    if (error) throw error;
+    await SupportTicket.destroy({ where: { id } });
   }
 
   async countTickets(where = {}) {
-    let q = this.db.from('support_tickets').select('*', { count: 'exact', head: true });
-    Object.entries(where).forEach(([key, val]) => { q = q.eq(key, val); });
-    const { count, error } = await q;
-    if (error) throw error;
-    return count || 0;
+    return SupportTicket.count({ where });
   }
 
   // ── Messages ──
   async createMessage(data) {
-    const { data: msg, error } = await this.db.from('ticket_messages').insert(data).select().single();
-    if (error) throw error;
-    return msg;
+    const msg = await TicketMessage.create(data);
+    return msg.get({ plain: true });
   }
 
   async findMessages(ticketId) {
-    const { data, error } = await this.db.from('ticket_messages').select('*').eq('ticketId', ticketId).order('created_at', { ascending: true });
-    if (error) throw error;
-    return data || [];
+    return TicketMessage.findAll({
+      where: { ticketId },
+      order: [['created_at', 'ASC']],
+      raw: true
+    });
   }
 
   // ── Templates ──
   async findTemplates(filters = {}) {
-    let q = this.db.from('reply_templates').select('*').eq('isActive', true);
-    if (filters.category) q = q.eq('category', filters.category);
-    q = q.order('category').order('name');
-    const { data, error } = await q;
-    if (error) throw error;
-    return data || [];
+    const where = { isActive: true };
+    if (filters.category) where.category = filters.category;
+
+    return ReplyTemplate.findAll({
+      where,
+      order: [['category', 'ASC'], ['name', 'ASC']],
+      raw: true
+    });
   }
 
   async createTemplate(data) {
-    const { data: t, error } = await this.db.from('reply_templates').insert(data).select().single();
-    if (error) throw error;
-    return t;
+    const template = await ReplyTemplate.create(data);
+    return template.get({ plain: true });
   }
 
   async updateTemplate(id, updates) {
-    const { data, error } = await this.db.from('reply_templates').update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedTemplate]] = await ReplyTemplate.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedTemplate;
   }
 
   // ── Notification Logs ──
   async createNotificationLog(data) {
-    const { data: log, error } = await this.db.from('notification_logs').insert(data).select().single();
-    if (error) throw error;
-    return log;
+    const log = await NotificationLog.create(data);
+    return log.get({ plain: true });
   }
 
   async findNotificationLogs({ page = 1, limit = 25 } = {}) {
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-    const { data, count, error } = await this.db.from('notification_logs').select('*', { count: 'exact' })
-      .order('created_at', { ascending: false }).range(offset, offset + parseInt(limit) - 1);
-    if (error) throw error;
-    return { logs: data || [], total: count || 0 };
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await NotificationLog.findAndCountAll({
+      order: [['created_at', 'DESC']],
+      limit,
+      offset,
+      raw: true
+    });
+
+    return { logs: rows, total: count };
   }
 
   // ── SLA Config ──
   async findSLAConfig() {
-    const { data, error } = await this.db.from('sla_config').select('*').order('firstResponseMins');
-    if (error) throw error;
-    return data || [];
+    return SLAConfig.findAll({
+      order: [['firstResponseMins', 'ASC']],
+      raw: true
+    });
   }
 
   async upsertSLA(config) {
-    const { data, error } = await this.db.from('sla_config').upsert(config, { onConflict: 'priority' }).select().single();
-    if (error) throw error;
-    return data;
+    const [record] = await SLAConfig.upsert(config, { returning: true });
+    return record.get({ plain: true });
   }
 
   async findSLAByPriority(priority) {
-    const { data, error } = await this.db.from('sla_config').select('*').eq('priority', priority).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return SLAConfig.findOne({ where: { priority }, raw: true });
   }
 }
 

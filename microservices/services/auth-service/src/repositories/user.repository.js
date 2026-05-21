@@ -1,87 +1,47 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+
+const { User, AdminUser } = models;
 
 /**
- * User repository — abstracts all Supabase queries for the users table.
- * Single source of truth for auth-related DB operations.
+ * User repository — abstracts all DB queries for auth service.
+ * Refactored to use Sequelize ORM.
  */
 class UserRepository {
-  constructor() {
-    this.db = getSupabaseClient();
-    this.table = 'users';
-    this.adminTable = 'admin_users';
-  }
-
   async findById(id) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .select('*')
-      .eq('id', id)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return User.findByPk(id, { raw: true });
   }
 
   async findByEmail(email) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .select('*')
-      .eq('email', email)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return User.findOne({ where: { email }, raw: true });
   }
 
   async findByPhone(phone) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .select('*')
-      .eq('phone', phone)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return User.findOne({ where: { phone }, raw: true });
   }
 
   async create(userData) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .insert(userData)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    const user = await User.create(userData);
+    return user.get({ plain: true });
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedUser]] = await User.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedUser;
   }
 
   // ── Admin User queries ──
 
   async findAdminByEmail(email) {
-    const { data, error } = await this.db
-      .from(this.adminTable)
-      .select('*')
-      .eq('email', email)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return AdminUser.findOne({ where: { email }, raw: true });
   }
 
   async createAdmin(adminData) {
-    const { data, error } = await this.db
-      .from(this.adminTable)
-      .insert(adminData)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    const admin = await AdminUser.create(adminData);
+    return admin.get({ plain: true });
   }
 }
 

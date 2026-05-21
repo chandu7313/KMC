@@ -9,10 +9,8 @@ const env = {
   // JWT (for token verification)
   jwtSecret: process.env.JWT_SECRET,
 
-  // Supabase
-  supabaseUrl: process.env.SUPABASE_URL,
-  supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
-  supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  // Database
+  databaseUrl: process.env.DATABASE_URL || process.env.SUPABASE_URL,
 
   // Redis
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',

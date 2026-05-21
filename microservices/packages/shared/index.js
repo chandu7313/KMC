@@ -20,7 +20,11 @@ export { signAccessToken, signRefreshToken, verifyToken, decodeToken } from './a
 export { ROLES, PERMISSIONS, hasPermission, isAdminRole, getRolePermissions } from './auth/rbac.js';
 
 // Database clients
-export { getSupabaseClient, checkSupabaseHealth } from './database/supabase.js';
+export { getSequelize, checkSequelizeHealth, disconnectSequelize } from './database/sequelize.js';
+export { default as models } from './models/index.js';
+
+// Backward compatibility for anything that hasn't been migrated yet
+export { getSequelize as getSupabaseClient } from './database/sequelize.js';
 export { connectMongoDB, disconnectMongoDB, checkMongoHealth } from './database/mongodb.js';
 export {
   getRedisClient, REDIS_DBS,

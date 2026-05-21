@@ -1,51 +1,69 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+
+const { MarketplaceOrder, MarketplaceOrderItem, Product, User } = models;
 
 class OrderRepository {
-  constructor() { this.db = getSupabaseClient(); this.orderTable = 'marketplace_orders'; this.itemTable = 'marketplace_order_items'; }
-
   async createOrder(data) {
-    const { data: order, error } = await this.db.from(this.orderTable).insert(data).select().single();
-    if (error) throw error;
-    return order;
+    const order = await MarketplaceOrder.create(data);
+    return order.get({ plain: true });
   }
 
   async createOrderItems(items) {
-    const { data, error } = await this.db.from(this.itemTable).insert(items).select();
-    if (error) throw error;
-    return data;
+    const createdItems = await MarketplaceOrderItem.bulkCreate(items);
+    return createdItems.map(item => item.get({ plain: true }));
   }
 
   async findById(id) {
-    const { data, error } = await this.db.from(this.orderTable).select('*').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return MarketplaceOrder.findByPk(id, {
+      include: [{
+        model: MarketplaceOrderItem,
+        as: 'items',
+        include: [{ model: Product, as: 'product' }]
+      }],
+      raw: false // We need false here to let Sequelize build the nested structure
+    }).then(result => result ? result.get({ plain: true }) : null);
   }
 
   async findByUser(userId) {
-    const { data: orders, error } = await this.db.from(this.orderTable).select('*').eq('userId', userId).order('created_at', { ascending: false });
-    if (error) throw error;
-    // Fetch items for each order
-    for (const order of (orders || [])) {
-      const { data: items } = await this.db.from(this.itemTable).select('*').eq('orderId', order.id);
-      order.items = items || [];
-    }
-    return orders || [];
+    return MarketplaceOrder.findAll({
+      where: { userId },
+      order: [['created_at', 'DESC']],
+      include: [{
+        model: MarketplaceOrderItem,
+        as: 'items',
+        include: [{ model: Product, as: 'product' }]
+      }]
+    }).then(results => results.map(r => r.get({ plain: true })));
   }
 
   async findAll() {
-    const { data: orders, error } = await this.db.from(this.orderTable).select('*').order('created_at', { ascending: false });
-    if (error) throw error;
-    for (const order of (orders || [])) {
-      const { data: items } = await this.db.from(this.itemTable).select('*').eq('orderId', order.id);
-      order.items = items || [];
-    }
-    return orders || [];
+    return MarketplaceOrder.findAll({
+      order: [['created_at', 'DESC']],
+      include: [
+        { model: User, as: 'user', attributes: ['name', 'phone'] },
+        {
+          model: MarketplaceOrderItem,
+          as: 'items',
+          include: [{ model: Product, as: 'product' }]
+        }
+      ]
+    }).then(results => results.map(r => r.get({ plain: true })));
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db.from(this.orderTable).update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedOrder]] = await MarketplaceOrder.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedOrder;
+  }
+
+  async decrementStock(productId, quantity) {
+    const product = await Product.findByPk(productId);
+    if (!product) return;
+    const newStock = Math.max(0, (product.stock || 0) - quantity);
+    await product.update({ stock: newStock });
   }
 }
 

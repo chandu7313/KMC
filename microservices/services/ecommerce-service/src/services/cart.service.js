@@ -1,19 +1,19 @@
-import { HttpError, getSupabaseClient, createLogger } from '@kissan/shared';
+import { HttpError, models, createLogger } from '@kissan/shared';
 
+const { User } = models;
 const logger = createLogger('ecommerce-service');
-const db = getSupabaseClient();
 
 class CartService {
   async getCart(userId) {
-    const { data, error } = await db.from('users').select('cartData').eq('id', userId).single();
-    if (error) throw error;
-    return data?.cartData || {};
+    const user = await User.findByPk(userId, { attributes: ['cartData'], raw: true });
+    if (!user) throw HttpError.notFound('User not found');
+    return user.cartData || {};
   }
 
   async addToCart(userId, itemId) {
     const cartData = await this.getCart(userId);
     cartData[itemId] = (cartData[itemId] || 0) + 1;
-    await db.from('users').update({ cartData }).eq('id', userId);
+    await User.update({ cartData }, { where: { id: userId } });
     return cartData;
   }
 
@@ -21,12 +21,12 @@ class CartService {
     const cartData = await this.getCart(userId);
     if (quantity <= 0) delete cartData[itemId];
     else cartData[itemId] = quantity;
-    await db.from('users').update({ cartData }).eq('id', userId);
+    await User.update({ cartData }, { where: { id: userId } });
     return cartData;
   }
 
   async clearCart(userId) {
-    await db.from('users').update({ cartData: {} }).eq('id', userId);
+    await User.update({ cartData: {} }, { where: { id: userId } });
     return {};
   }
 }

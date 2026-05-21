@@ -1,118 +1,125 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+
+const { Expert, ExpertBooking, ExpertReview, User } = models;
 
 class ExpertRepository {
-  constructor() { this.db = getSupabaseClient(); }
-
   // ── Experts ──
   async findAll({ page = 1, limit = 20, specialization, available } = {}) {
-    let q = this.db.from('experts').select('*', { count: 'exact' }).eq('isActive', true);
-    if (specialization) q = q.eq('specialization', specialization);
-    if (available !== undefined) q = q.eq('isAvailable', available);
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-    q = q.order('rating', { ascending: false }).range(offset, offset + parseInt(limit) - 1);
-    const { data, count, error } = await q;
-    if (error) throw error;
-    return { experts: data || [], total: count || 0 };
+    const where = { isActive: true };
+    if (specialization) where.specialization = specialization;
+    if (available !== undefined) where.isAvailable = available;
+
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await Expert.findAndCountAll({
+      where,
+      order: [['rating', 'DESC']],
+      limit,
+      offset,
+      raw: true
+    });
+
+    return { experts: rows, total: count };
   }
 
   async findById(id) {
-    const { data, error } = await this.db.from('experts').select('*').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return Expert.findByPk(id, { raw: true });
   }
 
   async findByUserId(userId) {
-    const { data, error } = await this.db.from('experts').select('*').eq('userId', userId).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return Expert.findOne({ where: { userId }, raw: true });
   }
 
   async create(data) {
-    const { data: expert, error } = await this.db.from('experts').insert(data).select().single();
-    if (error) throw error;
-    return expert;
+    const expert = await Expert.create(data);
+    return expert.get({ plain: true });
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db.from('experts').update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedExpert]] = await Expert.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedExpert;
   }
 
   async delete(id) {
-    const { error } = await this.db.from('experts').update({ isActive: false }).eq('id', id);
-    if (error) throw error;
+    await Expert.update({ isActive: false }, { where: { id } });
   }
 
   // ── Bookings ──
   async createBooking(data) {
-    const { data: booking, error } = await this.db.from('expert_bookings').insert(data).select().single();
-    if (error) throw error;
-    return booking;
+    const booking = await ExpertBooking.create(data);
+    return booking.get({ plain: true });
   }
 
   async findBookingById(id) {
-    const { data, error } = await this.db.from('expert_bookings').select('*, experts(*)').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return ExpertBooking.findByPk(id, {
+      include: [{ model: Expert, as: 'expert' }]
+    }).then(result => result ? result.get({ plain: true }) : null);
   }
 
   async findBookingsByFarmer(farmerId, { page = 1, limit = 10 } = {}) {
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-    const { data, count, error } = await this.db
-      .from('expert_bookings')
-      .select('*, experts(name, specialization, profileImage)', { count: 'exact' })
-      .eq('farmerId', farmerId)
-      .order('scheduledAt', { ascending: false })
-      .range(offset, offset + parseInt(limit) - 1);
-    if (error) throw error;
-    return { bookings: data || [], total: count || 0 };
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await ExpertBooking.findAndCountAll({
+      where: { farmerId },
+      include: [{ model: Expert, as: 'expert', attributes: ['name', 'specialization', 'profileImage'] }],
+      order: [['scheduledAt', 'DESC']],
+      limit,
+      offset
+    });
+
+    return { bookings: rows.map(r => r.get({ plain: true })), total: count };
   }
 
   async findBookingsByExpert(expertId, { page = 1, limit = 10 } = {}) {
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-    const { data, count, error } = await this.db
-      .from('expert_bookings')
-      .select('*', { count: 'exact' })
-      .eq('expertId', expertId)
-      .order('scheduledAt', { ascending: false })
-      .range(offset, offset + parseInt(limit) - 1);
-    if (error) throw error;
-    return { bookings: data || [], total: count || 0 };
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await ExpertBooking.findAndCountAll({
+      where: { expertId },
+      order: [['scheduledAt', 'DESC']],
+      limit,
+      offset,
+      raw: true
+    });
+
+    return { bookings: rows, total: count };
   }
 
   async updateBooking(id, updates) {
-    const { data, error } = await this.db.from('expert_bookings').update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedBooking]] = await ExpertBooking.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedBooking;
   }
 
   async countBookings(where = {}) {
-    let q = this.db.from('expert_bookings').select('*', { count: 'exact', head: true });
-    Object.entries(where).forEach(([key, val]) => { q = q.eq(key, val); });
-    const { count, error } = await q;
-    if (error) throw error;
-    return count || 0;
+    return ExpertBooking.count({ where });
   }
 
   // ── Reviews ──
   async createReview(data) {
-    const { data: review, error } = await this.db.from('expert_reviews').insert(data).select().single();
-    if (error) throw error;
-    return review;
+    const review = await ExpertReview.create(data);
+    return review.get({ plain: true });
   }
 
   async findReviewsByExpert(expertId) {
-    const { data, error } = await this.db.from('expert_reviews').select('*').eq('expertId', expertId).order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+    return ExpertReview.findAll({
+      where: { expertId },
+      order: [['created_at', 'DESC']],
+      raw: true
+    });
   }
 
   async getAverageRating(expertId) {
-    const { data, error } = await this.db.from('expert_reviews').select('rating').eq('expertId', expertId);
-    if (error) throw error;
-    if (!data || data.length === 0) return 0;
-    return data.reduce((sum, r) => sum + r.rating, 0) / data.length;
+    const result = await ExpertReview.sum('rating', { where: { expertId } });
+    const count = await ExpertReview.count({ where: { expertId } });
+    if (!count) return 0;
+    return result / count;
   }
 }
 

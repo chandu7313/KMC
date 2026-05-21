@@ -1,99 +1,68 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+
+const { EquipmentOrder, EquipmentOrderItem, Equipment, User } = models;
 
 class EquipmentOrderRepository {
-  constructor() {
-    this.db = getSupabaseClient();
-    this.orderTable = 'equipment_orders';
-    this.itemTable = 'equipment_order_items';
-    this.equipmentTable = 'equipments';
-  }
-
   async createOrder(data) {
-    const { data: order, error } = await this.db.from(this.orderTable).insert(data).select().single();
-    if (error) throw error;
-    return order;
+    const order = await EquipmentOrder.create(data);
+    return order.get({ plain: true });
   }
 
   async createOrderItems(items) {
-    const { data, error } = await this.db.from(this.itemTable).insert(items).select();
-    if (error) throw error;
-    return data;
+    const createdItems = await EquipmentOrderItem.bulkCreate(items);
+    return createdItems.map(item => item.get({ plain: true }));
   }
 
   async findById(id) {
-    const { data, error } = await this.db.from(this.orderTable).select('*').eq('id', id).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return EquipmentOrder.findByPk(id, {
+      include: [{
+        model: EquipmentOrderItem,
+        as: 'items',
+        include: [{ model: Equipment, as: 'equipment' }]
+      }]
+    }).then(result => result ? result.get({ plain: true }) : null);
   }
 
   async findByUser(userId) {
-    const { data: orders, error } = await this.db
-      .from(this.orderTable).select('*')
-      .eq('userId', userId)
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-
-    for (const order of (orders || [])) {
-      const { data: items } = await this.db
-        .from(this.itemTable).select('*')
-        .eq('orderId', order.id);
-
-      for (const item of (items || [])) {
-        const { data: equipment } = await this.db
-          .from(this.equipmentTable).select('*')
-          .eq('id', item.equipmentId).single();
-        item.equipmentId = equipment || item.equipmentId;
-      }
-      order.items = items || [];
-    }
-    return orders || [];
+    return EquipmentOrder.findAll({
+      where: { userId },
+      order: [['created_at', 'DESC']],
+      include: [{
+        model: EquipmentOrderItem,
+        as: 'items',
+        include: [{ model: Equipment, as: 'equipment' }]
+      }]
+    }).then(results => results.map(r => r.get({ plain: true })));
   }
 
   async findAll() {
-    const { data: orders, error } = await this.db
-      .from(this.orderTable).select('*')
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-
-    for (const order of (orders || [])) {
-      // Attach user info
-      const { data: user } = await this.db
-        .from('users').select('name, phone')
-        .eq('id', order.userId).single();
-      order.userId = user || order.userId;
-
-      // Attach items with equipment details
-      const { data: items } = await this.db
-        .from(this.itemTable).select('*')
-        .eq('orderId', order.id);
-
-      for (const item of (items || [])) {
-        const { data: equipment } = await this.db
-          .from(this.equipmentTable).select('*')
-          .eq('id', item.equipmentId).single();
-        item.equipmentId = equipment || item.equipmentId;
-      }
-      order.items = items || [];
-    }
-    return orders || [];
+    return EquipmentOrder.findAll({
+      order: [['created_at', 'DESC']],
+      include: [
+        { model: User, as: 'user', attributes: ['name', 'phone'] },
+        {
+          model: EquipmentOrderItem,
+          as: 'items',
+          include: [{ model: Equipment, as: 'equipment' }]
+        }
+      ]
+    }).then(results => results.map(r => r.get({ plain: true })));
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db.from(this.orderTable).update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedOrder]] = await EquipmentOrder.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedOrder;
   }
 
-  /** Decrement stock for an equipment (direct DB access — Option A) */
   async decrementStock(equipmentId, quantity) {
-    const { data: equipment, error } = await this.db
-      .from(this.equipmentTable).select('stock')
-      .eq('id', equipmentId).single();
-    if (error) throw error;
-    if (!equipment) return;
-
-    const newStock = Math.max(0, (equipment.stock || 0) - quantity);
-    await this.db.from(this.equipmentTable).update({ stock: newStock }).eq('id', equipmentId);
+    const eq = await Equipment.findByPk(equipmentId);
+    if (!eq) return;
+    const newStock = Math.max(0, (eq.stock || 0) - quantity);
+    await eq.update({ stock: newStock });
   }
 }
 

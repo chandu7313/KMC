@@ -18,7 +18,7 @@ const errorResponse = (res, error) => {
     });
   }
 
-  // Sequelize/Supabase unique constraint violation
+  // Sequelize unique constraint violation
   if (error.name === 'SequelizeUniqueConstraintError' || error.code === '23505') {
     return res.status(409).json({
       success: false,

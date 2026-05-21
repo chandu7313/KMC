@@ -13,10 +13,8 @@ const env = {
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
 
-  // Supabase
-  supabaseUrl: process.env.SUPABASE_URL,
-  supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
-  supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  // Database
+  databaseUrl: process.env.DATABASE_URL || process.env.SUPABASE_URL,
 
   // Redis
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
@@ -40,7 +38,7 @@ const env = {
 };
 
 // Validate critical env vars
-const required = ['jwtSecret', 'supabaseUrl'];
+const required = ['jwtSecret', 'databaseUrl'];
 for (const key of required) {
   if (!env[key]) {
     console.warn(`WARNING: Required env var "${key}" is not set. Service may not function correctly.`);

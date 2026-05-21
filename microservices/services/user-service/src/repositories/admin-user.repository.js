@@ -1,82 +1,60 @@
-import { getSupabaseClient } from '@kissan/shared';
+import { models } from '@kissan/shared';
+
+const { AdminUser } = models;
 
 /**
- * Admin user repository — Supabase queries for admin_users table.
+ * Admin user repository — Sequelize queries for admin_users table.
  */
 class AdminUserRepository {
-  constructor() {
-    this.db = getSupabaseClient();
-    this.table = 'admin_users';
-  }
-
   async findById(id) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .select('*')
-      .eq('id', id)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return AdminUser.findByPk(id, { raw: true });
   }
 
   async findByEmail(email) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .select('*')
-      .eq('email', email)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    return AdminUser.findOne({ where: { email }, raw: true });
   }
 
   async create(adminData) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .insert(adminData)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    const admin = await AdminUser.create(adminData);
+    return admin.get({ plain: true });
   }
 
   async update(id, updates) {
-    const { data, error } = await this.db
-      .from(this.table)
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    const [_, [updatedAdmin]] = await AdminUser.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true
+    });
+    return updatedAdmin;
   }
 
   async delete(id) {
-    const { error } = await this.db.from(this.table).delete().eq('id', id);
-    if (error) throw error;
+    await AdminUser.destroy({ where: { id } });
     return true;
   }
 
   async findAll({ page = 1, limit = 20, role, status } = {}) {
-    let query = this.db
-      .from(this.table)
-      .select('id, name, email, role, status, created_at', { count: 'exact' });
+    const where = {};
+    if (role) where.role = role;
+    if (status) where.status = status;
 
-    if (role) query = query.eq('role', role);
-    if (status) query = query.eq('status', status);
+    const offset = (page - 1) * limit;
 
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    query = query.order('created_at', { ascending: false }).range(from, to);
-
-    const { data, error, count } = await query;
-    if (error) throw error;
+    const { rows, count } = await AdminUser.findAndCountAll({
+      where,
+      attributes: ['id', 'name', 'email', 'role', 'status', 'created_at'],
+      order: [['created_at', 'DESC']],
+      limit,
+      offset,
+      raw: true
+    });
 
     return {
-      admins: data || [],
+      admins: rows,
       pagination: {
         page, limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
+        total: count,
+        totalPages: Math.ceil(count / limit),
       },
     };
   }
