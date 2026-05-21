@@ -7,7 +7,7 @@
 networks:
   kissan-network:
     external: true
-    name: microservices_kissan-network
+    name: kissan-network
   monitoring-network:
     driver: bridge
 
@@ -16,6 +16,7 @@ volumes:
   grafana_data:
   loki_data:
   alertmanager_data:
+  promtail_positions:
 
 services:
 
@@ -111,6 +112,8 @@ services:
       - monitoring-network
 
   # ─── cAdvisor (Container Metrics) ───────────────────────
+  # NOTE: On macOS Docker Desktop, cgroup mounts are not available.
+  # We mount only the Docker socket for container-level metrics.
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     container_name: kissan-cadvisor
@@ -121,11 +124,10 @@ services:
       - '--housekeeping_interval=30s'
       - '--docker_only=true'
     volumes:
-      - /var/run:/var/run:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - monitoring-network
       - kissan-network
-    privileged: true
 
   # ─── Redis Exporter ─────────────────────────────────────
   redis-exporter:
@@ -136,7 +138,9 @@ services:
       - "9121:9121"
     environment:
       REDIS_ADDR: redis://redis:6379
-      REDIS_PASSWORD: kmc_redis_secret
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-kmc_redis_secret}
+    env_file:
+      - ../.env
     networks:
       - kissan-network
       - monitoring-network
@@ -171,6 +175,7 @@ services:
     volumes:
       - ./promtail/promtail.yml:/etc/promtail/promtail.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - promtail_positions:/run/promtail
     networks:
       - kissan-network
       - monitoring-network
