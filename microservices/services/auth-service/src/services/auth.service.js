@@ -250,40 +250,75 @@ class AuthService {
 
     if (adminRoles.includes(role)) {
       const email = `${role}_test@agridust.com`;
-      user = await userRepository.findAdminByEmail(email);
+      try {
+        user = await userRepository.findAdminByEmail(email);
 
-      if (!user) {
-        user = await userRepository.createAdmin({
+        if (!user) {
+          user = await userRepository.createAdmin({
+            name: `${role.replace(/_/g, ' ').toUpperCase()} TEST`,
+            email,
+            password: 'hashed_password_here',
+            role,
+            status: 'online',
+          });
+        }
+      } catch (err) {
+        user = {
+          id: `mock-${role}-123`,
           name: `${role.replace(/_/g, ' ').toUpperCase()} TEST`,
           email,
-          password: 'hashed_password_here',
           role,
           status: 'online',
-        });
+          isAccountVerified: true,
+        };
       }
     } else if (role === 'farmer' || role === 'user') {
-      user = await userRepository.findByEmail('amit@example.com');
-      if (!user) {
-        user = await userRepository.create({
-          name: 'Amit Kumar',
+      try {
+        user = await userRepository.findByEmail('amit@example.com');
+        if (!user) {
+          user = await userRepository.create({
+            name: 'Amit Kumar',
+            email: 'amit@example.com',
+            phone: '8888888888',
+            role: 'user',
+            district: 'Pune',
+            crops: ['Wheat'],
+            isAccountVerified: true,
+          });
+        }
+      } catch (err) {
+        user = {
+          id: `mock-user-123`,
+          name: 'Amit Kumar (Mock)',
           email: 'amit@example.com',
           phone: '8888888888',
           role: 'user',
           district: 'Pune',
           crops: ['Wheat'],
           isAccountVerified: true,
-        });
+        };
       }
     } else if (role === 'field-officer') {
-      user = await userRepository.findByEmail('john.fo@agridust.com');
-      if (!user) {
-        user = await userRepository.create({
-          name: 'John Officer',
+      try {
+        user = await userRepository.findByEmail('john.fo@agridust.com');
+        if (!user) {
+          user = await userRepository.create({
+            name: 'John Officer',
+            email: 'john.fo@agridust.com',
+            phone: '7777777777',
+            role: 'field-officer',
+            isAccountVerified: true,
+          });
+        }
+      } catch (err) {
+        user = {
+          id: `mock-fo-123`,
+          name: 'John Officer (Mock)',
           email: 'john.fo@agridust.com',
           phone: '7777777777',
           role: 'field-officer',
           isAccountVerified: true,
-        });
+        };
       }
     }
 
