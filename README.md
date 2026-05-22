@@ -1,290 +1,303 @@
-KMC Project Architecture & Workflow
-This document provides a comprehensive overview of the KMC (Kisan mithar consultancy)
-project, detailing its architecture, tech stack, folder structure, and operational workflows.
-1. Project Overview
-KMC is a full-stack web application designed to empower farmers by providing essential
-agricultural services, information, and a marketplace for farming supplies. It serves as a
-centralized hub for:
-• Expert Advice: Soil testing, crop selection, and advisor consultations.
-• Resource Management: Marketplace for fertilizers and farming equipment.
-• Information Hub: Agricultural blogs, success stories, and real-time market prices.
-• Admin Control: Comprehensive dashboard for managing users, products, and
-platform data.
-The project follows a modern MERN-like architecture with a decoupled frontend and
-backend, ensuring scalability and ease of maintenance.
-1.1 Problem Statement
-The agricultural sector currently faces a "Knowledge-Action Gap." Farmers are often
-disconnected from the scientific and market realities that dictate profitability. This gap
-manifests in three critical areas:
-• Information Asymmetry: Farmers frequently rely on generational knowledge or
-hearsay rather than scientific data for crop selection and disease management. This
-leads to preventable crop failures and lower yields.
-• Supply Chain Inefficiencies: The market for essential inputs like fertilizers and
-equipment is fragmented. Intermediaries often struggle to provide transparent
-pricing or quality assurance, driving up costs for the end farmer.
-• Advisory Accessibility: Access to qualified agricultural scientists (Field Officers) is
-geographically limited. Farmers cannot easily "book" an expert visit, leaving them
-unsupported during critical infestation or planting periods.
-KMC solves these problems by digitizing the agricultural lifecycle. It is a centralized
-platform that integrates:
-• Direct-to-Farmer Marketplace: Eliminating middlemen for fertilizers and
-equipment.
-• On-Demand Advisory: A booking system for physical farm visits by experts.
-• Data-Driven Decision Making: Real-time market prices and weather-aligned crop
-advice.
-1.3 Business Impact
-• Yield Maximization: Timely expert advice and correct input usage can increase
-crop yields significantly.
-• Cost Reduction: Direct sourcing of equipment and fertilizers reduces input costs
-for farmers.
-• Operational Efficiency: Digitizing records allows for better policy-making and
-resource allocation by administrators.
-2. Learning Outcomes
-By exploring or developing this project, one gains proficiency in:
-• Full-Stack Development: Integrating a React frontend with a Node/Express
-backend.
-• Database Designing: Using Mongoose for complex data modeling and
-relationships.
-• State Management: Handling global state and navigation in a multi-page React
-app.
-• RESTful API Design: Creating secure and efficient endpoints for CRUD operations.
-• Third-Party Integrations: Implementing Cloudinary for image hosting, Nodemailer
-for emails, and payment/SMS gateways.
-• Admin Dashboards: Building interactive analytics and management interfaces.
-• Security Best Practices: Implementing JWT-based authentication and role-based
-access control (RBAC).
-3. Tech Stack
-Frontend
-• Framework: React.js (Vite)
-• Styling: Tailwind CSS
-• Icons: Lucide React, React Icons
-• State/Routing: React Router DOM
-• Charts: Recharts
-• Notifications: React Toastify
-• HTTP Client: Axios
-Frontend folder structure
-KMC/Frontend/
-├── public/ # Static assets (favicons, etc.)
-├── src/
-│ ├── assets/ # Images and icons used in the UI
-│ ├── components/ # Reusable UI components (Navbar, Footer, Admin layouts)
-│ ├── context/ # React Context for global state management
-│ ├── pages/ # Individual page components (Auth, Admin, Farming, etc.)
-│ ├── App.jsx # Main routing configuration
-│ └── main.jsx # Application entry point
-├── vite.config.js # Vite build configuration
-└── vercel.json # Deployment configuration for Vercel
-Key Directories
-• src/components: Reusable UI components (Header, Navbar, Footer, etc.)
-• src/pages: Page components corresponding to routes (Home, Login, Services,
-etc.)
-• src/context: React Context for state management (AppContext.jsx)
-• src/assets: Static assets (images, icons)
-Routing (App.jsx)
-The application defines the following main routes:
-• /: Home
-• /login: Login
-• /email-verify: Email Verification
-• /reset-password: Reset Password
-• /soil-crop-analysis: Soil Testing
-• /equipments: Equipments
-• /packages: Packages
-• /blogs: Blogs
-• /about: About Us
-• /fertilizers: Fertilizers
-• /orchard-planning: Orchard Planning
-• /market-prices: Market Prices
-• /whether-insights: Weather Insights
-• /crop-selection: Crop Selection
-• /contact: Contact Us
-• *: 404 Not Found
-Key Components
-main.jsx :
-Entry point. Wraps the application in BrowserRouter and AppContextProvider.
-index.css
-Global styles. Imports 'Outfit' font from Google Fonts and initializes TailwindCSS.
-Navbar.jsx :
-• Responsive navigation bar.
-• Handles authentication state (userData, logout).
-• Includes verification OTP sending logic.
-• Responsive mobile menu.
-Header.jsx :
-• Hero section with background image carousel.
-• Displays "Our Services" grid cards.
-• "Drone Technology" promotional section.
-Backend
-• Environment: Node.js
-• Framework: Express.js
-• Database: MongoDB (Mongoose ODM)
-• Authentication: JSON Web Tokens (JWT), BcryptJS
-• Media Storage: Cloudinary
-• Email/SMS: Nodemailer, Fast2SMS
-• Middleware: Multer (file uploads), Cookie Parser, CORS.
-Backend folder structure
-KMC/Backend/
-├── config/ # Database, Cloudinary, and SMS configurations
-├── controllers/ # Logical implementation of API endpoints
-├── middleware/ # Authentication and error-handling middleware
-├── models/ # Mongoose schemas for MongoDB
-├── routes/ # Express route definitions
-├── seedData.js # Scripts to populate the database with initial data
-├── server.js # Main entry point of the server
-└── vercel.json # Deployment configuration for Vercel
-5. System Architecture & Workflow
-5.1 User Interaction Workflow
-1. 2. 3. User Action: Triggering the request from the React UI.
-API Routing: How Express handles the endpoint.
-Authentication: The role of the
-userAuth middleware.
-4. Business Logic: Controller validation.
-5. 6. Database: Mongoose interaction with MongoDB Atlas.
-Response: Updating the UI state.
-Workflow
-5.2 Admin Panel Architecture
-The Admin Panel is a secured, isolated interface designed for system oversight. It uses a
-strict Role-Based Access Control (RBAC) mechanism to ensure only authorized
-personel can access sensitive data.
-Access Control Logic
-Access is governed by the adminAuth middleware, which performs a dual-check:
-Authentication: Verifies the JWT token from the httpOnly cookie is valid and not
-expired.
-Authorization: Decodes the token to verify user.role === ‘admin'.
-Access Flow Chart
-Dashboard Capabilities
-Once authenticated, the Admin has exclusive access to:
-• Analytics: Real-time graphs for revenue, user growth, and crop distribution.
-• User Management: Approve/Reject new farmer registrations and manage field
-officers.
-• Content Management: Publish blogs, success stories, and update market prices.
-• Inventory Control: Add/Edit/Delete fertilizers and equipment.
-5.3. User Roles & Access Control
-The system implements strict Role-Based Access Control (RBAC) to ensure data
-security.
-Role Key Capabilities Key Capabilities
-Farmer (User) Basic • Browse Products & Blogs
-• Book Farm Visits
-• Place Orders
-• View Market Prices
-• View Assigned Bookings
-Field Officer Intermediate
-• Update Booking Status
-(Pending → Completed)
-• Submit Visit Reports
-• User Management
-(Approve/Reject Farmers)
-• Product Inventory
-Admin Full Control
-Management
-• Analytics Dashboard
-• Manage Content (Blogs,
-Stories)
-6. Operational Workflows
-6.1 Farm Visit Booking Cycle
-1. 2. 3. 4. Request: Farmer logs in, selects a date, and submits a "Request for Visit".
-Assignment: Admin/System assigns a Field Officer to the request based on
-District/Location.
-Execution: Field Officer visits the farm on the scheduled date.
-Completion: Officer marks the booking as "Completed" in the system.
-6.2 E-Commerce Order Cycle
-1. 2. 3. 4. Selection: Farmer adds Fertilizers/Equipment to the cart.
-Checkout: System validates stock availability in Product collection.
-Creation: An Order document is created with status "Processing".
-Fulfillment: Admin updates status to "Shipped" -> “Delivered".
-7. Database Schema Design (Key Models)
-User Collection :
-javascript
-{
-name: String,
-email: { type: String, unique: true },
-role: { type: String, enum: ['user', 'admin', 'field-
-officer'] },
-district: String,
-crops: [String], // Array of crops they grow
-isAccountVerified: Boolean
-}
-Booking Collection :
-javascript
-{
-farmerId: ObjectId (Ref: User),
-visitDate: Date,
-assignedOfficer: ObjectId (Ref: User),
-status: { type: String, enum: ['Pending', 'Confirmed',
-'Completed'] },
-notes: String
-}
-The system uses several Mongoose models to manage data:
-• User: Stores credentials, roles (Admin/User), and profile info.
-• Blog: Content for agricultural updates with slugs for SEO.
-• Equipment & Fertilizer: Product details for the marketplace.
-• Order/EquipmentOrder: Tracking purchases and customer details.
-• MarketPrice: Real-time or updated pricing for crops.
-• SuccessStory: Testimonials and case studies.
-• Booking: Farm visit or consultation schedules.
-8. API Documentation Summary
-Authentication (/api/auth)
-• POST /login: Validates credentials, sets HTTP-Only cookie.
-• POST /verify-otp: Multifactor authentication support.
-Admin Operations (/api/admin)
-• GET /dashboard-stats: Aggregated data for analytics charts.
-• PATCH /users/:id/role: Promote users/officers.
-Marketplace (/api/products)
-• GET /: List all products (supports pagination ?page=1).
-• GET /:id: Product details.
-9. How to Run + Quick Tests
-Prerequisites
-• Node.js (v16 or higher)
-• MongoDB account (Atlas or Local)
-• Cloudinary Account (for media)
-Setup Instructions
-1. Clone the Repo:bash
-git clone <repo-url>
-cd KMC
-2. Backend Setup:bash
-cd Backend
-npm install
-# Create a .env file based on existing .env structure
-npm start
-3. Frontend Setup:bash
-cd ../Frontend
-npm install
-# Create a .env file with VITE_BACKEND_URL
-npm run dev
-Quick Tests
-• Auth Test: Create a new account and verify if you can log in.
-• API Health: Visit http://localhost:4000/ to check if the server is running.
-• Admin Access: Log in with an admin account and check if the /admin/
-dashboard loads metrics.
-10. Debugging Techniques
-• Console Logging: Use console.log on the backend to trace request payloads
-(req.body) and database results.
-• Network Tab: Use Chrome DevTools Network tab to inspect failing API calls (check
-status codes like 404, 500).
-• Redux/Context DevTools: Inspect state changes if using global state.
-• Mongoose Debug Mode: Enable mongoose.set('debug', true) to see raw
-MongoDB queries.
-• Tailwind Inspection: Use the browser inspector to debug styling issues and
-responsive breakpoints.
-11. Security & Deployment
-• JWT Secrets: All sensitive tokens are stored in environment variables, never
-committed to VCS.
-• CORS Configuration: Restricts API access to authorized frontend domains.
-• Deployment: Both Frontend and Backend are configured for deployment
-on Vercel using
-vercel.json files.
-• Role-Based Access: Specialized middleware ensures only Admins can access /
-api/admin routes.
-• XSS Protection: Tokens stored in HttpOnly cookies, inaccessible to JavaScript.
-• Input Validation: All API inputs are validated at the controller level before DB
-queries.
-• Global Error Handler: Centralized middleware catches async errors and sends
-standardized JSON responses.
-12. Deployment & Scalability
-Deployment
-• Frontend: Deployed on Vercel (Static Site Generation).
-• Backend: Deployed on Vercel (Serverless Functions) or Node.js hosting.
-• Database: Hosted on MongoDB Atlas (Managed Cloud Database).
-Scalability
-• Stateless API: The backend is RESTful and stateless, allowing easy horizontal
-scaling.
-• CDN: Images and static assets are delivered via global CDNs (Cloudinary/Vercel
-Edge).
+# 🌾 Kissan Mithar Consultancy (KMC) — Enterprise Platform
+
+Welcome to the **KMC (Kissan Mithar Consultancy)** project repository. KMC is a state-of-the-art, production-grade agricultural platform designed to bridge the "Knowledge-Action Gap" for farmers. 
+
+The platform connects farmers with scientific crop diagnostics, real-time market prices, on-demand field-officer bookings, and a direct-to-farmer agricultural marketplace.
+
+> [!NOTE]
+> This project has evolved from a monolithic backend into a fully containerized **15-Microservices Architecture** leveraging **RabbitMQ** event routing, **Redis** caching, **PostgreSQL (Sequelize ORM)**, **MongoDB (Mongoose)**, and **Nginx** API Gateway.
+
+---
+
+## 📖 Table of Contents
+1. [Project Overview & Business Impact](#-project-overview--business-impact)
+2. [Technology Stack](#-technology-stack)
+3. [System Architecture](#-system-architecture)
+4. [Detailed Microservices Registry](#-detailed-microservices-registry)
+5. [Database & Data Architecture](#-database--data-architecture)
+6. [Repository & Project Structure](#-repository--project-structure)
+7. [Running the Platform Locally](#-running-the-platform-locally)
+8. [Monitoring & Observability](#-monitoring--observability)
+9. [CI/CD & Deployment](#-cicd--deployment)
+10. [References & Supplementary Docs](#-references--supplementary-docs)
+
+---
+
+## 💡 Project Overview & Business Impact
+
+Farmers face massive information asymmetry, inefficient supply chains, and limited access to agronomy experts. KMC solves these core problems:
+* **Information Asymmetry:** Combated via automated soil health assessments, crop selection advisory, and real-time disease detection (powered by Gemini & Plant.id APIs).
+* **Supply Chain Inefficiencies:** Addressed by a decentralized marketplace for fertilizers and farming equipment, cutting out exploitative middle-men.
+* **Advisory Accessibility:** Integrated booking system allowing farmers to schedule physical/virtual farm visits with qualified Field Officers.
+
+---
+
+## 🛠 Technology Stack
+
+### Frontend Applications
+* **Web Client:** React.js (Vite), Tailwind CSS, React Router DOM, Recharts, React Toastify, Axios
+* **Mobile Client:** Flutter (Dart) mobile application
+
+### Backend Microservices
+* **Core Environment:** Node.js, Express.js
+* **Event Broker:** RabbitMQ (AMQP) for asynchronous, message-driven service communication
+* **Caching & Rate-Limiting:** Redis (in-memory caching and session validation)
+* **API Gateway:** Nginx for unified routing, CORS, and SSL termination
+
+### Databases
+* **Relational Database:** PostgreSQL (hosted on Supabase) utilizing **Sequelize ORM** with 36 custom-mapped models
+* **Document Database:** MongoDB Atlas using **Mongoose ODM** for unstructured documents, logs, and telemetry
+
+---
+
+## 📐 System Architecture
+
+All traffic from the Web and Mobile clients targets the **Nginx API Gateway** on ports `80` (HTTP) or `443` (HTTPS). Nginx acts as a reverse proxy, routing requests to the appropriate backend microservice based on paths (e.g. `/api/v1/auth` -> Auth Service).
+
+```mermaid
+graph TD
+    %% Define Styles
+    classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef gateway fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+    classDef service fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
+    classDef infra fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
+    classDef external fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5;
+
+    %% Client Layer
+    subgraph Clients["Client Layer"]
+        Web("Frontend Web App<br>(React/Vite)<br>Port: 3000"):::client
+        Mobile("Frontend Mobile App<br>(Flutter)<br>Port: 3016"):::client
+    end
+
+    %% Gateway Layer
+    Gateway{"Nginx API Gateway<br>Port: 80 / 443"}:::gateway
+
+    %% Microservices Layer
+    subgraph Microservices["Microservices Layer (Ports: 3001-3015)"]
+        direction LR
+        subgraph Core
+            Auth("Auth Service<br>:3001"):::service
+            User("User Service<br>:3002"):::service
+            Notif("Notification Service<br>:3010"):::service
+        end
+        subgraph AI_Agronomy["AI & Agronomy"]
+            AI("AI Service<br>:3003"):::service
+            Disease("Disease Service<br>:3004"):::service
+            Soil("Soil Service<br>:3005"):::service
+            Field("Field Service<br>:3015"):::service
+        end
+        subgraph Commerce["E-Commerce"]
+            Market("Market Service<br>:3006"):::service
+            Ecom("Ecommerce Service<br>:3007"):::service
+            Order("Order Service<br>:3008"):::service
+            Payment("Payment Service<br>:3009"):::service
+        end
+        subgraph Content_Support["Content & Support"]
+            Support("Support Service<br>:3011"):::service
+            Expert("Expert Service<br>:3012"):::service
+            Content("Content Service<br>:3013"):::service
+            Analytics("Analytics Service<br>:3014"):::service
+        end
+    end
+
+    %% Infrastructure Layer
+    subgraph Infrastructure["Infrastructure Layer"]
+        Redis[("Redis<br>Cache & Session<br>Port: 6379")]:::infra
+        RMQ[("RabbitMQ<br>Message Broker<br>Port: 5672/15672")]:::infra
+    end
+
+    %% External Services
+    subgraph External["External Services / Databases"]
+        Postgres[("PostgreSQL DB<br>(Sequelize ORM)")]:::external
+        Mongo[("MongoDB Atlas<br>(Mongoose ODM)")]:::external
+        Cloudinary("Cloudinary<br>(Image Hosting)"):::external
+        Gemini("Google Gemini / Plant.id<br>(AI APIs)"):::external
+        Razorpay("Razorpay API<br>(Payments)"):::external
+        SMS("Fast2SMS / SMTP<br>(Notifications)"):::external
+    end
+
+    %% Connections
+    Web -->|HTTP/REST| Gateway
+    Mobile -->|HTTP/REST| Gateway
+    
+    Gateway -->|Reverse Proxy| Microservices
+    
+    %% Service to Infra
+    Microservices <-->|Cache/Session| Redis
+    Microservices <-->|Async Events| RMQ
+
+    %% Service to External
+    Microservices -->|Read/Write| Postgres
+    Microservices -->|Read/Write| Mongo
+    Disease --> Cloudinary
+    Soil --> Cloudinary
+    Ecom --> Cloudinary
+    Content --> Cloudinary
+    AI --> Gemini
+    Payment --> Razorpay
+    Notif --> SMS
+```
+
+---
+
+## 📦 Detailed Microservices Registry
+
+The backend contains **15 microservices** located in the `services/` directory. Each microservice is an independent Node.js process:
+
+| Service | Port | Primary Responsibilities | Main Dependencies / Integrations |
+| :--- | :--- | :--- | :--- |
+| **Auth Service** | `3001` | User signup/login, MFA, SMS/Email OTP generation, JWT token issuance. | Redis, [Auth Shared Module](file:///Volumes/My%20Files/Projects/KMC/microservices/packages/shared/auth) |
+| **User Service** | `3002` | User profiles, address book, role assignment, registration verification. | PostgreSQL (Sequelize) |
+| **AI Service** | `3003` | Contextual AI chat, prompt generation, LLM tuning. | Google Gemini AI SDK |
+| **Disease Service** | `3004` | Crop disease identification from image uploads, treatment recommendations. | Plant.id API, Cloudinary |
+| **Soil Service** | `3005` | Processing soil quality metrics (NPK values) to recommend appropriate crops/fertilizers. | Cloudinary, AI Service |
+| **Market Service** | `3006` | Fetching commodity prices, mandi rates, historical trends. | Data.gov.in API |
+| **Ecommerce Service** | `3007` | Managing agricultural inputs (fertilizers, equipment, seeds) catalog and inventory. | Cloudinary, PostgreSQL |
+| **Order Service** | `3008` | Cart management, order creation, tracking checkout workflows, inventory reservation. | RabbitMQ, PostgreSQL |
+| **Payment Service** | `3009` | Processing checkout payments, creating orders, validating transaction signatures. | Razorpay Gateway |
+| **Notification Service** | `3010` | Sending SMS and SMTP emails asynchronously based on event queues. | Fast2SMS, Brevo/Nodemailer, RabbitMQ |
+| **Support Service** | `3011` | Customer support ticketing, FAQs management, feedback submission. | MongoDB (telemetry) |
+| **Expert Service** | `3012` | Managing consultation bookings between farmers and Field Officers/Advisors. | PostgreSQL, RabbitMQ |
+| **Content Service** | `3013` | Publishing blogs, agricultural newsletters, successful farming stories. | Cloudinary, MongoDB |
+| **Analytics Service** | `3014` | Compiling platform metrics, revenue tracking, and order data for the Admin Dashboard. | PostgreSQL & MongoDB |
+| **Field Service** | `3015` | Tracking individual farm boundaries, crop calendars, and field-level tasks. | MongoDB |
+
+---
+
+## 🗄 Database & Data Architecture
+
+KMC implements a dual-database architecture to match document-based logs with strictly structured, relational transactional data.
+
+### 1. PostgreSQL (Sequelize ORM)
+All transactional data is stored in PostgreSQL and mapped using **Sequelize**. 36 distinct tables/models are defined in the shared package:
+* Core models like `User`, `Product`, `Order`, `OrderItem`, `Booking`, `Address`, `PaymentTransaction`, etc.
+* Eager loading is configured (`include`) to resolve complex relationships like joining `Order -> OrderItem -> Product` in a single query, eliminating legacy API round-trip issues.
+* Database initialization, models, and shared utilities are packaged under [packages/shared/database/](file:///Volumes/My%20Files/Projects/KMC/microservices/packages/shared/database/) and [packages/shared/models/](file:///Volumes/My%20Files/Projects/KMC/microservices/packages/shared/models/).
+
+### 2. MongoDB (Mongoose ODM)
+Unstructured data (like AI chats, weather insights, field mappings, support tickets, and system logs) is stored in MongoDB via Mongoose schemas.
+
+---
+
+## 📁 Repository & Project Structure
+
+The project is structured as a monorepo under the `microservices` folder:
+
+```
+KMC/
+├── Jenkinsfile                      # Jenkins CD Pipeline script
+├── architecture_overview.md         # Detailed architectural design doc
+├── deployment_guide.md              # Docker-compose local launch reference
+├── deployment_guide_aws.md          # Comprehensive AWS EC2, Jenkins, GHA deployment guide
+├── render.yaml                      # Backup deployment file
+└── microservices/                   # Root Monorepo
+    ├── .env                         # Centralized local environment configuration
+    ├── docker-compose.yml           # Local Orchestrator (Development Mode)
+    ├── docker-compose.prod.yml      # Local Orchestrator (Production Mode)
+    ├── Makefile                     # Build & orchestration shortcuts
+    ├── nginx/                       # Nginx gateway setup and reverse proxy configs
+    ├── monitoring/                  # Prometheus and Grafana setup
+    ├── frontend/                    # Client Applications
+    │   ├── web/                     # React/Vite Frontend
+    │   └── mobile/                  # Flutter Mobile Client
+    ├── packages/                    # Shared internal NPM packages
+    │   ├── shared/                  # Logger, Sequelize models, Auth middleware, Custom errors
+    │   ├── database/                # Legacy SQL generation & migration scripts
+    │   └── events/                  # RabbitMQ channel helpers
+    └── services/                    # Microservices
+        ├── auth-service/
+        ├── user-service/
+        └── ... (all 15 services)
+```
+
+---
+
+## 🚀 Running the Platform Locally
+
+To spin up the entire platform, you must have **Docker Desktop** installed. 
+
+### 1. Configure the Environment Variables
+Create a `.env` file inside the `microservices/` directory. Use [microservices/.env.example](file:///Volumes/My%20Files/Projects/KMC/microservices/.env.example) as a reference:
+
+```ini
+# App Config
+NODE_ENV="development"
+LOG_LEVEL=debug
+
+# Databases
+DATABASE_URL="postgresql://user:pass@host:port/database"
+MONGODB_URI="mongodb+srv://..."
+REDIS_URL="redis://localhost:6379"
+
+# RabbitMQ
+RABBITMQ_URL="amqp://localhost:5672"
+
+# API Gateways & Credentials
+JWT_SECRET="your_jwt_secret"
+GEMINI_API_KEY="your_gemini_key"
+RAZORPAY_KEY_ID="your_razorpay_key"
+```
+> [!IMPORTANT]
+> The deprecated `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` have been completely removed. The system connects directly to your SQL database using standard connection pools via `DATABASE_URL` / `SUPABASE_URL`.
+
+### 2. Orchestration using Make (Recommended)
+Navigate to the `microservices/` directory:
+
+```bash
+# Start all 15 microservices, databases, gateways, and the Web/Mobile frontends
+make up
+
+# Rebuild all docker images (run this if you update package.json dependencies)
+make rebuild
+
+# Follow combined logs of all running services
+make logs
+
+# View logs for a specific service (e.g. auth-service)
+make logs-auth
+
+# Stop the entire stack and tear down the containers
+make down
+
+# Clean up all containers, system volumes, and dangling resources
+make clean
+```
+
+### 3. Run with raw Docker-Compose
+If `make` is not installed on your system, execute the following from `microservices/`:
+```bash
+# Run in background
+docker-compose up -d
+
+# Stop containers
+docker-compose down
+```
+
+---
+
+## 📊 Monitoring & Observability
+
+KMC includes full monitoring support via **Prometheus** and **Grafana** (configured under [microservices/monitoring/](file:///Volumes/My%20Files/Projects/KMC/microservices/monitoring/)).
+
+* **Prometheus:** Pulls application performance metrics, CPU utilization, request throughput, and active connection volumes from each microservice's `/metrics` endpoint.
+* **Grafana:** Visualizes metrics on live dashboards.
+* **Ports:**
+  * **Prometheus UI:** `http://localhost:9090`
+  * **Grafana Dashboard:** `http://localhost:3100` (Default credentials configured in `.env`).
+
+---
+
+## 🔄 CI/CD & Deployment
+
+Deployments are fully automated for enterprise scaling:
+* **Continuous Integration (CI):** Triggered on GitHub pull requests. Runs code linting, tests, and formatting checks using GitHub Actions.
+* **Continuous Deployment (CD):** Managed by **Jenkins** (orchestrated via [Jenkinsfile](file:///Volumes/My%20Files/Projects/KMC/Jenkinsfile)). On pushes to the `main` branch, Jenkins compiles Docker containers and deploys them to AWS EC2 instances behind security group firewalls.
+
+---
+
+## 🔗 References & Supplementary Docs
+
+For deeper dives into individual layers, refer to:
+* 📐 **System Topology:** Detailed port registry, API reverse proxies, and asynchronous events routing are documented in [architecture_overview.md](file:///Volumes/My%20Files/Projects/KMC/architecture_overview.md).
+* 🐳 **Local Deployment Guide:** Specific command variations and troubleshooting tips are available in [deployment_guide.md](file:///Volumes/My%20Files/Projects/KMC/deployment_guide.md).
+* ☁️ **AWS Cloud & DevOps Guide:** Jenkins workflows, Webhook setups, EC2 Ubuntu configurations, and GHA pipelines are structured step-by-step in [deployment_guide_aws.md](file:///Volumes/My%20Files/Projects/KMC/deployment_guide_aws.md).
