@@ -36,7 +36,7 @@ Farmers face massive information asymmetry, inefficient supply chains, and limit
 
 ### Frontend Applications
 * **Web Client:** React.js (Vite), Tailwind CSS, React Router DOM, Recharts, React Toastify, Axios
-* **Mobile Client:** Flutter (Dart) mobile application
+
 
 ### Backend Microservices
 * **Core Environment:** Node.js, Express.js
@@ -52,7 +52,7 @@ Farmers face massive information asymmetry, inefficient supply chains, and limit
 
 ## 📐 System Architecture
 
-All traffic from the Web and Mobile clients targets the **Nginx API Gateway** on ports `80` (HTTP) or `443` (HTTPS). Nginx acts as a reverse proxy, routing requests to the appropriate backend microservice based on paths (e.g. `/api/v1/auth` -> Auth Service).
+All traffic from the Web client targets the **Nginx API Gateway** on ports `80` (HTTP) or `443` (HTTPS). Nginx acts as a reverse proxy, routing requests to the appropriate backend microservice based on paths (e.g. `/api/v1/auth` -> Auth Service).
 
 ```mermaid
 graph TD
@@ -66,7 +66,7 @@ graph TD
     %% Client Layer
     subgraph Clients["Client Layer"]
         Web("Frontend Web App<br>(React/Vite)<br>Port: 3000"):::client
-        Mobile("Frontend Mobile App<br>(Flutter)<br>Port: 3016"):::client
+
     end
 
     %% Gateway Layer
@@ -118,7 +118,7 @@ graph TD
 
     %% Connections
     Web -->|HTTP/REST| Gateway
-    Mobile -->|HTTP/REST| Gateway
+
     
     Gateway -->|Reverse Proxy| Microservices
     
@@ -199,7 +199,7 @@ KMC/
     ├── monitoring/                  # Prometheus and Grafana setup
     ├── frontend/                    # Client Applications
     │   ├── web/                     # React/Vite Frontend
-    │   └── mobile/                  # Flutter Mobile Client
+
     ├── packages/                    # Shared internal NPM packages
     │   ├── shared/                  # Logger, Sequelize models, Auth middleware, Custom errors
     │   ├── database/                # Legacy SQL generation & migration scripts
@@ -244,7 +244,7 @@ RAZORPAY_KEY_ID="your_razorpay_key"
 Navigate to the `microservices/` directory:
 
 ```bash
-# Start all 15 microservices, databases, gateways, and the Web/Mobile frontends
+# Start all 15 microservices, databases, gateways, and the Web frontend
 make up
 
 # Rebuild all docker images (run this if you update package.json dependencies)

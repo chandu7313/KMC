@@ -19,7 +19,6 @@ graph TD
     %% Client Layer
     subgraph Clients["Client Layer"]
         Web("Frontend Web App<br>(React/Vite)<br>Port: 3000"):::client
-        Mobile("Frontend Mobile App<br>Port: 3016"):::client
     end
 
     %% Gateway Layer
@@ -70,7 +69,7 @@ graph TD
 
     %% Connections
     Web -->|HTTP/REST| Gateway
-    Mobile -->|HTTP/REST| Gateway
+
     
     Gateway -->|Reverse Proxy| Microservices
     
@@ -98,7 +97,7 @@ The project is structured with an API Gateway handling all incoming traffic and 
 | Application | Port | Description |
 | :--- | :--- | :--- |
 | **Frontend Web** | `3000` | The main React application for web users. |
-| **Frontend Mobile** | `3016` | The mobile application wrapper or specific mobile web build (maps to 3000 internally). |
+
 
 ### 2. Infrastructure Layer
 
