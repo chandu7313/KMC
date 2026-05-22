@@ -122,15 +122,16 @@ Docker version 27.x.x, build xxxxxxx
 Docker Compose version v2.x.x
 ```
 
-### Step 2.4 — Install Node.js 18
+### Step 2.4 — Install Node.js 20
 
 ```bash
-# Install Node.js 18 via NodeSource
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt install -y nodejs
+# Install Node.js 20 via NodeSource
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
 # Verify
-node --version   # Should print v18.x.x
+node -v
+# Should output v20.x.x
 npm --version    # Should print 10.x.x or 9.x.x
 ```
 
@@ -243,17 +244,13 @@ Copy this password. You will need it in the next step.
 
 ### Step 4.3 — Configure Node.js Tool
 
-1. Go to **Manage Jenkins → Tools**.
-2. Scroll to **NodeJS installations** → click **Add NodeJS**.
-3. Fill in:
-
-   | Field | Value |
-   |-------|-------|
-   | Name | `Node-18` |
-   | Install automatically | ✅ Checked |
-   | Version | `NodeJS 18.x.x` (latest 18.x) |
-
-4. Click **Save**.
+1. Go to **Dashboard → Manage Jenkins → Global Tool Configuration** (or "Tools" in newer versions).
+2. Scroll down to **NodeJS installations**.
+3. Click **Add NodeJS**.
+4. Set the **Name** to: `Node 20`
+5. Check **Install automatically**.
+6. Select version **NodeJS 20.x.x** from the dropdown.
+7. Click **Save**.
 
 ### Step 4.4 — Add SSH Credentials (for EC2 Access)
 

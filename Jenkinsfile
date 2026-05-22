@@ -10,7 +10,7 @@
 //   - Credentials configured:
 //       • SSH private key  → ID matches AWS_SSH_CREDENTIALS_ID
 //       • .env secrets     → ID "kmc-env-file" (Secret file)
-//   - Node.js 18 available (via NodeJS plugin or pre-installed)
+//   - Node.js 20 available (via NodeJS plugin or pre-installed)
 //
 // Prerequisites on AWS EC2 target:
 //   - Docker & Docker Compose installed
