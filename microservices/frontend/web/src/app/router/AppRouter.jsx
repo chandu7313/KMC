@@ -11,6 +11,9 @@ import FarmerLayout from '@/app/layouts/FarmerLayout';
 import SupportLayout from '@/app/layouts/SupportLayout';
 import SuperAdminLayout from '@/app/layouts/SuperAdminLayout';
 
+// ─── Admin Pages ───────────────────────
+import AdminDashboardPage from '@/modules/admin/pages/AdminDashboardPage';
+
 // ─── Farmer Pages ──────────────────────
 import HomePage from '@/modules/farmer/pages/HomePage';
 import NotFoundPage from '@/modules/info/pages/NotFoundPage';
@@ -30,7 +33,7 @@ import EquipmentsPage from '@/modules/ecommerce/pages/EquipmentsPage';
 import OrdersPage from '@/modules/farmer/pages/OrdersPage';
 import ExpertConsultationPage from '@/modules/fieldVisit/pages/ExpertConsultationPage';
 import BookFarmVisitPage from '@/modules/fieldVisit/pages/BookFarmVisitPage';
-import DashboardPage from '@/modules/farmer/pages/HomePage'; // Temporarily aliasing missing dashboard
+import DashboardPage from '@/modules/farmer/pages/DashboardPage';
 import ProfilePage from '@/modules/farmer/pages/ProfilePage';
 import OnboardingSurveyPage from '@/modules/onboarding/pages/OnboardingSurveyPage';
 import GovernmentSchemesPage from '@/modules/content/pages/GovernmentSchemesPage';
@@ -96,6 +99,16 @@ export const AppRouter = () => {
         {/* ─── Farmer Dashboard Routes ───── */}
         <Route path="/farmer" element={<FarmerLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
+        </Route>
+
+        {/* ─── Admin Dashboard Routes ────── */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+        </Route>
+
+        {/* ─── Super Admin Routes ────────── */}
+        <Route path="/super-admin" element={<SuperAdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboardPage />} />
         </Route>
 
         {/* ─── 404 Catch-all ──────────────── */}

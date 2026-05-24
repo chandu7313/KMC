@@ -1,5 +1,6 @@
 import { successResponse } from '@kissan/shared';
 import marketService from '../services/market.service.js';
+import datagovService from '../services/datagov.service.js';
 
 export const getPrices = async (req, res, next) => {
   try { return successResponse(res, { prices: await marketService.getPrices(req.query) }); } catch (e) { next(e); }
@@ -30,5 +31,12 @@ export const getAnalytics = async (req, res, next) => {
     const trend = await marketService.getTrend(req.query.crop, req.query.district);
     const rec = await marketService.getRecommendation(req.query.crop, req.query.district);
     return successResponse(res, { crop: req.query.crop, district: req.query.district, trends: trend, recommendation: rec });
+  } catch (e) { next(e); }
+};
+
+export const syncData = async (req, res, next) => {
+  try {
+    const result = await datagovService.syncMarketPrices();
+    return successResponse(res, result, 'Market prices synced successfully');
   } catch (e) { next(e); }
 };

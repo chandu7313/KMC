@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { 
     LayoutDashboard, Sprout, Package, Landmark, 
     LineChart, HeadphonesIcon, Settings, LogOut, 
-    Search, Bell, Menu, X, Plus, Sun
+    Search, Bell, Menu, X, Plus, Sun, Info, AlertTriangle
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -29,16 +29,14 @@ const FarmerLayout = () => {
     };
 
     const navItems = [
-        { title: 'Dashboard', icon: LayoutDashboard, path: '/farmer/dashboard' },
-        { title: 'Crops', icon: Sprout, path: '/farmer/crops' },
-        { title: 'Inventory', icon: Package, path: '/farmer/inventory' },
-        { title: 'Financials', icon: Landmark, path: '/farmer/financials' },
-        { title: 'Analytics', icon: LineChart, path: '/farmer/analytics' },
-        { title: 'Support', icon: HeadphonesIcon, path: '/farmer/support' },
+        { title: 'My Farm', icon: LayoutDashboard, path: '/farmer/dashboard' },
+        { title: 'Market & Shop', icon: Package, path: '/market-prices' },
+        { title: 'Expert & Support', icon: HeadphonesIcon, path: '/farmer/support' },
+        { title: 'Information', icon: Info, path: '/farmer/information' },
     ];
 
     return (
-        <div className="flex h-screen bg-[#f9faf9] font-sans overflow-hidden">
+        <div className="flex h-screen bg-[#FDFCF6] font-sans overflow-hidden">
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div 
@@ -49,60 +47,59 @@ const FarmerLayout = () => {
 
             {/* Sidebar */}
             <aside className={`
-                fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#f9faf9] border-r border-slate-200 
+                fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#115e3b] text-white
                 transform transition-transform duration-300 ease-in-out flex flex-col
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             `}>
                 {/* Logo Area */}
-                <div className="h-20 flex items-center px-6 border-b border-slate-200 shrink-0 cursor-pointer" onClick={() => navigate('/')}>
+                <div className="h-20 flex items-center px-6 shrink-0 cursor-pointer" onClick={() => navigate('/')}>
                     <div>
-                        <h1 className="text-xl font-black text-[#1f2d1f] tracking-tight">KMC Agriculture</h1>
-                        <p className="text-[10px] text-slate-500 font-medium">Premium Estate Management</p>
+                        <h1 className="text-xl font-black text-white tracking-tight">KMC</h1>
+                        <p className="text-[11px] text-green-200 font-medium">Maharashtra Region</p>
                     </div>
                 </div>
 
                 {/* Main Navigation */}
-                <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+                <nav className="flex-1 overflow-y-auto py-6 space-y-1">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.title}
                             to={item.path}
                             onClick={() => setIsSidebarOpen(false)}
                             className={({ isActive }) => `
-                                flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold text-sm
+                                flex items-center gap-3 px-6 py-4 transition-all font-semibold text-sm
                                 ${isActive 
-                                    ? 'bg-[#186036] text-white shadow-md' 
-                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                                    ? 'bg-[#0f5334] text-white border-l-4 border-white' 
+                                    : 'text-green-100 hover:bg-[#146b43] border-l-4 border-transparent'
                                 }
                             `}
                         >
-                            <item.icon size={18} strokeWidth={2.5} />
+                            <item.icon size={20} strokeWidth={2} />
                             {item.title}
                         </NavLink>
                     ))}
                 </nav>
 
                 {/* Bottom Actions */}
-                <div className="p-4 border-t border-slate-200 space-y-2 shrink-0">
+                <div className="p-4 space-y-2 shrink-0">
                     <button 
-                        onClick={() => navigate('/soil-crop-analysis')}
-                        className="w-full flex items-center justify-center gap-2 bg-[#186036] hover:bg-[#124d2b] active:scale-95 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md mb-4"
+                        className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md mb-4"
                     >
-                        <Plus size={16} strokeWidth={3} /> New Report
+                        <AlertTriangle size={16} strokeWidth={3} /> Emergency Support
                     </button>
 
                     <NavLink
                         to="/farmer/settings"
                         className={({ isActive }) => `
                             flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-semibold text-sm
-                            ${isActive ? 'bg-[#186036] text-white' : 'text-slate-600 hover:bg-slate-100'}
+                            ${isActive ? 'bg-[#0f5334] text-white' : 'text-green-100 hover:bg-[#146b43]'}
                         `}
                     >
                         <Settings size={18} /> Settings
                     </NavLink>
                     <button
                         onClick={logout}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-semibold text-sm text-slate-600 hover:bg-red-50 hover:text-red-600"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-semibold text-sm text-green-100 hover:bg-red-500/20 hover:text-red-300"
                     >
                         <LogOut size={18} /> Logout
                     </button>

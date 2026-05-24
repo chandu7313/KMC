@@ -4,6 +4,7 @@ datasources:
 
   - name: Prometheus
     type: prometheus
+    uid: prometheus
     access: proxy
     url: http://prometheus:9090
     isDefault: true
@@ -13,10 +14,4 @@ datasources:
       queryTimeout: 60s
       httpMethod: POST
 
-  - name: Loki
-    type: loki
-    access: proxy
-    url: http://loki:3200
-    editable: false
-    jsonData:
-      maxLines: 1000
+

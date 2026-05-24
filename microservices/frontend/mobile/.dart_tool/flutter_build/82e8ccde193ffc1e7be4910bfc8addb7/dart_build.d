@@ -1,0 +1,1 @@
+ /Volumes/My\ Files/Projects/KMC/microservices/frontend/mobile/.dart_tool/flutter_build/82e8ccde193ffc1e7be4910bfc8addb7/dart_build_result.json:  /Users/gcm/flutter/bin/cache/dart-sdk/version /Volumes/My\ Files/Projects/KMC/microservices/frontend/mobile/.dart_tool/package_config.json /Volumes/My\ Files/Projects/KMC/microservices/frontend/mobile/pubspec.yaml

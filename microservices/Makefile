@@ -110,8 +110,6 @@ monitoring-health:
 	@printf "Prometheus:   " && (curl -sf http://localhost:9090/-/healthy && echo "✅ UP") || echo "❌ DOWN"
 	@printf "Grafana:      " && (curl -sf http://localhost:3100/api/health > /dev/null && echo "✅ UP") || echo "❌ DOWN"
 	@printf "AlertManager: " && (curl -sf http://localhost:9093/-/healthy > /dev/null && echo "✅ UP") || echo "❌ DOWN"
-	@printf "Loki:         " && (curl -sf http://localhost:3200/ready > /dev/null && echo "✅ UP") || echo "❌ DOWN"
-	@printf "Promtail:     " && (curl -sf http://localhost:9080/ready > /dev/null && echo "✅ UP") || echo "❌ DOWN"
 	@printf "Pushgateway:  " && (curl -sf http://localhost:9091/-/healthy > /dev/null && echo "✅ UP") || echo "❌ DOWN"
 	@echo "─────────────────────────────"
 	@echo "Grafana UI:   http://localhost:3100"

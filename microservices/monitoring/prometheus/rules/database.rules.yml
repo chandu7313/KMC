@@ -1,0 +1,29 @@
+groups:
+  - name: DatabaseAlerts
+    rules:
+      - alert: DatabaseDown
+        expr: up{job=~"postgresql|mongodb"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database {{ $labels.job }} is down"
+          description: "Prometheus could not scrape {{ $labels.job }} for more than 1 minute."
+
+      - alert: PostgreSQLHighConnections
+        expr: pg_stat_activity_count > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of active connections in PostgreSQL"
+          description: "PostgreSQL has {{ $value }} active connections."
+          
+      - alert: MongoDBHighConnections
+        expr: mongodb_connections{state="current"} > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of active connections in MongoDB"
+          description: "MongoDB has {{ $value }} active connections."

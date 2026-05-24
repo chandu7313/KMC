@@ -95,14 +95,6 @@
       "gridPos": { "h": 8, "w": 6, "x": 18, "y": 15 }, "id": 11,
       "title": "GC Duration", "type": "timeseries",
       "targets": [{ "expr": "rate(kissan_nodejs_gc_duration_seconds_sum{service=~\"$service\"}[5m])", "legendFormat": "{{ kind }}" }]
-    },
-    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 }, "id": 103, "title": "📝 Logs", "type": "row" },
-    {
-      "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 24 }, "id": 12,
-      "options": { "showTime": true, "showLabels": true, "wrapLogMessage": true, "enableLogDetails": true, "sortOrder": "Descending" },
-      "title": "Service Logs", "type": "logs",
-      "targets": [{ "expr": "{service=~\"$service\"}" }]
     }
   ],
   "refresh": "30s", "schemaVersion": 38, "style": "dark",

@@ -155,7 +155,7 @@ const Login = () => {
             const { data } = await axios.post(backendUrl + `${API.AUTH}/auto-login`, { role });
             if (data.success) {
                 setIsLoggedin(true);
-                getUserData();
+                await getUserData();
                 syncPreferencesToBackend().catch(err => console.warn('Preferences sync skipped', err));
                 toast.success(`Logged in automatically as ${role}`);
                 

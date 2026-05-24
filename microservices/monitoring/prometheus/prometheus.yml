@@ -24,6 +24,7 @@ rule_files:
   - /etc/prometheus/rules/business.rules.yml
   - /etc/prometheus/rules/infrastructure.rules.yml
   - /etc/prometheus/rules/nodejs.rules.yml
+  - /etc/prometheus/rules/database.rules.yml
 
 # ─── Scrape Targets ──────────────────────────────────────────
 scrape_configs:
@@ -107,3 +108,19 @@ scrape_configs:
     honor_labels: true
     static_configs:
       - targets: ['pushgateway:9091']
+
+  # PostgreSQL
+  - job_name: postgresql
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: postgresql
+
+  # MongoDB
+  - job_name: mongodb
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+        labels:
+          service: mongodb

@@ -11,6 +11,7 @@ router.get('/trend', mCtrl.getTrend);
 router.get('/recommendation', mCtrl.getRecommendation);
 router.get('/analytics', mCtrl.getAnalytics);
 router.get('/compare/:crop', mCtrl.getCropComparison);
+router.post('/sync', mCtrl.syncData);
 
 // Admin
 router.post('/prices', authenticate, authorize(['market:write']), mCtrl.addPrice);
