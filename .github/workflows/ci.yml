@@ -47,7 +47,9 @@ jobs:
           cache-dependency-path: microservices/frontend/web/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          rm -f package-lock.json
+          npm install
 
       - name: Run ESLint
         run: npm run lint
