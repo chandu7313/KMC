@@ -43,13 +43,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: microservices/frontend/web/package-lock.json
+          # Temporarily disable caching to avoid npm optional dependency cache issues
+          # cache: 'npm'
+          # cache-dependency-path: microservices/frontend/web/package-lock.json
 
       - name: Install dependencies
         run: |
-          rm -f package-lock.json
-          npm install
+          npm install -g npm@latest
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+          npm install --include=optional
 
       - name: Run ESLint
         run: npm run lint
