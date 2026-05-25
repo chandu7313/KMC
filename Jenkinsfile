@@ -80,7 +80,7 @@ pipeline {
         stage('Deploy to AWS') {
             when {
                 allOf {
-                    branch 'main'
+                    expression { return (env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main' || !env.GIT_BRANCH) }
                     expression { return params.DEPLOY_TO_AWS }
                     expression { return params.AWS_EC2_HOST?.trim() }
                 }
@@ -147,7 +147,7 @@ pipeline {
         stage('Health Check') {
             when {
                 allOf {
-                    branch 'main'
+                    expression { return (env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'origin/main' || env.GIT_BRANCH == 'main' || !env.GIT_BRANCH) }
                     expression { return params.DEPLOY_TO_AWS }
                     expression { return params.AWS_EC2_HOST?.trim() }
                 }
