@@ -1,17 +1,30 @@
-import React, { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
 import { X, Star, MapPin, Calendar, Clock, Loader2, ArrowLeft } from 'lucide-react';
 import { expertApi } from '../api/expert.api';
 
 const ExpertProfilePanel = ({ isOpen, onClose, expertId, onSelectExpert }) => {
-  // Fetch full expert profile when opened
-  const { data: profileRes, isLoading, error } = useQuery({
-    queryKey: ['expertProfile', expertId],
-    queryFn: () => expertApi.getExpertProfile(expertId),
-    enabled: isOpen && !!expertId,
-  });
+  const [profile, setProfile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const profile = profileRes?.data?.expert;
+  useEffect(() => {
+    if (!isOpen || !expertId) return;
+
+    const fetchProfile = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await expertApi.getExpertProfile(expertId);
+        setProfile(res.data?.expert || null);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [isOpen, expertId]);
 
   // Handle escape key to close
   useEffect(() => {

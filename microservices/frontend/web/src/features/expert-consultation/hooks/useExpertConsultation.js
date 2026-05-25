@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useGlobalStore } from '@/app/store/globalStore'; // using project's actual auth store
 import api from '../../../core/api/axios.instance';
@@ -83,32 +82,58 @@ const useExpertConsultation = () => {
   const [notesModal, setNotesModal] = useState(null);
   const [detailsModal, setDetailsModal] = useState(null);
 
+  // ─── Experts State ──────────────────
+  const [experts, setExperts] = useState([]);
+  const [expertsLoading, setExpertsLoading] = useState(false);
+
+  // ─── History State ──────────────────
+  const [consultations, setConsultations] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
   // ─── Load detected issue on mount ───
   useEffect(() => {
     loadDetectedIssue();
   }, []);
 
-  // ─── Re-fetch experts on topic change
-  const { data: experts, isLoading: expertsLoading } = useQuery({
-    queryKey: ['experts', selectedTopic],
-    queryFn: () => expertApi.getExperts({
-      topic: selectedTopic,
-      available: true
-    }),
-    staleTime: 5 * 60 * 1000
-  });
+  // ─── Fetch experts on topic change ───
+  useEffect(() => {
+    const fetchExperts = async () => {
+      setExpertsLoading(true);
+      try {
+        const response = await expertApi.getExperts({
+          topic: selectedTopic,
+          available: true
+        });
+        setExperts(response.data || []);
+      } catch (err) {
+        toast.error('Failed to load experts');
+      } finally {
+        setExpertsLoading(false);
+      }
+    };
 
-  // ─── Consultation history ────────────
-  const {
-    data: historyData,
-    isLoading: historyLoading,
-    refetch: refetchHistory
-  } = useQuery({
-    queryKey: ['consultations', 'my'],
-    queryFn: () => expertApi.getMyConsultations({
-      page: 1, limit: 5
-    })
-  });
+    fetchExperts();
+  }, [selectedTopic]);
+
+  // ─── Fetch consultation history ───────
+  const refetchHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const response = await expertApi.getMyConsultations({
+        page: 1,
+        limit: 5
+      });
+      setConsultations(response.data || []);
+    } catch (err) {
+      // Mock history on failure or auth issue if testing
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refetchHistory();
+  }, [refetchHistory]);
 
   const loadDetectedIssue = async () => {
     try {
@@ -240,7 +265,7 @@ const useExpertConsultation = () => {
     showConfirmModal,
     setShowConfirmModal,
     // History
-    consultations: historyData?.data || [],
+    consultations: consultations?.data || [],
     historyLoading,
     refetchHistory,
     // Modals
