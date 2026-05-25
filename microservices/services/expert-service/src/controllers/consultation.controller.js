@@ -123,7 +123,7 @@ export const bookConsultation = async (req, res, next) => {
       id: booking.id,
       bookingRef: booking.bookingRef,
       expertName,
-      slotDatetime: booking.scheduledAt,
+      slotDatetime: booking.createdAt,
       topic: booking.topic,
       farmerPhone: booking.farmerPhone,
       callType: booking.callType
@@ -141,12 +141,12 @@ export const getMyConsultations = async (req, res, next) => {
     const consultations = await ExpertConsultation.findAll({
       where: { userId: farmerId },
       include: [{ model: ExpertV2, as: 'expert', attributes: ['name'] }],
-      order: [['scheduledAt', 'DESC']]
+      order: [['createdAt', 'DESC']]
     });
 
     const mapped = consultations.map(c => ({
       id: c.id,
-      createdAt: c.scheduledAt,
+      createdAt: c.createdAt,
       expertName: c.expert?.name || 'Unknown Expert',
       topic: c.topic,
       status: c.status,
@@ -163,7 +163,7 @@ export const getConsultationNotes = async (req, res, next) => {
     const { id } = req.params;
     
     const note = await ExpertConsultation.findByPk(id, {
-      attributes: ['expertNotes', 'recommendations', 'durationActualMinutes', 'farmerRating', 'topic', 'scheduledAt'],
+      attributes: ['expertNotes', 'recommendations', 'durationActualMinutes', 'farmerRating', 'topic', 'createdAt'],
       include: [{ model: ExpertV2, as: 'expert', attributes: ['name'] }]
     });
 
@@ -180,7 +180,7 @@ export const getConsultationNotes = async (req, res, next) => {
       durationActualMinutes: note.durationActualMinutes,
       farmerRating: note.farmerRating,
       topic: note.topic,
-      createdAt: note.scheduledAt,
+      createdAt: note.createdAt,
       expertName: note.expert?.name
     };
 
