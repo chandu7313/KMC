@@ -13,7 +13,8 @@ CMD ["npm", "start"]
 FROM node:20-slim AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# Remove lockfile to prevent architecture mismatch for native bindings (esbuild/tailwindcss)
+RUN rm -f package-lock.json && npm install
 COPY . .
 ARG REACT_APP_API_URL
 ARG REACT_APP_ENV=production
