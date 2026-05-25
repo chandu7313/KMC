@@ -101,7 +101,9 @@ jobs:
 
       - name: Verify docker-compose config
         working-directory: microservices
-        run: docker compose -f docker-compose.prod.yml config --quiet
+        run: |
+          touch .env
+          docker compose -f docker-compose.prod.yml config --quiet
 
       - name: Smoke build — auth-service (production target)
         working-directory: microservices
