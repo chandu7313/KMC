@@ -105,4 +105,24 @@ models.Expert.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
 models.TicketMessage.belongsTo(models.SupportTicket, { foreignKey: 'ticketId', as: 'ticket' });
 models.SupportTicket.hasMany(models.TicketMessage, { foreignKey: 'ticketId', as: 'messages' });
 
+import ExpertV2Model from './ExpertV2.js';
+import ExpertSlotModel from './ExpertSlot.js';
+import ExpertConsultationModel from './ExpertConsultation.js';
+import ExpertConsultationNoteModel from './ExpertConsultationNote.js';
+
+models.ExpertV2 = ExpertV2Model(sequelize);
+models.ExpertSlot = ExpertSlotModel(sequelize);
+models.ExpertConsultation = ExpertConsultationModel(sequelize);
+models.ExpertConsultationNote = ExpertConsultationNoteModel(sequelize);
+
+// ExpertV2 Associations
+models.ExpertSlot.belongsTo(models.ExpertV2, { foreignKey: 'expertId', as: 'expert' });
+models.ExpertV2.hasMany(models.ExpertSlot, { foreignKey: 'expertId', as: 'slots' });
+
+models.ExpertConsultation.belongsTo(models.ExpertV2, { foreignKey: 'expertId', as: 'expert' });
+models.ExpertV2.hasMany(models.ExpertConsultation, { foreignKey: 'expertId', as: 'consultations' });
+
+models.ExpertConsultationNote.belongsTo(models.ExpertConsultation, { foreignKey: 'consultationId', as: 'consultation' });
+models.ExpertConsultation.hasOne(models.ExpertConsultationNote, { foreignKey: 'consultationId', as: 'notes' });
+
 export default models;
