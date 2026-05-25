@@ -6,7 +6,7 @@
  * - Auth and Error interceptors are attached
  */
 import axios from 'axios';
-import env from '../../config/env';
+import env from '../../app/config/env';
 import { setupAuthInterceptor } from './interceptors/auth.interceptor';
 import { setupErrorInterceptor } from './interceptors/error.interceptor';
 
