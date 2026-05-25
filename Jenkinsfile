@@ -1,21 +1,8 @@
 // ============================================================
 // Kissan Mithar Consultancy — Continuous Delivery Pipeline
 // ============================================================
-// Declarative Jenkins pipeline for building, testing, and
-// deploying the KMC microservices stack to AWS Ubuntu via SSH.
-//
-// Prerequisites on Jenkins controller:
-//   - Docker & Docker Compose installed on the build agent
-//   - "SSH Agent" plugin installed
-//   - Credentials configured:
-//       • SSH private key  → ID matches AWS_SSH_CREDENTIALS_ID
-//       • .env secrets     → ID "kmc-env-file" (Secret file)
-//   - Node.js 20 available (via NodeJS plugin or pre-installed)
-//
-// Prerequisites on AWS EC2 target:
-//   - Docker & Docker Compose installed
-//   - SSH access for the Jenkins user
-//   - Project directory at /opt/kmc (configurable via DEPLOY_DIR)
+// Declarative Jenkins pipeline for deploying the KMC 
+// microservices stack to AWS Ubuntu via SSH.
 // ============================================================
 
 pipeline {
@@ -30,7 +17,7 @@ pipeline {
         )
         string(
             name: 'AWS_EC2_HOST',
-            defaultValue: '',
+            defaultValue: '65.1.198.122',
             description: 'Public IP or hostname of the target AWS Ubuntu EC2 instance'
         )
         string(
@@ -45,16 +32,14 @@ pipeline {
         )
         string(
             name: 'DEPLOY_DIR',
-            defaultValue: '/opt/kmc',
+            defaultValue: '/home/ubuntu/kissan',
             description: 'Absolute path on the remote server where the project is deployed'
         )
     }
 
     // ─── Environment ───────────────────────────────
     environment {
-        COMPOSE_FILE    = 'docker-compose.prod.yml'
-        DOCKER_BUILDKIT = '1'
-        COMPOSE_DOCKER_CLI_BUILD = '1'
+        NODE_VERSION = '20'
     }
 
     // ─── Options ───────────────────────────────────
@@ -91,42 +76,7 @@ pipeline {
             }
         }
 
-        // ── Stage 3: Build & Lint Frontend ─────────
-        stage('Build Frontend') {
-            steps {
-                dir('microservices/frontend/web') {
-                    sh '''
-                        echo "📦 Installing frontend dependencies..."
-                        npm ci
-
-                        echo "🔍 Linting frontend code..."
-                        npm run lint
-
-                        echo "🏗️  Building production bundle..."
-                        VITE_BACKEND_URL=https://kissanmithar.com \
-                        VITE_APP_ENV=production \
-                        npm run build
-                    '''
-                }
-            }
-        }
-
-        // ── Stage 4: Build Docker Images ───────────
-        stage('Build Docker Images') {
-            steps {
-                dir('microservices') {
-                    sh '''
-                        echo "🐳 Building production Docker images..."
-                        docker compose -f ${COMPOSE_FILE} build --parallel
-
-                        echo "📋 Built images:"
-                        docker images --filter "reference=microservices-*" --format "  {{.Repository}}:{{.Tag}} ({{.Size}})"
-                    '''
-                }
-            }
-        }
-
-        // ── Stage 5: Deploy to AWS ─────────────────
+        // ── Stage 3: Deploy to AWS ─────────────────
         stage('Deploy to AWS') {
             when {
                 allOf {
@@ -142,76 +92,36 @@ pipeline {
 
                     sshagent(credentials: [params.AWS_SSH_CREDENTIALS_ID]) {
 
-                        // Ensure the deployment directory exists
+                        // Ensure directory exists and pull latest code
                         sh """
+                            echo "🚀 Updating code on ${remoteHost}:${deployDir}..."
                             ssh -o StrictHostKeyChecking=no ${remoteHost} '
-                                mkdir -p ${deployDir}/microservices
+                                if [ ! -d "${deployDir}/.git" ]; then
+                                    echo "Cloning repository..."
+                                    git clone https://github.com/chandu7313/KMC.git ${deployDir}
+                                    cd ${deployDir}
+                                else
+                                    cd ${deployDir}
+                                    echo "Pulling latest changes..."
+                                    git fetch origin main
+                                    git reset --hard origin/main
+                                fi
                             '
-                        """
-
-                        // Sync project files to the remote server
-                        sh """
-                            echo "📤 Syncing project files to ${remoteHost}:${deployDir}..."
-                            rsync -avz --delete \
-                                --exclude 'node_modules' \
-                                --exclude '.git' \
-                                --exclude 'logs' \
-                                --exclude '.DS_Store' \
-                                -e 'ssh -o StrictHostKeyChecking=no' \
-                                microservices/docker-compose.prod.yml \
-                                microservices/docker-compose.yml \
-                                microservices/Dockerfile.template \
-                                microservices/Makefile \
-                                microservices/package.json \
-                                microservices/package-lock.json \
-                                ${remoteHost}:${deployDir}/microservices/
-                        """
-
-                        // Sync service source code, shared packages, nginx, and rabbitmq configs
-                        sh """
-                            rsync -avz --delete \
-                                --exclude 'node_modules' \
-                                --exclude '.DS_Store' \
-                                -e 'ssh -o StrictHostKeyChecking=no' \
-                                microservices/services/ \
-                                ${remoteHost}:${deployDir}/microservices/services/
-
-                            rsync -avz --delete \
-                                --exclude 'node_modules' \
-                                -e 'ssh -o StrictHostKeyChecking=no' \
-                                microservices/packages/ \
-                                ${remoteHost}:${deployDir}/microservices/packages/
-
-                            rsync -avz --delete \
-                                -e 'ssh -o StrictHostKeyChecking=no' \
-                                microservices/nginx/ \
-                                ${remoteHost}:${deployDir}/microservices/nginx/
-
-                            rsync -avz --delete \
-                                -e 'ssh -o StrictHostKeyChecking=no' \
-                                microservices/rabbitmq/ \
-                                ${remoteHost}:${deployDir}/microservices/rabbitmq/
-
-                            rsync -avz --delete \
-                                --exclude 'node_modules' \
-                                --exclude '.DS_Store' \
-                                -e 'ssh -o StrictHostKeyChecking=no' \
-                                microservices/frontend/ \
-                                ${remoteHost}:${deployDir}/microservices/frontend/
                         """
 
                         // Upload the .env file from Jenkins secret
                         withCredentials([file(credentialsId: 'kmc-env-file', variable: 'ENV_FILE')]) {
                             sh """
+                                echo "🔐 Uploading .env file..."
                                 scp -o StrictHostKeyChecking=no \
                                     \$ENV_FILE \
                                     ${remoteHost}:${deployDir}/microservices/.env
                             """
                         }
 
-                        // Stop old containers, rebuild, and start fresh
+                        // Build containers and start services
                         sh """
-                            echo "🚀 Deploying on ${remoteHost}..."
+                            echo "🏗️  Deploying on ${remoteHost}..."
                             ssh -o StrictHostKeyChecking=no ${remoteHost} '
                                 cd ${deployDir}/microservices
 
@@ -233,7 +143,7 @@ pipeline {
             }
         }
 
-        // ── Stage 6: Post-Deployment Health Check ──
+        // ── Stage 4: Post-Deployment Health Check ──
         stage('Health Check') {
             when {
                 allOf {
@@ -285,7 +195,6 @@ pipeline {
             echo '❌ Pipeline failed. Check the stage logs above for details.'
         }
         always {
-            // Clean up workspace to save disk on the Jenkins agent
             cleanWs(cleanWhenNotBuilt: false)
         }
     }
