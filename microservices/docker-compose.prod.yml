@@ -36,6 +36,21 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - auth-service
+      - user-service
+      - ai-service
+      - disease-service
+      - soil-service
+      - market-service
+      - ecommerce-service
+      - order-service
+      - payment-service
+      - notification-service
+      - support-service
+      - expert-service
+      - content-service
+      - analytics-service
+      - field-service
+      - frontend
     networks:
       - kissan-network
     deploy:
