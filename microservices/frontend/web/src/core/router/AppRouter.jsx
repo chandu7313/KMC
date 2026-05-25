@@ -105,7 +105,6 @@ const AppRouter = () => {
       <Route path="/orchard-planning" element={<OrchardPlanningPage />} />
       <Route path="/orchard-planning/plan" element={<PlanEstateFormPage />} />
       <Route path="/book-farm-visit" element={<BookFarmVisitPage />} />
-      <Route path="/market-prices" element={<MarketPage />} />
       <Route path="/whether-insights" element={<WeatherInsightsPage />} />
       <Route path="/crop-selection" element={<CropSelectionPage />} />
       <Route path="/government-schemes" element={<GovernmentSchemesPage />} />
@@ -121,8 +120,9 @@ const AppRouter = () => {
       <Route path="/checkout" element={<CheckoutPage />} />
 
       {/* ─── Farmer Dashboard Routes ───── */}
-      <Route path="/farmer" element={<FarmerLayout />}>
-        <Route path="dashboard" element={<DashboardPage />} />
+      <Route element={<FarmerLayout />}>
+        <Route path="/farmer/dashboard" element={<DashboardPage />} />
+        <Route path="/market-prices" element={<MarketPage />} />
       </Route>
 
       {/* ─── Support Portal Routes ──────── */}

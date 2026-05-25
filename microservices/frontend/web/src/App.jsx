@@ -1,12 +1,5 @@
-/**
- * App.jsx — Root Application Component
- * 
- * This is the top-level component that:
- * 1. Wraps the app in the router (AppRouter)
- * 2. Renders global UI elements (Toast, FloatingSupport)
- * 
- * All route definitions live in core/router/AppRouter.jsx
- */
+
+
 import { useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";

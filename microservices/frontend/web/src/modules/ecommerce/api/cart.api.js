@@ -2,7 +2,7 @@ import api from '@/shared/services/http/axios.client';
 import API from '@/core/api/api.config';
 
 export const getCart = async (userId) => {
-  const { data } = await api.post(`${API.CART}/get`, { userId });
+  const { data } = await api.get(`${API.CART}/`, { params: { userId } });
   return data;
 };
 

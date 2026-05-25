@@ -37,6 +37,7 @@ import DashboardPage from '@/modules/farmer/pages/DashboardPage';
 import ProfilePage from '@/modules/farmer/pages/ProfilePage';
 import OnboardingSurveyPage from '@/modules/onboarding/pages/OnboardingSurveyPage';
 import GovernmentSchemesPage from '@/modules/content/pages/GovernmentSchemesPage';
+import ExpertSupportPage from '@/modules/farmer/pages/ExpertSupportPage';
 import OrchardPlanningPage from '@/modules/orchard/pages/OrchardPlanningPage';
 import PlanEstateFormPage from '@/modules/orchard/pages/PlanEstateFormPage';
 import WeatherInsightsPage from '@/modules/content/pages/WeatherInsightsPage';
@@ -81,7 +82,6 @@ export const AppRouter = () => {
         <Route path="/orchard-planning" element={<OrchardPlanningPage />} />
         <Route path="/orchard-planning/plan" element={<PlanEstateFormPage />} />
         <Route path="/book-farm-visit" element={<BookFarmVisitPage />} />
-        <Route path="/market-prices" element={<MarketPage />} />
         <Route path="/whether-insights" element={<WeatherInsightsPage />} />
         <Route path="/crop-selection" element={<CropSelectionPage />} />
         <Route path="/government-schemes" element={<GovernmentSchemesPage />} />
@@ -97,8 +97,10 @@ export const AppRouter = () => {
         <Route path="/checkout" element={<CheckoutPage />} />
 
         {/* ─── Farmer Dashboard Routes ───── */}
-        <Route path="/farmer" element={<FarmerLayout />}>
-          <Route path="dashboard" element={<DashboardPage />} />
+        <Route element={<FarmerLayout />}>
+          <Route path="/farmer/dashboard" element={<DashboardPage />} />
+          <Route path="/market-prices" element={<MarketPage />} />
+          <Route path="/farmer/support" element={<ExpertSupportPage />} />
         </Route>
 
         {/* ─── Admin Dashboard Routes ────── */}

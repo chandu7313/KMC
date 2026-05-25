@@ -25,7 +25,7 @@ const CartPage = () => {
 
         try {
             // First get cart content
-            const cartRes = await axios.post(`${backendUrl}${API.CART}/get`, { userId: userData.id });
+            const cartRes = await axios.get(`${backendUrl}${API.CART}/`, { params: { userId: userData.id } });
             if (cartRes.data.success) {
                 const cartData = cartRes.data.cartData || cartRes.data.data?.cartData || {};
                 setCartItems(cartData);
