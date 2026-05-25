@@ -1,7 +1,7 @@
 import { successResponse, HttpError, models } from '@kissan/shared';
 import { Op } from 'sequelize';
 
-const { ExpertV2, ExpertSlot, ExpertConsultation, ExpertConsultationNote } = models;
+const { ExpertV2, ExpertSlot, ExpertConsultation } = models;
 
 // ── GET Experts ──
 export const getExpertsFromSupabase = async (req, res, next) => {
@@ -76,6 +76,7 @@ export const bookConsultation = async (req, res, next) => {
     const { expertId, topic, callType, phone, notes } = req.body;
     const farmerId = req.user?.id || '00000000-0000-0000-0000-000000000000';
     
+    let slotId = null;
     let slotTime = new Date();
     slotTime.setHours(slotTime.getHours() + 1);
     
@@ -93,18 +94,23 @@ export const bookConsultation = async (req, res, next) => {
         throw HttpError.conflict('NO_SLOTS_AVAILABLE');
       }
       
+      slotId = slot.id;
       slotTime = slot.slotDatetime;
       await slot.update({ isBooked: true });
     }
 
+    const bookingRef = 'KM-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+
     const booking = await ExpertConsultation.create({
+      bookingRef,
+      userId: farmerId,
       expertId,
-      farmerId,
-      farmerPhone: phone,
+      slotId,
       topic,
       callType,
-      scheduledAt: slotTime,
-      status: 'upcoming'
+      farmerPhone: phone,
+      notes,
+      status: 'confirmed'
     });
       
     let expertName = 'Auto-Assigned Expert';
@@ -115,7 +121,7 @@ export const bookConsultation = async (req, res, next) => {
 
     const mappedBooking = {
       id: booking.id,
-      bookingRef: `#KM-${booking.id.substring(0, 4).toUpperCase()}`,
+      bookingRef: booking.bookingRef,
       expertName,
       slotDatetime: booking.scheduledAt,
       topic: booking.topic,
@@ -133,7 +139,7 @@ export const getMyConsultations = async (req, res, next) => {
     const farmerId = req.user?.id || '00000000-0000-0000-0000-000000000000';
     
     const consultations = await ExpertConsultation.findAll({
-      where: { farmerId },
+      where: { userId: farmerId },
       include: [{ model: ExpertV2, as: 'expert', attributes: ['name'] }],
       order: [['scheduledAt', 'DESC']]
     });
@@ -156,13 +162,9 @@ export const getConsultationNotes = async (req, res, next) => {
   try {
     const { id } = req.params;
     
-    const note = await ExpertConsultationNote.findOne({
-      where: { consultationId: id },
-      include: [{
-        model: ExpertConsultation,
-        as: 'consultation',
-        include: [{ model: ExpertV2, as: 'expert', attributes: ['name'] }]
-      }]
+    const note = await ExpertConsultation.findByPk(id, {
+      attributes: ['expertNotes', 'recommendations', 'durationActualMinutes', 'farmerRating', 'topic', 'scheduledAt'],
+      include: [{ model: ExpertV2, as: 'expert', attributes: ['name'] }]
     });
 
     if (!note) {
@@ -177,9 +179,9 @@ export const getConsultationNotes = async (req, res, next) => {
       recommendations: note.recommendations,
       durationActualMinutes: note.durationActualMinutes,
       farmerRating: note.farmerRating,
-      topic: note.consultation?.topic,
-      createdAt: note.consultation?.scheduledAt,
-      expertName: note.consultation?.expert?.name
+      topic: note.topic,
+      createdAt: note.scheduledAt,
+      expertName: note.expert?.name
     };
 
     return successResponse(res, mapped, 'Notes retrieved');
@@ -198,8 +200,7 @@ export const cancelConsultation = async (req, res, next) => {
     await consultation.update({ 
       status: 'cancelled',
       cancelReason: reason,
-      cancelledAt: new Date(),
-      cancelledBy: 'farmer'
+      cancelledAt: new Date()
     });
     
     return successResponse(res, consultation, 'Consultation cancelled');
@@ -212,16 +213,14 @@ export const rateConsultation = async (req, res, next) => {
     const { id } = req.params;
     const { rating } = req.body;
     
-    let note = await ExpertConsultationNote.findOne({ where: { consultationId: id } });
-    if (!note) {
-      note = await ExpertConsultationNote.create({
-        consultationId: id,
-        farmerRating: rating
-      });
-    } else {
-      await note.update({ farmerRating: rating });
-    }
+    const consultation = await ExpertConsultation.findByPk(id);
+    if (!consultation) throw HttpError.notFound('Consultation not found');
+
+    await consultation.update({
+      farmerRating: rating,
+      ratedAt: new Date()
+    });
     
-    return successResponse(res, note, 'Rating submitted');
+    return successResponse(res, consultation, 'Rating submitted');
   } catch (err) { next(err); }
 };
