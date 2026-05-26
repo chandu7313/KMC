@@ -10,16 +10,26 @@ The platform connects farmers with scientific crop diagnostics, real-time market
 ---
 
 ## 📖 Table of Contents
-1. [Project Overview & Business Impact](#-project-overview--business-impact)
-2. [Technology Stack](#-technology-stack)
-3. [System Architecture](#-system-architecture)
-4. [Detailed Microservices Registry](#-detailed-microservices-registry)
-5. [Database & Data Architecture](#-database--data-architecture)
-6. [Repository & Project Structure](#-repository--project-structure)
-7. [Running the Platform Locally](#-running-the-platform-locally)
-8. [Monitoring & Observability](#-monitoring--observability)
-9. [CI/CD & Deployment](#-cicd--deployment)
-10. [References & Supplementary Docs](#-references--supplementary-docs)
+- [🌾 Kissan Mithar Consultancy (KMC) — Enterprise Platform](#-kissan-mithar-consultancy-kmc--enterprise-platform)
+  - [📖 Table of Contents](#-table-of-contents)
+  - [💡 Project Overview \& Business Impact](#-project-overview--business-impact)
+  - [🛠 Technology Stack](#-technology-stack)
+    - [Frontend Applications](#frontend-applications)
+    - [Backend Microservices](#backend-microservices)
+    - [Databases](#databases)
+  - [📐 System Architecture](#-system-architecture)
+  - [📦 Detailed Microservices Registry](#-detailed-microservices-registry)
+  - [🗄 Database \& Data Architecture](#-database--data-architecture)
+    - [1. PostgreSQL (Sequelize ORM)](#1-postgresql-sequelize-orm)
+    - [2. MongoDB (Mongoose ODM)](#2-mongodb-mongoose-odm)
+  - [📁 Repository \& Project Structure](#-repository--project-structure)
+  - [🚀 Running the Platform Locally](#-running-the-platform-locally)
+    - [1. Configure the Environment Variables](#1-configure-the-environment-variables)
+    - [2. Orchestration using Make (Recommended)](#2-orchestration-using-make-recommended)
+    - [3. Run with raw Docker-Compose](#3-run-with-raw-docker-compose)
+  - [📊 Monitoring \& Observability](#-monitoring--observability)
+  - [🔄 CI/CD \& Deployment](#-cicd--deployment)
+  - [🔗 References \& Supplementary Docs](#-references--supplementary-docs)
 
 ---
 
@@ -144,23 +154,23 @@ graph TD
 
 The backend contains **15 microservices** located in the `services/` directory. Each microservice is an independent Node.js process:
 
-| Service | Port | Primary Responsibilities | Main Dependencies / Integrations |
-| :--- | :--- | :--- | :--- |
-| **Auth Service** | `3001` | User signup/login, MFA, SMS/Email OTP generation, JWT token issuance. | Redis, [Auth Shared Module](file:///Volumes/My%20Files/Projects/KMC/microservices/packages/shared/auth) |
-| **User Service** | `3002` | User profiles, address book, role assignment, registration verification. | PostgreSQL (Sequelize) |
-| **AI Service** | `3003` | Contextual AI chat, prompt generation, LLM tuning. | Google Gemini AI SDK |
-| **Disease Service** | `3004` | Crop disease identification from image uploads, treatment recommendations. | Plant.id API, Cloudinary |
-| **Soil Service** | `3005` | Processing soil quality metrics (NPK values) to recommend appropriate crops/fertilizers. | Cloudinary, AI Service |
-| **Market Service** | `3006` | Fetching commodity prices, mandi rates, historical trends. | Data.gov.in API |
-| **Ecommerce Service** | `3007` | Managing agricultural inputs (fertilizers, equipment, seeds) catalog and inventory. | Cloudinary, PostgreSQL |
-| **Order Service** | `3008` | Cart management, order creation, tracking checkout workflows, inventory reservation. | RabbitMQ, PostgreSQL |
-| **Payment Service** | `3009` | Processing checkout payments, creating orders, validating transaction signatures. | Razorpay Gateway |
-| **Notification Service** | `3010` | Sending SMS and SMTP emails asynchronously based on event queues. | Fast2SMS, Brevo/Nodemailer, RabbitMQ |
-| **Support Service** | `3011` | Customer support ticketing, FAQs management, feedback submission. | MongoDB (telemetry) |
-| **Expert Service** | `3012` | Managing consultation bookings between farmers and Field Officers/Advisors. | PostgreSQL, RabbitMQ |
-| **Content Service** | `3013` | Publishing blogs, agricultural newsletters, successful farming stories. | Cloudinary, MongoDB |
-| **Analytics Service** | `3014` | Compiling platform metrics, revenue tracking, and order data for the Admin Dashboard. | PostgreSQL & MongoDB |
-| **Field Service** | `3015` | Tracking individual farm boundaries, crop calendars, and field-level tasks. | MongoDB |
+| Service                  | Port   | Primary Responsibilities                                                                 | Main Dependencies / Integrations                                                                        |
+| :----------------------- | :----- | :--------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| **Auth Service**         | `3001` | User signup/login, MFA, SMS/Email OTP generation, JWT token issuance.                    | Redis, [Auth Shared Module](file:///Volumes/My%20Files/Projects/KMC/microservices/packages/shared/auth) |
+| **User Service**         | `3002` | User profiles, address book, role assignment, registration verification.                 | PostgreSQL (Sequelize)                                                                                  |
+| **AI Service**           | `3003` | Contextual AI chat, prompt generation, LLM tuning.                                       | Google Gemini AI SDK                                                                                    |
+| **Disease Service**      | `3004` | Crop disease identification from image uploads, treatment recommendations.               | Plant.id API, Cloudinary                                                                                |
+| **Soil Service**         | `3005` | Processing soil quality metrics (NPK values) to recommend appropriate crops/fertilizers. | Cloudinary, AI Service                                                                                  |
+| **Market Service**       | `3006` | Fetching commodity prices, mandi rates, historical trends.                               | Data.gov.in API                                                                                         |
+| **Ecommerce Service**    | `3007` | Managing agricultural inputs (fertilizers, equipment, seeds) catalog and inventory.      | Cloudinary, PostgreSQL                                                                                  |
+| **Order Service**        | `3008` | Cart management, order creation, tracking checkout workflows, inventory reservation.     | RabbitMQ, PostgreSQL                                                                                    |
+| **Payment Service**      | `3009` | Processing checkout payments, creating orders, validating transaction signatures.        | Razorpay Gateway                                                                                        |
+| **Notification Service** | `3010` | Sending SMS and SMTP emails asynchronously based on event queues.                        | Fast2SMS, Brevo/Nodemailer, RabbitMQ                                                                    |
+| **Support Service**      | `3011` | Customer support ticketing, FAQs management, feedback submission.                        | MongoDB (telemetry)                                                                                     |
+| **Expert Service**       | `3012` | Managing consultation bookings between farmers and Field Officers/Advisors.              | PostgreSQL, RabbitMQ                                                                                    |
+| **Content Service**      | `3013` | Publishing blogs, agricultural newsletters, successful farming stories.                  | Cloudinary, MongoDB                                                                                     |
+| **Analytics Service**    | `3014` | Compiling platform metrics, revenue tracking, and order data for the Admin Dashboard.    | PostgreSQL & MongoDB                                                                                    |
+| **Field Service**        | `3015` | Tracking individual farm boundaries, crop calendars, and field-level tasks.              | MongoDB                                                                                                 |
 
 ---
 
@@ -301,3 +311,4 @@ For deeper dives into individual layers, refer to:
 * 📐 **System Topology:** Detailed port registry, API reverse proxies, and asynchronous events routing are documented in [architecture_overview.md](file:///Volumes/My%20Files/Projects/KMC/architecture_overview.md).
 * 🐳 **Local Deployment Guide:** Specific command variations and troubleshooting tips are available in [deployment_guide.md](file:///Volumes/My%20Files/Projects/KMC/deployment_guide.md).
 * ☁️ **AWS Cloud & DevOps Guide:** Jenkins workflows, Webhook setups, EC2 Ubuntu configurations, and GHA pipelines are structured step-by-step in [deployment_guide_aws.md](file:///Volumes/My%20Files/Projects/KMC/deployment_guide_aws.md).
+dfghjkl;lkjhgfd
