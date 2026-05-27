@@ -82,7 +82,7 @@ const MarketPage = () => {
   ];
 
   // Map real data if available
-  const mappedRates = prices.length > 0 ? prices.slice(0, 4).map(p => ({
+  const mappedRates = prices?.length > 0 ? prices.slice(0, 4).map(p => ({
     crop: p.cropName,
     today: p.modalPrice,
     yesterday: p.modalPrice - Math.floor(Math.random() * 50), // Mock yesterday
@@ -246,7 +246,7 @@ const MarketPage = () => {
             </button>
           </div>
           <div className="flex-1 min-h-[200px] w-full relative">
-             <ResponsiveContainer width="100%" height="100%">
+             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={200}>
               <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorTrend" x1="0" y1="0" x2="0" y2="1">

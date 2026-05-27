@@ -11,8 +11,10 @@ import { useGlobalStore } from '@/app/store/globalStore';
 import { useCartStore } from '@/modules/ecommerce/store/cartStore';
 import API from '@/core/api/api.config';
 
-const NavItem = ({ icon, label, active = false }) => (
-    <div className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition-colors ${active ? 'bg-[#1b5e20] text-white rounded-r-full mr-4 shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}>
+const NavItem = ({ icon, label, active = false, onClick }) => (
+    <div 
+        onClick={onClick}
+        className={`flex items-center gap-3 px-6 py-3 cursor-pointer transition-colors ${active ? 'bg-[#1b5e20] text-white rounded-r-full mr-4 shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}>
         {icon}
         <span className="text-[13px] font-bold tracking-wide">{label}</span>
     </div>
@@ -22,7 +24,7 @@ const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [qty, setQty] = useState(1);
-    const { backendUrl, isLoggedin } = useGlobalStore();
+    const { backendUrl, isLoggedin, setIsLoggedin, setUserData } = useGlobalStore();
     const { getCartCount, setCartItems, cartItems, getCartData } = useCartStore();
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
@@ -151,6 +153,20 @@ const ProductDetail = () => {
         fetchProductData();
     }, [id]);
 
+    const handleLogout = async () => {
+        try {
+            axios.defaults.withCredentials = true;
+            const { data } = await axios.post(backendUrl + "/api/auth/logout");
+            if (data.success) {
+                setIsLoggedin(false);
+                setUserData(false);
+                navigate("/login");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
     if (loading || !product) {
         return <div className="flex h-screen items-center justify-center bg-white"><div className="w-8 h-8 border-4 border-slate-200 border-t-[#1b5e20] rounded-full animate-spin"></div></div>;
     }
@@ -166,22 +182,28 @@ const ProductDetail = () => {
                 </div>
 
                 <nav className="flex-1 overflow-y-auto mt-4">
-                    <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" />
-                    <NavItem icon={<Database size={20} />} label="Inventory" active={true} />
-                    <NavItem icon={<Sprout size={20} />} label="Crops" />
-                    <NavItem icon={<LayoutDashboard size={20} className="rotate-180" />} label="Financials" />
-                    <NavItem icon={<LineChart size={20} />} label="Analytics" />
-                    <NavItem icon={<HeadphonesIcon size={20} />} label="Support" />
+                    <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" onClick={() => navigate('/admin/dashboard')} />
+                    <NavItem icon={<Sprout size={20} />} label="Crops" onClick={() => navigate('/admin/crops')} />
+                    <NavItem icon={<Database size={20} />} label="Inventory" active={true} onClick={() => navigate('/marketplace')} />
+                    <NavItem icon={<LayoutDashboard size={20} className="rotate-180" />} label="Financials" onClick={() => navigate('/admin/analytics')} />
+                    <NavItem icon={<LineChart size={20} />} label="Analytics" onClick={() => navigate('/admin/analytics')} />
+                    <NavItem icon={<HeadphonesIcon size={20} />} label="Support" onClick={() => navigate('/admin/support')} />
                 </nav>
 
                 <div className="p-6 space-y-4">
-                    <button className="w-full bg-[#1b5e20] hover:bg-green-900 text-white flex items-center justify-center gap-2 py-3 rounded-lg font-bold text-[13px] shadow-sm transition-colors">
+                    <button 
+                        onClick={() => navigate('/admin/reports/new')}
+                        className="w-full bg-[#1b5e20] hover:bg-green-900 text-white flex items-center justify-center gap-2 py-3 rounded-lg font-bold text-[13px] shadow-sm transition-colors">
                         <Plus size={16} strokeWidth={3} /> New Report
                     </button>
-                    <div className="flex items-center gap-3 px-2 py-2 cursor-pointer text-slate-600 hover:text-slate-900 transition-colors">
+                    <div 
+                        onClick={() => navigate('/admin/settings')}
+                        className="flex items-center gap-3 px-2 py-2 cursor-pointer text-slate-600 hover:text-slate-900 transition-colors">
                         <Settings size={18} /> <span className="text-[13px] font-bold">Settings</span>
                     </div>
-                    <div className="flex items-center gap-3 px-2 py-2 cursor-pointer text-slate-600 hover:text-slate-900 transition-colors">
+                    <div 
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-2 py-2 cursor-pointer text-slate-600 hover:text-slate-900 transition-colors">
                         <LogOut size={18} /> <span className="text-[13px] font-bold">Logout</span>
                     </div>
                 </div>

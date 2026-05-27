@@ -142,15 +142,18 @@ const FarmerLayout = () => {
                         </div>
 
                         <button className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+                            <Sun size={20} />
+                        </button>
+                        <button className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                             <Bell size={20} />
                             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                         </button>
 
                         <div className="flex items-center gap-3 pl-2 lg:pl-4 border-l border-slate-200">
-                            <span className="text-sm font-bold text-slate-800 hidden sm:block">
-                                {userData?.name || 'Farmer User'}
-                            </span>
-                            <div className="w-10 h-10 rounded-full bg-orange-200 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center font-bold text-orange-800">
+                            <div 
+                                onClick={() => navigate('/profile')}
+                                className="cursor-pointer hover:ring-2 hover:ring-[#186036] w-10 h-10 rounded-full bg-orange-200 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center font-bold text-orange-800 transition-all"
+                            >
                                 {userData?.name ? userData.name.charAt(0).toUpperCase() : 'F'}
                             </div>
                         </div>
@@ -159,17 +162,6 @@ const FarmerLayout = () => {
 
                 {/* Page Content (Scrollable) */}
                 <div className="flex-1 overflow-auto p-4 lg:p-8">
-                    {/* Mobile Greeting (visible only on very small screens where topbar greeting hides) */}
-                    <div className="sm:hidden mb-6">
-                        <h2 className="text-xl font-black text-[#1f2d1f]">
-                            Good Morning, {userData ? userData.name.split(' ')[0] : 'Farmer'} 🌾
-                        </h2>
-                        <div className="flex items-center gap-1.5 text-sm text-slate-600 font-medium mt-1">
-                            <Sun size={16} className="text-amber-500" />
-                            28°C • {userData?.district || 'Ludhiana'}, Punjab
-                        </div>
-                    </div>
-
                     <Outlet />
                 </div>
             </main>
