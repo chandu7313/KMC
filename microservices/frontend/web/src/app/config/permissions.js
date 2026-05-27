@@ -31,6 +31,7 @@ export const ALLOWED_ADMIN_ROLES = [
   ROLES.CONTENT_MANAGER,
   ROLES.FINANCE_MANAGER,
   ROLES.FIELD_AGENT,
+  'field-officer',
 ];
 
 export const ROLE_LABELS = {
@@ -45,6 +46,7 @@ export const ROLE_LABELS = {
   [ROLES.CONTENT_MANAGER]: 'Content',
   [ROLES.FINANCE_MANAGER]: 'Finance',
   [ROLES.FIELD_AGENT]: 'Field Agent',
+  'field-officer': 'Field Officer',
   [ROLES.FARMER]: 'Farmer',
 };
 
@@ -59,6 +61,7 @@ export const isAdminRole = (role) => ALLOWED_ADMIN_ROLES.includes(role);
 export const getDefaultRoute = (role) => {
   switch (role) {
     case ROLES.FARMER:
+    case 'user':
       return '/farmer/dashboard';
     case ROLES.SUPER_ADMIN:
     case ROLES.TECH_ADMIN:
@@ -67,7 +70,8 @@ export const getDefaultRoute = (role) => {
     case ROLES.SUPPORT_MANAGER:
       return '/admin/support';
     case ROLES.FIELD_AGENT:
-      return '/field-officer/dashboard';
+    case 'field-officer':
+      return '/admin/dashboard';
     default:
       return '/admin/dashboard';
   }
