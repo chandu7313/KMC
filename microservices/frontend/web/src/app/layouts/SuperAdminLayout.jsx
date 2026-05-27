@@ -129,8 +129,8 @@ const SuperAdminLayout = () => {
     );
   }
 
-  // Only allow super_admin role
-  if (!isLoggedin || userData?.role !== 'super_admin') {
+  // Allow super_admin and tech_admin roles
+  if (!isLoggedin || !['super_admin', 'tech_admin'].includes(userData?.role)) {
     return <Navigate to="/login" />;
   }
 
