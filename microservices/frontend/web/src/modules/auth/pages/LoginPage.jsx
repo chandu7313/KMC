@@ -6,6 +6,7 @@ import axios from "axios"
 import { toast } from "react-toastify"
 import { useGlobalStore } from '@/app/store/globalStore';
 import API from '@/core/api/api.config';
+import { getDefaultRoute, isAdminRole } from '@/app/config/permissions';
 
 const Login = () => {
     const { t } = useTranslation()
@@ -129,13 +130,10 @@ const Login = () => {
                         }
                     } catch (err) { console.error("Survey status check failed", err) }
                     
-                    if (email === 'admin@agridust.com' || email === 'admin@kissanmithar.com') {
-                        navigate('/admin/dashboard')
-                    } else if (email === 'agent@kissanmithar.com') {
-                        navigate('/admin/support')
-                    } else {
-                        navigate('/farmer/dashboard')
-                    }
+                    // Route based on user's actual role from getUserData
+                    const currentUserData = useGlobalStore.getState().userData;
+                    const userRole = currentUserData?.role || 'user';
+                    navigateBasedOnRole(userRole);
                 } else {
                     toast.error(data.message)
                 }
@@ -148,30 +146,33 @@ const Login = () => {
     }
 
     const navigateBasedOnRole = (role) => {
-        if (['farmer', 'user'].includes(role)) {
-            navigate('/farmer/dashboard');
-        } else if (role === 'super_admin') {
-            navigate('/super-admin/dashboard');
-        } else {
-            navigate('/admin/dashboard');
-        }
+        const route = getDefaultRoute(role);
+        navigate(route);
     };
 
     const fallbackMockLogin = (role) => {
+        const effectiveRole = role === 'farmer' ? 'user' : role;
         toast.info(`Logged in as ${role.replace(/_/g, ' ')} (Mock Data)`);
         setIsLoggedin(true);
-        // Direct state mutation on the store since we don't have setUserData exposed in the destructuring here
         useGlobalStore.setState({ 
             userData: {
                 id: `mock-${role}-123`,
-                name: `${role.replace(/_/g, ' ').toUpperCase()}`,
+                name: `${role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} (Dev)`,
                 email: `${role}_test@agridust.com`,
-                role: role === 'farmer' ? 'user' : role,
+                phone: '9876543210',
+                role: effectiveRole,
                 status: 'online',
                 isAccountVerified: true,
-            } 
+                isAdminUser: isAdminRole(effectiveRole),
+                hasCompletedTour: true,
+                hasCompletedSurvey: true,
+                district: 'Pune',
+                crops: ['Wheat', 'Cotton'],
+                addresses: [],
+            },
+            loading: false,
         });
-        navigateBasedOnRole(role);
+        navigateBasedOnRole(effectiveRole);
     };
 
     const handleAutoLogin = async (role) => {
@@ -182,10 +183,34 @@ const Login = () => {
             const { data } = await axios.post(backendUrl + `${API.AUTH}/auto-login`, { role });
             if (data.success) {
                 setIsLoggedin(true);
-                await getUserData();
+                try {
+                    await getUserData();
+                } catch (err) {
+                    console.warn('getUserData after auto-login failed, using response data', err);
+                    // Populate from the auto-login response directly
+                    const effectiveRole = role === 'farmer' ? 'user' : (data.data?.user?.role || role);
+                    useGlobalStore.setState({
+                        userData: {
+                            id: data.data?.user?.id || `auto-${role}`,
+                            name: data.data?.user?.name || role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                            email: data.data?.user?.email || `${role}_test@agridust.com`,
+                            phone: data.data?.user?.phone || '',
+                            role: effectiveRole,
+                            isAccountVerified: true,
+                            isAdminUser: isAdminRole(effectiveRole),
+                            hasCompletedTour: true,
+                            hasCompletedSurvey: true,
+                            district: data.data?.user?.district || 'Pune',
+                            crops: data.data?.user?.crops || [],
+                            addresses: [],
+                        },
+                        loading: false,
+                    });
+                }
                 syncPreferencesToBackend().catch(err => console.warn('Preferences sync skipped', err));
-                toast.success(`Logged in automatically as ${role}`);
-                navigateBasedOnRole(role);
+                toast.success(`Logged in as ${role.replace(/_/g, ' ')}`);
+                const effectiveRole = role === 'farmer' ? 'user' : (data.data?.role || role);
+                navigateBasedOnRole(effectiveRole);
             } else {
                 toast.error(data.message);
                 fallbackMockLogin(role);

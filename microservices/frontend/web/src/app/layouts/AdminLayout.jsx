@@ -26,7 +26,7 @@ const AdminLayout = () => {
   const isAdminUser = userData?.isAdminUser || false;
 
   if (!isLoggedin || (!ALLOWED_ADMIN_ROLES.includes(userRole) && !isAdminUser)) {
-    return <Navigate to="/" />;
+    return <Navigate to="/login" />;
   }
 
   const roleLabel = ROLE_LABELS[userRole] || userRole;

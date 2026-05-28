@@ -38,7 +38,7 @@ const SupportLayout = () => {
   const allowedSupportRoles = ['admin', 'super_admin', 'support_agent', 'support_manager'];
   
   if (!isLoggedin || !allowedSupportRoles.includes(userData?.role)) {
-    return <Navigate to="/" />;
+    return <Navigate to="/login" />;
   }
 
   return (

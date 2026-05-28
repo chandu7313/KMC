@@ -13,6 +13,7 @@ import SuperAdminLayout from '@/app/layouts/SuperAdminLayout';
 
 // ─── Admin Pages ───────────────────────
 import AdminDashboardPage from '@/modules/admin/pages/AdminDashboardPage';
+import AdminSupportDashboardPage from '@/modules/admin/pages/AdminSupportDashboardPage';
 
 // ─── Farmer Pages ──────────────────────
 import HomePage from '@/modules/farmer/pages/HomePage';
@@ -105,12 +106,41 @@ export const AppRouter = () => {
 
         {/* ─── Admin Dashboard Routes ────── */}
         <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="farmers" element={<AdminDashboardPage />} />
+          <Route path="soil-tests" element={<AdminDashboardPage />} />
+          <Route path="market" element={<AdminDashboardPage />} />
+          <Route path="inventory" element={<AdminDashboardPage />} />
+          <Route path="bookings" element={<AdminDashboardPage />} />
+          <Route path="users" element={<AdminDashboardPage />} />
+          <Route path="analytics" element={<AdminDashboardPage />} />
+          <Route path="blogs" element={<AdminDashboardPage />} />
+          <Route path="soil-entry" element={<AdminDashboardPage />} />
+        </Route>
+
+        {/* ─── Admin Support Routes ────────── */}
+        <Route path="/admin/support" element={<SupportLayout />}>
+          <Route index element={<AdminSupportDashboardPage />} />
+          <Route path="tickets" element={<AdminSupportDashboardPage />} />
+          <Route path="farmers" element={<AdminSupportDashboardPage />} />
+          <Route path="bookings" element={<AdminSupportDashboardPage />} />
+          <Route path="templates" element={<AdminSupportDashboardPage />} />
+          <Route path="notifications" element={<AdminSupportDashboardPage />} />
+          <Route path="reports" element={<AdminSupportDashboardPage />} />
+          <Route path="agents" element={<AdminSupportDashboardPage />} />
+          <Route path="settings/sla" element={<AdminSupportDashboardPage />} />
         </Route>
 
         {/* ─── Super Admin Routes ────────── */}
         <Route path="/super-admin" element={<SuperAdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="system" element={<AdminDashboardPage />} />
+          <Route path="users" element={<AdminDashboardPage />} />
+          <Route path="monitoring" element={<AdminDashboardPage />} />
+          <Route path="developer" element={<AdminDashboardPage />} />
+          <Route path="settings" element={<AdminDashboardPage />} />
         </Route>
 
         {/* ─── 404 Catch-all ──────────────── */}
