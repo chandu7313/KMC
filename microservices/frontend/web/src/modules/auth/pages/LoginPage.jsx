@@ -6,7 +6,7 @@ import axios from "axios"
 import { toast } from "react-toastify"
 import { useGlobalStore } from '@/app/store/globalStore';
 import API from '@/core/api/api.config';
-import { getDefaultRoute, isAdminRole } from '@/app/config/permissions';
+import { DEV_ACCOUNTS, ROLE_ICONS, ROLE_COLORS, getDefaultRoute, isAdminRole } from '@/app/config/permissions';
 
 const Login = () => {
     const { t } = useTranslation()
@@ -22,6 +22,7 @@ const Login = () => {
     const [otp, setOtp] = useState('')
     const [showOtpInput, setShowOtpInput] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [devLoginLoading, setDevLoginLoading] = useState(null)
 
     const syncPreferencesToBackend = async () => {
         try {
@@ -150,34 +151,9 @@ const Login = () => {
         navigate(route);
     };
 
-    const fallbackMockLogin = (role) => {
-        const effectiveRole = role === 'farmer' ? 'user' : role;
-        toast.info(`Logged in as ${role.replace(/_/g, ' ')} (Mock Data)`);
-        setIsLoggedin(true);
-        useGlobalStore.setState({ 
-            userData: {
-                id: `mock-${role}-123`,
-                name: `${role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} (Dev)`,
-                email: `${role}_test@agridust.com`,
-                phone: '9876543210',
-                role: effectiveRole,
-                status: 'online',
-                isAccountVerified: true,
-                isAdminUser: isAdminRole(effectiveRole),
-                hasCompletedTour: true,
-                hasCompletedSurvey: true,
-                district: 'Pune',
-                crops: ['Wheat', 'Cotton'],
-                addresses: [],
-            },
-            loading: false,
-        });
-        navigateBasedOnRole(effectiveRole);
-    };
-
     const handleAutoLogin = async (role) => {
         try {
-            setLoading(true);
+            setDevLoginLoading(role);
             axios.defaults.withCredentials = true;
 
             const { data } = await axios.post(backendUrl + `${API.AUTH}/auto-login`, { role });
@@ -187,39 +163,25 @@ const Login = () => {
                     await getUserData();
                 } catch (err) {
                     console.warn('getUserData after auto-login failed, using response data', err);
-                    // Populate from the auto-login response directly
-                    const effectiveRole = role === 'farmer' ? 'user' : (data.data?.user?.role || role);
                     useGlobalStore.setState({
-                        userData: {
-                            id: data.data?.user?.id || `auto-${role}`,
-                            name: data.data?.user?.name || role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                            email: data.data?.user?.email || `${role}_test@agridust.com`,
-                            phone: data.data?.user?.phone || '',
-                            role: effectiveRole,
-                            isAccountVerified: true,
-                            isAdminUser: isAdminRole(effectiveRole),
-                            hasCompletedTour: true,
-                            hasCompletedSurvey: true,
-                            district: data.data?.user?.district || 'Pune',
-                            crops: data.data?.user?.crops || [],
-                            addresses: [],
-                        },
+                        userData: data.data?.user || {},
                         loading: false,
                     });
                 }
                 syncPreferencesToBackend().catch(err => console.warn('Preferences sync skipped', err));
-                toast.success(`Logged in as ${role.replace(/_/g, ' ')}`);
-                const effectiveRole = role === 'farmer' ? 'user' : (data.data?.role || role);
-                navigateBasedOnRole(effectiveRole);
+                toast.success(`Logged in as ${data.data?.user?.name || role.replace(/_/g, ' ')}`);
+                
+                // Navigate to the exact dashboard path returned by the backend
+                const dashboard = data.data?.dashboard || getDefaultRoute(data.data?.user?.role || role);
+                navigate(dashboard);
             } else {
                 toast.error(data.message);
-                fallbackMockLogin(role);
             }
         } catch (error) {
             console.error("Auto login error:", error);
-            fallbackMockLogin(role);
+            toast.error(error.response?.data?.message || error.message || "Login failed");
         } finally {
-            setLoading(false);
+            setDevLoginLoading(null);
         }
     }
 
@@ -276,31 +238,29 @@ const Login = () => {
                     {!showOtpInput && state === 'Login' && (
                         <div className="mb-6">
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center mb-3">Quick Developer Login</p>
-                            <div className="flex flex-wrap gap-2 justify-center max-h-32 overflow-y-auto p-3 border border-slate-100 rounded-xl bg-slate-50 scrollbar-thin">
-                                {[
-                                    { id: 'farmer', label: 'Farmer' },
-                                    { id: 'field-officer', label: 'Field Officer' },
-                                    { id: 'super_admin', label: 'Super Admin' },
-                                    { id: 'admin', label: 'Admin' },
-                                    { id: 'tech_admin', label: 'Tech Admin' },
-                                    { id: 'agri_expert', label: 'Agri Expert' },
-                                    { id: 'ecommerce_manager', label: 'E-commerce' },
-                                    { id: 'order_manager', label: 'Order Manager' },
-                                    { id: 'support_agent', label: 'Support Agent' },
-                                    { id: 'support_manager', label: 'Support Manager' },
-                                    { id: 'content_manager', label: 'Content Manager' },
-                                    { id: 'finance_manager', label: 'Finance Manager' },
-                                    { id: 'field_agent', label: 'Field Agent' },
-                                ].map(r => (
-                                    <button 
-                                        key={r.id}
-                                        type="button" 
-                                        onClick={() => handleAutoLogin(r.id)} 
-                                        className="text-[10px] font-black bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg transition-all border border-slate-200 hover:border-emerald-200 shadow-sm"
-                                    >
-                                        {r.label}
-                                    </button>
-                                ))}
+                            <div className="flex flex-wrap gap-2 justify-center max-h-[160px] overflow-y-auto p-4 border border-slate-100 rounded-2xl bg-white shadow-inner scrollbar-thin">
+                                {DEV_ACCOUNTS.map(account => {
+                                    const roleInfo = ROLE_COLORS[account.role] || ROLE_COLORS['admin'];
+                                    const isSpinning = devLoginLoading === account.role;
+                                    return (
+                                        <button 
+                                            key={account.role}
+                                            type="button" 
+                                            onClick={() => handleAutoLogin(account.role)}
+                                            disabled={devLoginLoading !== null}
+                                            className={`flex items-center gap-1.5 text-[10px] font-black px-3 py-2 rounded-xl transition-all border shadow-sm group
+                                                ${roleInfo.bg} ${roleInfo.border} ${roleInfo.text} 
+                                                hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        >
+                                            {isSpinning ? (
+                                                <div className={`w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin`}></div>
+                                            ) : (
+                                                <span className="text-sm">{ROLE_ICONS[account.role]}</span>
+                                            )}
+                                            {account.label}
+                                        </button>
+                                    );
+                                })}
                             </div>
                             <div className="border-b border-slate-100 my-6 relative">
                                 <span className="absolute left-1/2 -translate-x-1/2 -top-2.5 bg-white px-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">OR</span>

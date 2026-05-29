@@ -14,6 +14,13 @@ import SuperAdminLayout from '@/app/layouts/SuperAdminLayout';
 // ─── Admin Pages ───────────────────────
 import AdminDashboardPage from '@/modules/admin/pages/AdminDashboardPage';
 import AdminSupportDashboardPage from '@/modules/admin/pages/AdminSupportDashboardPage';
+import TechAdminDashboard from '@/modules/admin/pages/TechAdminDashboard';
+import AgriExpertDashboard from '@/modules/admin/pages/AgriExpertDashboard';
+import EcommerceDashboard from '@/modules/admin/pages/EcommerceDashboard';
+import OrderManagerDashboard from '@/modules/admin/pages/OrderManagerDashboard';
+import ContentDashboard from '@/modules/admin/pages/ContentDashboard';
+import FinanceDashboard from '@/modules/admin/pages/FinanceDashboard';
+import FieldDashboard from '@/modules/admin/pages/FieldDashboard';
 
 // ─── Farmer Pages ──────────────────────
 import HomePage from '@/modules/farmer/pages/HomePage';
@@ -108,6 +115,17 @@ export const AppRouter = () => {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
+          
+          {/* New Role-Specific Dashboards */}
+          <Route path="tech" element={<TechAdminDashboard />} />
+          <Route path="agri" element={<AgriExpertDashboard />} />
+          <Route path="ecommerce" element={<EcommerceDashboard />} />
+          <Route path="orders" element={<OrderManagerDashboard />} />
+          <Route path="content" element={<ContentDashboard />} />
+          <Route path="finance" element={<FinanceDashboard />} />
+          <Route path="field" element={<FieldDashboard />} />
+
+          {/* Legacy Generic Routes */}
           <Route path="farmers" element={<AdminDashboardPage />} />
           <Route path="soil-tests" element={<AdminDashboardPage />} />
           <Route path="market" element={<AdminDashboardPage />} />
@@ -130,17 +148,6 @@ export const AppRouter = () => {
           <Route path="reports" element={<AdminSupportDashboardPage />} />
           <Route path="agents" element={<AdminSupportDashboardPage />} />
           <Route path="settings/sla" element={<AdminSupportDashboardPage />} />
-        </Route>
-
-        {/* ─── Super Admin Routes ────────── */}
-        <Route path="/super-admin" element={<SuperAdminLayout />}>
-          <Route index element={<AdminDashboardPage />} />
-          <Route path="dashboard" element={<AdminDashboardPage />} />
-          <Route path="system" element={<AdminDashboardPage />} />
-          <Route path="users" element={<AdminDashboardPage />} />
-          <Route path="monitoring" element={<AdminDashboardPage />} />
-          <Route path="developer" element={<AdminDashboardPage />} />
-          <Route path="settings" element={<AdminDashboardPage />} />
         </Route>
 
         {/* ─── 404 Catch-all ──────────────── */}

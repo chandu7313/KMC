@@ -132,7 +132,39 @@ export const autoLogin = async (req, res, next) => {
     tokenService.setTokenCookie(res, accessToken);
     await tokenService.storeSession(user.id, accessToken);
 
-    return successResponse(res, { user, role: req.body.role }, 'Auto login successful');
+    // Role-to-dashboard mapping (mirrors frontend permissions.js)
+    const ROLE_DASHBOARDS = {
+      farmer: '/farmer/dashboard',
+      user: '/farmer/dashboard',
+      admin: '/admin/dashboard',
+      super_admin: '/admin/dashboard',
+      tech_admin: '/admin/tech',
+      agri_expert: '/admin/agri',
+      ecommerce_manager: '/admin/ecommerce',
+      order_manager: '/admin/orders',
+      support_agent: '/admin/support',
+      support_manager: '/admin/support',
+      content_manager: '/admin/content',
+      finance_manager: '/admin/finance',
+      field_agent: '/admin/field',
+      field_officer: '/admin/field',
+    };
+
+    const effectiveRole = user.role || req.body.role;
+    const dashboard = ROLE_DASHBOARDS[effectiveRole] || '/admin/dashboard';
+
+    return successResponse(res, {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: effectiveRole,
+        userType: user.userType || 'admin',
+      },
+      dashboard,
+      devMode: true,
+    }, 'Auto login successful');
   } catch (error) {
     next(error);
   }

@@ -240,92 +240,57 @@ class AuthService {
   // ── Auto-Login (Dev mode) ──
 
   async autoLogin(role) {
+    // All admin roles that live in admin_users table
     const adminRoles = [
       'super_admin', 'admin', 'tech_admin', 'agri_expert',
       'ecommerce_manager', 'order_manager', 'support_agent',
-      'support_manager', 'content_manager', 'finance_manager', 'field_agent',
+      'support_manager', 'content_manager', 'finance_manager',
+      'field_agent', 'field_officer',
     ];
 
     let user;
 
-    if (adminRoles.includes(role)) {
-      const email = `${role}_test@agridust.com`;
-      try {
-        user = await userRepository.findAdminByEmail(email);
+    if (role === 'farmer' || role === 'user') {
+      // Farmer login — look up in users table by phone
+      user = await userRepository.findByPhone('9876543210');
 
-        if (!user) {
-          user = await userRepository.createAdmin({
-            name: `${role.replace(/_/g, ' ').toUpperCase()} TEST`,
-            email,
-            password: 'hashed_password_here',
-            role,
-            status: 'online',
-          });
-        }
-      } catch (err) {
-        user = {
-          id: `mock-${role}-123`,
-          name: `${role.replace(/_/g, ' ').toUpperCase()} TEST`,
-          email,
-          role,
-          status: 'online',
-          isAccountVerified: true,
-        };
-      }
-    } else if (role === 'farmer' || role === 'user') {
-      try {
-        user = await userRepository.findByEmail('amit@example.com');
-        if (!user) {
-          user = await userRepository.create({
-            name: 'Amit Kumar',
-            email: 'amit@example.com',
-            phone: '8888888888',
-            role: 'user',
-            district: 'Pune',
-            crops: ['Wheat'],
-            isAccountVerified: true,
-          });
-        }
-      } catch (err) {
-        user = {
-          id: `mock-user-123`,
-          name: 'Amit Kumar (Mock)',
-          email: 'amit@example.com',
-          phone: '8888888888',
+      if (!user) {
+        // Create a dev farmer if missing
+        user = await userRepository.create({
+          name: 'Test Farmer',
+          email: 'farmer@dev.kissanmithar.com',
+          phone: '9876543210',
           role: 'user',
-          district: 'Pune',
-          crops: ['Wheat'],
+          district: 'Nizamabad',
+          crops: ['Wheat', 'Cotton'],
           isAccountVerified: true,
-        };
+        });
       }
-    } else if (role === 'field-officer') {
-      try {
-        user = await userRepository.findByEmail('john.fo@agridust.com');
-        if (!user) {
-          user = await userRepository.create({
-            name: 'John Officer',
-            email: 'john.fo@agridust.com',
-            phone: '7777777777',
-            role: 'field-officer',
-            isAccountVerified: true,
-          });
-        }
-      } catch (err) {
-        user = {
-          id: `mock-fo-123`,
-          name: 'John Officer (Mock)',
-          email: 'john.fo@agridust.com',
-          phone: '7777777777',
-          role: 'field-officer',
-          isAccountVerified: true,
-        };
+
+      // Normalize role for frontend
+      user = { ...user, role: 'farmer', userType: 'farmer' };
+
+    } else if (adminRoles.includes(role)) {
+      // Admin roles — look up in admin_users table by role
+      user = await userRepository.findAdminByRole(role);
+
+      if (!user) {
+        throw HttpError.notFound(
+          `Dev account for role "${role}" not found. Run: node scripts/seedDevAccounts.js`
+        );
       }
+
+      user = { ...user, userType: 'admin' };
+
+    } else {
+      throw HttpError.badRequest(`Unknown role: "${role}"`);
     }
 
     if (!user) {
       throw HttpError.notFound('User not found for auto-login');
     }
 
+    logger.info(`Auto-login successful for role: ${role}`, { userId: user.id });
     return user;
   }
 }

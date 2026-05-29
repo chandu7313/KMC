@@ -39,9 +39,29 @@ class UserRepository {
     return AdminUser.findOne({ where: { email }, raw: true });
   }
 
+  async findAdminByRole(role) {
+    return AdminUser.findOne({
+      where: { role, isActive: true },
+      raw: true,
+    });
+  }
+
+  async findAdminById(id) {
+    return AdminUser.findByPk(id, { raw: true });
+  }
+
   async createAdmin(adminData) {
     const admin = await AdminUser.create(adminData);
     return admin.get({ plain: true });
+  }
+
+  async updateAdmin(id, updates) {
+    const [_, [updatedAdmin]] = await AdminUser.update(updates, {
+      where: { id },
+      returning: true,
+      raw: true,
+    });
+    return updatedAdmin;
   }
 }
 

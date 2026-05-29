@@ -3,6 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useGlobalStore } from '@/app/store/globalStore';
+import { ROLE_LABELS, getDefaultRoute } from '@/app/config/permissions';
 import {
   LayoutDashboard,
   Users,
@@ -29,23 +30,11 @@ const AdminSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const userRole = userData?.role || '';
-  const roleLabelMap = {
-    super_admin: 'Super Admin',
-    admin: 'Admin',
-    tech_admin: 'Tech Admin',
-    agri_expert: 'Agri Expert',
-    ecommerce_manager: 'E-commerce',
-    order_manager: 'Order Manager',
-    support_agent: 'Support Agent',
-    support_manager: 'Support Manager',
-    content_manager: 'Content',
-    finance_manager: 'Finance',
-    field_agent: 'Field Agent',
-  };
-  const roleLabel = roleLabelMap[userRole] || userRole;
+  const roleLabel = ROLE_LABELS[userRole] || userRole;
+  const dashboardPath = getDefaultRoute(userRole);
 
   const mainNavItems = [
-    { to: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
+    { to: dashboardPath, label: "Dashboard", icon: <LayoutDashboard size={20} /> },
     { to: "/admin/farmers", label: "Farmers", icon: <Users size={20} /> },
     { to: "/admin/soil-tests", label: "Soil", icon: <FlaskConical size={20} /> },
     { to: "/admin/market", label: "Market", icon: <TrendingUp size={20} /> },
@@ -114,7 +103,7 @@ const AdminSidebar = () => {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === "/admin/dashboard"}
+            end={item.label === "Dashboard"}
             className={({ isActive }) =>
               `flex items-center ${collapsed ? 'justify-center' : 'gap-3'} ${collapsed ? 'px-0 py-3' : 'px-3 py-2.5'} rounded-lg text-sm font-medium transition-all duration-200 group relative
               ${isActive
