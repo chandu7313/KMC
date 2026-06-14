@@ -20,10 +20,15 @@ router.delete('/:id', authorize(['support:admin']), tCtrl.deleteTicket);
 // Assignment & escalation
 router.post('/:id/assign', authorize(['support:admin']), tCtrl.assignTicket);
 router.post('/:id/escalate', authorize(['support:write']), tCtrl.escalateTicket);
+router.post('/:id/resolve', authorize(['support:write']), tCtrl.resolveTicket);
+router.post('/:id/close', authorize(['support:write']), tCtrl.closeTicket);
 
 // Messages
 router.get('/:id/messages', authorize(['support:read']), tCtrl.getMessages);
 router.post('/:id/messages', authorize(['support:write']), tCtrl.sendReply);
 router.post('/:id/notes', authorize(['support:write']), tCtrl.addInternalNote);
+
+// Activity
+router.get('/:id/activity', authorize(['support:read']), tCtrl.getActivity);
 
 export default router;

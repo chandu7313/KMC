@@ -56,6 +56,6 @@ export const autoLoginSchema = Joi.object({
     'super_admin', 'admin', 'tech_admin', 'agri_expert',
     'ecommerce_manager', 'order_manager', 'support_agent',
     'support_manager', 'content_manager', 'finance_manager',
-    'field_agent', 'farmer', 'field-officer', 'user'
+    'field_agent', 'farmer', 'field_officer', 'user'
   ).required(),
 });

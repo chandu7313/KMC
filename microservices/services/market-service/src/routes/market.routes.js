@@ -14,8 +14,8 @@ router.get('/compare/:crop', mCtrl.getCropComparison);
 router.post('/sync', mCtrl.syncData);
 
 // Admin
-router.post('/prices', authenticate, authorize(['market:write']), mCtrl.addPrice);
-router.put('/prices/:id', authenticate, authorize(['market:write']), mCtrl.updatePrice);
-router.delete('/prices/:id', authenticate, authorize(['market:write']), mCtrl.deletePrice);
+router.post('/prices', authenticate, authorize(['market:manage']), mCtrl.addPrice);
+router.put('/prices/:id', authenticate, authorize(['market:manage']), mCtrl.updatePrice);
+router.delete('/prices/:id', authenticate, authorize(['market:manage']), mCtrl.deletePrice);
 
 export default router;

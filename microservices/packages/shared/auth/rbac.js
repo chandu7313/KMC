@@ -74,7 +74,7 @@ const PERMISSIONS = {
   'notifications:manage': [ROLES.SUPER_ADMIN, ROLES.TECH_ADMIN, ROLES.CONTENT_MANAGER],
 
   // support-service
-  'support:read':     [ROLES.SUPER_ADMIN, ROLES.TECH_ADMIN],
+  'support:read':     [ROLES.SUPER_ADMIN, ROLES.TECH_ADMIN, ROLES.SUPPORT_AGENT, ROLES.SUPPORT_MANAGER],
   'support:manage':   [ROLES.SUPER_ADMIN, ROLES.SUPPORT_AGENT, ROLES.SUPPORT_MANAGER],
   'support:own':      [ROLES.FARMER],
 

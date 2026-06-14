@@ -8,9 +8,9 @@ const router = express.Router();
 router.get('/list', fCtrl.listFertilizers);
 router.get('/:id', fCtrl.getFertilizer);
 
-// Admin (requires product:write permission)
-router.post('/add', authenticate, authorize(['product:write']), fCtrl.addFertilizer);
-router.put('/update/:id', authenticate, authorize(['product:write']), fCtrl.updateFertilizer);
-router.delete('/delete/:id', authenticate, authorize(['product:write']), fCtrl.removeFertilizer);
+// Admin (requires products:manage permission)
+router.post('/add', authenticate, authorize(['products:manage']), fCtrl.addFertilizer);
+router.put('/update/:id', authenticate, authorize(['products:manage']), fCtrl.updateFertilizer);
+router.delete('/delete/:id', authenticate, authorize(['products:manage']), fCtrl.removeFertilizer);
 
 export default router;

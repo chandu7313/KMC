@@ -1,87 +1,88 @@
 import bcrypt from 'bcryptjs';
-import { HttpError, models, createLogger } from '@kissan/shared';
-import { Op } from 'sequelize';
+import { HttpError, supabaseClient, createLogger } from '@kissan/shared';
 import ticketRepo from '../repositories/ticket.repository.js';
 import agentRepo from '../repositories/agent.repository.js';
 
-const { User, Booking } = models;
 const logger = createLogger('support-service');
 
 class ManagementService {
   // ── Farmers ──
   async getFarmers(filters) {
-    const where = { role: 'user' };
-    
+    let query = supabaseClient
+      .from('users')
+      .select('id, name, email, phone, district, language, is_account_verified, created_at', { count: 'exact' })
+      .eq('role', 'user');
+
     if (filters.search) {
-      where[Op.or] = [
-        { name: { [Op.iLike]: `%${filters.search}%` } },
-        { phone: { [Op.iLike]: `%${filters.search}%` } },
-        { email: { [Op.iLike]: `%${filters.search}%` } }
-      ];
+      query = query.or(`name.ilike.%${filters.search}%,phone.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
     }
-    if (filters.district) where.district = filters.district;
+    if (filters.district) query = query.eq('district', filters.district);
 
     const limit = parseInt(filters.limit || 25);
     const offset = (parseInt(filters.page || 1) - 1) * limit;
 
-    const { rows, count } = await User.findAndCountAll({
-      where,
-      attributes: ['id', 'name', 'email', 'phone', 'district', 'language', 'isAccountVerified', 'created_at'],
-      order: [['created_at', 'DESC']],
-      limit,
-      offset,
-      raw: true
-    });
+    query = query.order('created_at', { ascending: false });
+    query = query.range(offset, offset + limit - 1);
 
-    return { farmers: rows, total: count };
+    const { data, count, error } = await query;
+    if (error) throw new Error(error.message);
+
+    return { farmers: data, total: count };
   }
 
   async getFarmerProfile(id) {
-    const farmer = await User.findByPk(id, { raw: true });
-    if (!farmer) throw HttpError.notFound('Farmer not found');
-    return farmer;
+    const res = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (!res.data) throw HttpError.notFound('Farmer not found');
+    return res.data;
   }
 
   async blockFarmer(id) {
     const farmer = await this.getFarmerProfile(id);
-    const newStatus = !farmer.isAccountVerified;
-    await User.update({ isAccountVerified: newStatus }, { where: { id } });
+    const newStatus = !farmer.is_account_verified;
+    await supabaseClient
+      .from('users')
+      .update({ is_account_verified: newStatus, updated_at: new Date().toISOString() })
+      .eq('id', id);
     return { blocked: !newStatus };
   }
 
   // ── Bookings ──
   async getBookings(filters) {
-    const where = {};
-    if (filters.status) where.status = filters.status;
+    let query = supabaseClient
+      .from('bookings')
+      .select('*', { count: 'exact' });
+
+    if (filters.status) query = query.eq('status', filters.status);
     if (filters.search) {
-      where[Op.or] = [
-        { full_name: { [Op.iLike]: `%${filters.search}%` } },
-        { phone: { [Op.iLike]: `%${filters.search}%` } }
-      ];
+      query = query.or(`full_name.ilike.%${filters.search}%,phone.ilike.%${filters.search}%`);
     }
 
     const limit = parseInt(filters.limit || 25);
     const offset = (parseInt(filters.page || 1) - 1) * limit;
 
-    const { rows, count } = await Booking.findAndCountAll({
-      where,
-      order: [['visit_date', 'ASC']],
-      limit,
-      offset,
-      raw: true
-    });
+    query = query.order('visit_date', { ascending: true });
+    query = query.range(offset, offset + limit - 1);
 
-    return { bookings: rows, total: count };
+    const { data, count, error } = await query;
+    if (error) throw new Error(error.message);
+
+    return { bookings: data, total: count };
   }
 
   async updateBooking(id, updates) {
-    const [_, [updatedBooking]] = await Booking.update(updates, {
-      where: { id },
-      returning: true,
-      raw: true
-    });
-    if (!updatedBooking) throw HttpError.notFound('Booking not found');
-    return updatedBooking;
+    updates.updated_at = new Date().toISOString();
+    const res = await supabaseClient
+      .from('bookings')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (!res.data) throw HttpError.notFound('Booking not found');
+    return res.data;
   }
 
   // ── Templates ──
@@ -126,8 +127,8 @@ class ManagementService {
     const hashedPassword = await bcrypt.hash(data.password || 'agent123', 10);
     const agent = await agentRepo.create({
       name: data.name, email: data.email, phone: data.phone, password: hashedPassword,
-      role: data.role || 'support_agent', assignedDistricts: data.assignedDistricts || [],
-      languagesSpoken: data.languagesSpoken || ['en'],
+      role: data.role || 'support_agent', assigned_districts: data.assignedDistricts || [],
+      languages_spoken: data.languagesSpoken || ['en'],
     });
     const { password, ...rest } = agent;
     return rest;

@@ -13,6 +13,7 @@ import HttpError from '../errors/HttpError.js';
  * router.delete('/users/:id', authenticate, authorize('users:manage'), deleteUser);
  */
 const authorize = (...requiredPermissions) => {
+  const perms = requiredPermissions.flat();
   return (req, res, next) => {
     if (!req.user || !req.user.role) {
       return next(HttpError.unauthorized('Authentication required'));
@@ -21,7 +22,7 @@ const authorize = (...requiredPermissions) => {
     const { role } = req.user;
 
     // Check if user has ALL required permissions
-    const hasAll = requiredPermissions.every((perm) => hasPermission(role, perm));
+    const hasAll = perms.every((perm) => hasPermission(role, perm));
 
     if (!hasAll) {
       return next(
@@ -43,12 +44,13 @@ const authorize = (...requiredPermissions) => {
  * @returns {Function}
  */
 const authorizeAny = (...permissions) => {
+  const perms = permissions.flat();
   return (req, res, next) => {
     if (!req.user || !req.user.role) {
       return next(HttpError.unauthorized('Authentication required'));
     }
 
-    const hasAny = permissions.some((perm) => hasPermission(req.user.role, perm));
+    const hasAny = perms.some((perm) => hasPermission(req.user.role, perm));
 
     if (!hasAny) {
       return next(

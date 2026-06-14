@@ -25,19 +25,20 @@ import FertilizerOrderModel from './FertilizerOrder.js';
 import FertilizerOrderItemModel from './FertilizerOrderItem.js';
 import BlogModel from './Blog.js';
 import SuccessStoryModel from './SuccessStory.js';
-import BookingModel from './Booking.js';
-import ExpertModel from './Expert.js';
-import ExpertBookingModel from './ExpertBooking.js';
-import ExpertReviewModel from './ExpertReview.js';
+// NOTE: Booking, Expert, ExpertBooking, ExpertReview, Order removed — superseded by ExpertV2/ExpertConsultation/typed orders
 import NotificationLogModel from './NotificationLog.js';
 import SupportTicketModel from './SupportTicket.js';
 import TicketMessageModel from './TicketMessage.js';
 import ReplyTemplateModel from './ReplyTemplate.js';
 import SLAConfigModel from './SLAConfig.js';
-import OrderModel from './Order.js';
+import TicketActivityModel from './TicketActivity.js';
+import AgentPerformanceModel from './AgentPerformance.js';
 import PaymentModel from './Payment.js';
 import CropDiagnosisModel from './CropDiagnosis.js';
 import SchemeModel from './Scheme.js';
+import ExpertV2Model from './ExpertV2.js';
+import ExpertSlotModel from './ExpertSlot.js';
+import ExpertConsultationModel from './ExpertConsultation.js';
 
 models.User = UserModel(sequelize);
 models.UserAddress = UserAddressModel(sequelize);
@@ -60,64 +61,60 @@ models.FertilizerOrder = FertilizerOrderModel(sequelize);
 models.FertilizerOrderItem = FertilizerOrderItemModel(sequelize);
 models.Blog = BlogModel(sequelize);
 models.SuccessStory = SuccessStoryModel(sequelize);
-models.Booking = BookingModel(sequelize);
-models.Expert = ExpertModel(sequelize);
-models.ExpertBooking = ExpertBookingModel(sequelize);
-models.ExpertReview = ExpertReviewModel(sequelize);
 models.NotificationLog = NotificationLogModel(sequelize);
 models.SupportTicket = SupportTicketModel(sequelize);
 models.TicketMessage = TicketMessageModel(sequelize);
 models.ReplyTemplate = ReplyTemplateModel(sequelize);
 models.SLAConfig = SLAConfigModel(sequelize);
-models.Order = OrderModel(sequelize);
+models.TicketActivity = TicketActivityModel(sequelize);
+models.AgentPerformance = AgentPerformanceModel(sequelize);
 models.Payment = PaymentModel(sequelize);
 models.CropDiagnosis = CropDiagnosisModel(sequelize);
 models.Scheme = SchemeModel(sequelize);
-
-
-// Associations
-models.UserAddress.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-models.User.hasMany(models.UserAddress, { foreignKey: 'userId', as: 'addresses' });
-
-models.FarmerSurvey.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-models.User.hasOne(models.FarmerSurvey, { foreignKey: 'userId', as: 'survey' });
-
-models.SoilReport.belongsTo(models.User, { foreignKey: 'farmerId', as: 'farmer' });
-models.User.hasMany(models.SoilReport, { foreignKey: 'farmerId', as: 'soilReports' });
-
-models.MarketplaceOrder.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-models.MarketplaceOrder.hasMany(models.MarketplaceOrderItem, { foreignKey: 'orderId', as: 'items' });
-models.MarketplaceOrderItem.belongsTo(models.Product, { foreignKey: 'productId', as: 'product' });
-
-models.EquipmentOrder.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-models.EquipmentOrder.hasMany(models.EquipmentOrderItem, { foreignKey: 'orderId', as: 'items' });
-models.EquipmentOrderItem.belongsTo(models.Equipment, { foreignKey: 'equipmentId', as: 'equipment' });
-
-models.FertilizerOrder.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-models.FertilizerOrder.hasMany(models.FertilizerOrderItem, { foreignKey: 'orderId', as: 'items' });
-models.FertilizerOrderItem.belongsTo(models.Fertilizer, { foreignKey: 'fertilizerId', as: 'fertilizer' });
-
-models.ExpertBooking.belongsTo(models.User, { foreignKey: 'farmerId', as: 'farmer' });
-models.ExpertBooking.belongsTo(models.Expert, { foreignKey: 'expertId', as: 'expert' });
-models.Expert.hasMany(models.ExpertBooking, { foreignKey: 'expertId', as: 'bookings' });
-models.Expert.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-
-models.TicketMessage.belongsTo(models.SupportTicket, { foreignKey: 'ticketId', as: 'ticket' });
-models.SupportTicket.hasMany(models.TicketMessage, { foreignKey: 'ticketId', as: 'messages' });
-
-import ExpertV2Model from './ExpertV2.js';
-import ExpertSlotModel from './ExpertSlot.js';
-import ExpertConsultationModel from './ExpertConsultation.js';
-
 models.ExpertV2 = ExpertV2Model(sequelize);
 models.ExpertSlot = ExpertSlotModel(sequelize);
 models.ExpertConsultation = ExpertConsultationModel(sequelize);
 
-// ExpertV2 Associations
+// ── Associations ──
+
+// User → Addresses
+models.UserAddress.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+models.User.hasMany(models.UserAddress, { foreignKey: 'userId', as: 'addresses' });
+
+// User → Survey
+models.FarmerSurvey.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+models.User.hasOne(models.FarmerSurvey, { foreignKey: 'userId', as: 'survey' });
+
+// User → Soil Reports
+models.SoilReport.belongsTo(models.User, { foreignKey: 'farmerId', as: 'farmer' });
+models.User.hasMany(models.SoilReport, { foreignKey: 'farmerId', as: 'soilReports' });
+
+// Marketplace Orders
+models.MarketplaceOrder.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+models.MarketplaceOrder.hasMany(models.MarketplaceOrderItem, { foreignKey: 'orderId', as: 'items' });
+models.MarketplaceOrderItem.belongsTo(models.Product, { foreignKey: 'productId', as: 'product' });
+
+// Equipment Orders
+models.EquipmentOrder.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+models.EquipmentOrder.hasMany(models.EquipmentOrderItem, { foreignKey: 'orderId', as: 'items' });
+models.EquipmentOrderItem.belongsTo(models.Equipment, { foreignKey: 'equipmentId', as: 'equipment' });
+
+// Fertilizer Orders
+models.FertilizerOrder.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+models.FertilizerOrder.hasMany(models.FertilizerOrderItem, { foreignKey: 'orderId', as: 'items' });
+models.FertilizerOrderItem.belongsTo(models.Fertilizer, { foreignKey: 'fertilizerId', as: 'fertilizer' });
+
+// Support Tickets
+models.TicketMessage.belongsTo(models.SupportTicket, { foreignKey: 'ticketId', as: 'ticket' });
+models.SupportTicket.hasMany(models.TicketMessage, { foreignKey: 'ticketId', as: 'messages' });
+models.TicketActivity.belongsTo(models.SupportTicket, { foreignKey: 'ticketId', as: 'ticket' });
+models.SupportTicket.hasMany(models.TicketActivity, { foreignKey: 'ticketId', as: 'activities' });
+
+// ExpertV2 → Slots & Consultations
 models.ExpertSlot.belongsTo(models.ExpertV2, { foreignKey: 'expertId', as: 'expert' });
 models.ExpertV2.hasMany(models.ExpertSlot, { foreignKey: 'expertId', as: 'slots' });
-
 models.ExpertConsultation.belongsTo(models.ExpertV2, { foreignKey: 'expertId', as: 'expert' });
 models.ExpertV2.hasMany(models.ExpertConsultation, { foreignKey: 'expertId', as: 'consultations' });
 
 export default models;
+

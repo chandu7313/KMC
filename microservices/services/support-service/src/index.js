@@ -8,6 +8,7 @@ import { createLogger, requestId, metrics } from '@kissan/shared';
 import ticketRoutes from './routes/ticket.routes.js';
 import managementRoutes from './routes/management.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { startSLAMonitor } from './jobs/slaMonitor.js';
 
 const app = express();
 const logger = createLogger('support-service');
@@ -35,7 +36,10 @@ app.use('/manage', managementRoutes);
 app.use((req, res) => res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: `${req.method} ${req.path} not found` } }));
 app.use(errorHandler);
 
-const server = app.listen(PORT, '0.0.0.0', () => logger.info(`Support service running on 0.0.0.0:${PORT}`));
+const server = app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Support service running on 0.0.0.0:${PORT}`);
+  startSLAMonitor();
+});
 const gracefulShutdown = (signal) => { logger.info(`${signal}`); server.close(() => process.exit(0)); setTimeout(() => process.exit(1), 10000); };
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));

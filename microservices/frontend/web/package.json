@@ -11,6 +11,7 @@
     "start": "vite --host"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/postcss": "^4.0.8",
     "@tailwindcss/vite": "^4.0.8",
     "@tanstack/react-query": "^5.100.14",

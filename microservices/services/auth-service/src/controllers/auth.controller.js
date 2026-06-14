@@ -137,7 +137,7 @@ export const autoLogin = async (req, res, next) => {
       farmer: '/farmer/dashboard',
       user: '/farmer/dashboard',
       admin: '/admin/dashboard',
-      super_admin: '/admin/dashboard',
+      super_admin: '/super-admin/dashboard',
       tech_admin: '/admin/tech',
       agri_expert: '/admin/agri',
       ecommerce_manager: '/admin/ecommerce',

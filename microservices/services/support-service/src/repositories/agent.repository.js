@@ -1,43 +1,64 @@
-import { models } from '@kissan/shared';
+import { supabaseClient } from '@kissan/shared';
 
-const { AdminUser } = models;
+// Helper to handle Supabase response errors
+const handleResponse = (res) => {
+  if (res.error) throw new Error(res.error.message);
+  return res.data;
+};
 
 class AgentRepository {
   async findAll() {
-    return AdminUser.findAll({
-      order: [['name', 'ASC']],
-      raw: true
-    });
+    const res = await supabaseClient
+      .from('admin_users')
+      .select('*')
+      .order('name', { ascending: true });
+    return res.data || [];
   }
 
   async findActive() {
-    return AdminUser.findAll({
-      attributes: ['id', 'name', 'avatar', 'status', 'role', 'email', 'phone'],
-      where: { isActive: true },
-      raw: true
-    });
+    const res = await supabaseClient
+      .from('admin_users')
+      .select('id, name, avatar, status, role, email, phone')
+      .eq('is_active', true);
+    return res.data || [];
   }
 
   async findById(id) {
-    return AdminUser.findByPk(id, { raw: true });
+    const res = await supabaseClient
+      .from('admin_users')
+      .select('*')
+      .eq('id', id)
+      .single();
+    return res.data; // null if not found
   }
 
   async findByEmail(email) {
-    return AdminUser.findOne({ where: { email }, raw: true });
+    const res = await supabaseClient
+      .from('admin_users')
+      .select('*')
+      .eq('email', email)
+      .single();
+    return res.data; // null if not found
   }
 
   async create(data) {
-    const agent = await AdminUser.create(data);
-    return agent.get({ plain: true });
+    const res = await supabaseClient
+      .from('admin_users')
+      .insert(data)
+      .select()
+      .single();
+    return handleResponse(res);
   }
 
   async update(id, updates) {
-    const [_, [updatedAgent]] = await AdminUser.update(updates, {
-      where: { id },
-      returning: true,
-      raw: true
-    });
-    return updatedAgent;
+    updates.updated_at = new Date().toISOString();
+    const res = await supabaseClient
+      .from('admin_users')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    return res.data;
   }
 }
 

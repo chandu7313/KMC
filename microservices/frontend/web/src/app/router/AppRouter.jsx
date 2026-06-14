@@ -13,7 +13,6 @@ import SuperAdminLayout from '@/app/layouts/SuperAdminLayout';
 
 // ─── Admin Pages ───────────────────────
 import AdminDashboardPage from '@/modules/admin/pages/AdminDashboardPage';
-import AdminSupportDashboardPage from '@/modules/admin/pages/AdminSupportDashboardPage';
 import TechAdminDashboard from '@/modules/admin/pages/TechAdminDashboard';
 import AgriExpertDashboard from '@/modules/admin/pages/AgriExpertDashboard';
 import EcommerceDashboard from '@/modules/admin/pages/EcommerceDashboard';
@@ -21,6 +20,18 @@ import OrderManagerDashboard from '@/modules/admin/pages/OrderManagerDashboard';
 import ContentDashboard from '@/modules/admin/pages/ContentDashboard';
 import FinanceDashboard from '@/modules/admin/pages/FinanceDashboard';
 import FieldDashboard from '@/modules/admin/pages/FieldDashboard';
+
+// ─── Admin Support Pages ────────────────
+import SupportDashboardPage from '@/features/admin/support/pages/SupportDashboardPage';
+import TicketListPage from '@/features/admin/support/pages/TicketListPage';
+import TicketDetailPage from '@/features/admin/support/pages/TicketDetailPage';
+import FarmerListPage from '@/features/admin/support/pages/FarmerListPage';
+import BookingListPage from '@/features/admin/support/pages/BookingListPage';
+import TemplateListPage from '@/features/admin/support/pages/TemplateListPage';
+import NotificationPage from '@/features/admin/support/pages/NotificationPage';
+import ReportsPage from '@/features/admin/support/pages/ReportsPage';
+import AgentListPage from '@/features/admin/support/pages/AgentListPage';
+import SLASettingsPage from '@/features/admin/support/pages/SLASettingsPage';
 
 // ─── Farmer Pages ──────────────────────
 import HomePage from '@/modules/farmer/pages/HomePage';
@@ -139,15 +150,26 @@ export const AppRouter = () => {
 
         {/* ─── Admin Support Routes ────────── */}
         <Route path="/admin/support" element={<SupportLayout />}>
-          <Route index element={<AdminSupportDashboardPage />} />
-          <Route path="tickets" element={<AdminSupportDashboardPage />} />
-          <Route path="farmers" element={<AdminSupportDashboardPage />} />
-          <Route path="bookings" element={<AdminSupportDashboardPage />} />
-          <Route path="templates" element={<AdminSupportDashboardPage />} />
-          <Route path="notifications" element={<AdminSupportDashboardPage />} />
-          <Route path="reports" element={<AdminSupportDashboardPage />} />
-          <Route path="agents" element={<AdminSupportDashboardPage />} />
-          <Route path="settings/sla" element={<AdminSupportDashboardPage />} />
+          <Route index element={<SupportDashboardPage />} />
+          <Route path="tickets" element={<TicketListPage />} />
+          <Route path="tickets/:id" element={<TicketDetailPage />} />
+          <Route path="farmers" element={<FarmerListPage />} />
+          <Route path="bookings" element={<BookingListPage />} />
+          <Route path="templates" element={<TemplateListPage />} />
+          <Route path="notifications" element={<NotificationPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="agents" element={<AgentListPage />} />
+          <Route path="settings/sla" element={<SLASettingsPage />} />
+        </Route>
+
+        {/* ─── Super Admin Routes ─────────── */}
+        <Route path="/super-admin" element={<SuperAdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="system" element={<AdminDashboardPage />} />
+          <Route path="users" element={<AdminDashboardPage />} />
+          <Route path="monitoring" element={<AdminDashboardPage />} />
+          <Route path="developer" element={<AdminDashboardPage />} />
         </Route>
 
         {/* ─── 404 Catch-all ──────────────── */}

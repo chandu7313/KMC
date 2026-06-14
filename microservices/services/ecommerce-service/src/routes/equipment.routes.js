@@ -8,9 +8,9 @@ const router = express.Router();
 router.get('/list', eCtrl.listEquipments);
 router.get('/:id', eCtrl.getEquipment);
 
-// Admin (requires product:write permission)
-router.post('/add', authenticate, authorize(['product:write']), eCtrl.addEquipment);
-router.put('/update/:id', authenticate, authorize(['product:write']), eCtrl.updateEquipment);
-router.delete('/delete/:id', authenticate, authorize(['product:write']), eCtrl.removeEquipment);
+// Admin (requires products:manage permission)
+router.post('/add', authenticate, authorize(['products:manage']), eCtrl.addEquipment);
+router.put('/update/:id', authenticate, authorize(['products:manage']), eCtrl.updateEquipment);
+router.delete('/delete/:id', authenticate, authorize(['products:manage']), eCtrl.removeEquipment);
 
 export default router;

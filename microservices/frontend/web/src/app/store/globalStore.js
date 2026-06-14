@@ -38,7 +38,9 @@ export const useGlobalStore = create((set, get) => ({
     try {
       const data = await fetchUserData();
       if (data.success) {
-        set({ userData: data.userData });
+        // Backend's successResponse wraps the payload in a 'data' property
+        const user = data.data?.userData || data.userData || data.data?.user || data.user;
+        set({ userData: user });
         // NOTE: cartData is now handled by cartStore, so we'll need to trigger it separately
       } else {
         toast.error(data.message);
