@@ -2,6 +2,8 @@ import React from "react";
 import Navbar from '@/app/layouts/Navbar';
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Leaf, Droplets, LayoutTemplate, Briefcase, TrendingUp, Check, Microscope, Building, Calendar, CloudLightning } from "lucide-react";
+import { useGlobalStore } from '@/app/store/globalStore';
+import { toast } from 'react-toastify';
 
 // Imports for our local images
 import heroBg from '@/assets/orchard/hero.png';
@@ -9,6 +11,16 @@ import soilImg from '@/assets/orchard/soil.png';
 
 const OrchardPlanning = () => {
   const navigate = useNavigate();
+  const { isLoggedin } = useGlobalStore();
+
+  const handleStartPlanning = () => {
+      if (!isLoggedin) {
+          toast.error("Please log in to start orchard planning.");
+          navigate('/login');
+          return;
+      }
+      navigate('/orchard-planning/plan');
+  };
 
   // Unsplash fallbacks for images
   const expertImages = [
@@ -47,7 +59,7 @@ const OrchardPlanning = () => {
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <button 
-                onClick={() => navigate('/orchard-planning/plan')}
+                onClick={handleStartPlanning}
                 className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-colors flex items-center justify-center active:scale-95"
               >
                 Start Planning
