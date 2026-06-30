@@ -29,13 +29,13 @@ const getSequelize = (options = {}) => {
       acquire: 30000,
       idle: 10000,
     },
-    // Required for Supabase pooling to work well
-    dialectOptions: {
+    // Required for Supabase pooling to work well (only in production)
+    dialectOptions: process.env.NODE_ENV === 'production' ? {
       ssl: {
         require: true,
         rejectUnauthorized: false, // For supabase connection
       }
-    },
+    } : {},
     // We already use underscored names in Supabase schema (created_at, updated_at)
     define: {
       timestamps: true,
