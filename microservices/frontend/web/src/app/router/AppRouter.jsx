@@ -50,7 +50,6 @@ import CheckoutPage from '@/modules/ecommerce/pages/CheckoutPage';
 import FertilizersPage from '@/modules/ecommerce/pages/FertilizersPage';
 import EquipmentsPage from '@/modules/ecommerce/pages/EquipmentsPage';
 import OrdersPage from '@/modules/farmer/pages/OrdersPage';
-import ExpertConsultationPage from '@/modules/fieldVisit/pages/ExpertConsultationPage';
 import BookFarmVisitPage from '@/modules/fieldVisit/pages/BookFarmVisitPage';
 import DashboardPage from '@/modules/farmer/pages/DashboardPage';
 import ProfilePage from '@/modules/farmer/pages/ProfilePage';
@@ -79,48 +78,51 @@ export const AppRouter = () => {
   return (
     <Suspense fallback={<GlobalLoader />}>
       <Routes>
-        {/* ─── Public Routes ──────────────── */}
-        <Route path="/" element={<HomePage />} />
+        {/* ─── Public Routes & Exceptions ──────────────── */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/email-verify" element={<EmailVerifyPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/blogs" element={<BlogsPage />} />
-        <Route path="/blog/:slug" element={<BlogDetailPage />} />
         <Route path="/packages" element={<PackagesPage />} />
-        <Route path="/success-stories" element={<SuccessStoriesPage />} />
+        
+        {/* Exception Pages without Sidebar */}
         <Route path="/customer-care" element={<CustomerCarePage />} />
-
-        {/* ─── Farmer Routes ──────────────── */}
-        <Route path="/soil-crop-analysis" element={<SoilTestingPage />} />
-        <Route path="/soil-history" element={<SoilHistoryPage />} />
-        <Route path="/equipments" element={<EquipmentsPage />} />
-        <Route path="/fertilizers" element={<FertilizersPage />} />
-        <Route path="/my-orders" element={<OrdersPage />} />
-        <Route path="/orchard-planning" element={<OrchardPlanningPage />} />
-        <Route path="/orchard-planning/plan" element={<PlanEstateFormPage />} />
-        <Route path="/book-farm-visit" element={<BookFarmVisitPage />} />
         <Route path="/whether-insights" element={<WeatherInsightsPage />} />
-        <Route path="/crop-selection" element={<CropSelectionPage />} />
+        <Route path="/my-orders" element={<OrdersPage />} />
         <Route path="/government-schemes" element={<GovernmentSchemesPage />} />
-        <Route path="/expert-consultations" element={<ExpertConsultationPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/onboarding-survey" element={<OnboardingSurveyPage />} />
-        <Route path="/crop-doctor" element={<DiseaseDetectionPage />} />
 
-        {/* ─── Marketplace Routes ─────────── */}
-        <Route path="/marketplace" element={<ShopPage />} />
+        {/* ─── Pages with Sidebar (FarmerLayout) ───── */}
+        <Route element={<FarmerLayout />}>
+          {/* Main Pages */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/success-stories" element={<SuccessStoriesPage />} />
+          <Route path="/blogs" element={<BlogsPage />} />
+          <Route path="/blog/:slug" element={<BlogDetailPage />} />
+          <Route path="/crop-doctor" element={<DiseaseDetectionPage />} />
+          <Route path="/marketplace" element={<ShopPage />} />
+          <Route path="/market-prices" element={<MarketPage />} />
+          
+          {/* Dashboard & Profile */}
+          <Route path="/farmer/dashboard" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/farmer/support" element={<ExpertSupportPage />} />
+          
+          {/* Tools & Services */}
+          <Route path="/soil-crop-analysis" element={<SoilTestingPage />} />
+          <Route path="/soil-history" element={<SoilHistoryPage />} />
+          <Route path="/equipments" element={<EquipmentsPage />} />
+          <Route path="/fertilizers" element={<FertilizersPage />} />
+          <Route path="/orchard-planning" element={<OrchardPlanningPage />} />
+          <Route path="/orchard-planning/plan" element={<PlanEstateFormPage />} />
+          <Route path="/book-farm-visit" element={<BookFarmVisitPage />} />
+          <Route path="/onboarding-survey" element={<OnboardingSurveyPage />} />
+        </Route>
+
+        {/* ─── Additional Marketplace Routes ─────────── */}
         <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-
-        {/* ─── Farmer Dashboard Routes ───── */}
-        <Route element={<FarmerLayout />}>
-          <Route path="/farmer/dashboard" element={<DashboardPage />} />
-          <Route path="/market-prices" element={<MarketPage />} />
-          <Route path="/farmer/support" element={<ExpertSupportPage />} />
-        </Route>
 
         {/* ─── Admin Dashboard Routes ────── */}
         <Route path="/admin" element={<AdminLayout />}>
