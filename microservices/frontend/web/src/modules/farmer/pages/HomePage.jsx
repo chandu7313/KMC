@@ -178,7 +178,7 @@ const Home = () => {
             </div>
 
             <LanguageModal />
-            <Navbar /> {/* Ensure Navbar remains mostly untouched via external CSS wrapper if needed, layout handles this */}
+            {/* Navbar removed as FarmerLayout provides Topbar */}
 
             {/* --- HERO SECTION --- */}
             <section className="bg-[#1f2d1f] relative overflow-hidden py-24 -mt-[24px] pt-[120px]">
