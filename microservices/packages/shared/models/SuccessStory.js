@@ -15,7 +15,8 @@ export default (sequelize) => {
   
   }, {
     tableName: 'success_stories',
-    timestamps: true
+    timestamps: true,
+    underscored: true
   });
 
   return SuccessStory;
