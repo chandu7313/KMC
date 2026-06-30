@@ -42,7 +42,7 @@ const Checkbox = ({ label, count, checked, onChange, mutedText }) => (
 
 const ShopPage = () => {
     const navigate = useNavigate();
-    const { backendUrl, setIsLoggedin, setUserData } = useGlobalStore();
+    const { backendUrl, isLoggedin, setIsLoggedin, setUserData } = useGlobalStore();
     const { getCartCount } = useCartStore();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -119,42 +119,9 @@ const ShopPage = () => {
     ];
 
     return (
-        <div className="flex h-screen bg-[#fafafa] font-sans overflow-hidden">
+        <div className="flex h-full bg-[#fafafa] font-sans overflow-hidden -m-4 lg:-m-8">
             
-            {/* Left Sidebar - Estate Management */}
-            <aside className="w-[260px] bg-[#f4f5f4] border-r border-slate-200 flex flex-col shrink-0">
-                <div className="p-6 pb-8">
-                    <h1 className="text-[18px] font-black text-[#1b5e20] tracking-tight mb-0.5">KMC Agriculture</h1>
-                    <p className="text-[11px] text-slate-500 font-bold tracking-wide">Premium Estate Management</p>
-                </div>
 
-                <nav className="flex-1 overflow-y-auto">
-                    <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" onClick={() => navigate('/admin/dashboard')} />
-                    <NavItem icon={<Sprout size={20} />} label="Crops" onClick={() => navigate('/admin/crops')} />
-                    <NavItem icon={<Database size={20} />} label="Inventory" active={true} onClick={() => navigate('/marketplace')} />
-                    <NavItem icon={<LayoutDashboard size={20} className="rotate-180" />} label="Financials" onClick={() => navigate('/admin/analytics')} />
-                    <NavItem icon={<LineChart size={20} />} label="Analytics" onClick={() => navigate('/admin/analytics')} />
-                    <NavItem icon={<HeadphonesIcon size={20} />} label="Support" onClick={() => navigate('/admin/support')} />
-                </nav>
-
-                <div className="p-6 space-y-4">
-                    <button 
-                        onClick={() => navigate('/admin/reports/new')}
-                        className="w-full bg-[#1b5e20] hover:bg-green-900 text-white flex items-center justify-center gap-2 py-3 rounded-lg font-bold text-[13px] shadow-sm transition-colors">
-                        <Plus size={16} strokeWidth={3} /> New Report
-                    </button>
-                    <div 
-                        onClick={() => navigate('/admin/settings')}
-                        className="flex items-center gap-3 px-2 py-2 cursor-pointer text-slate-600 hover:text-slate-900 transition-colors">
-                        <Settings size={18} /> <span className="text-[13px] font-bold">Settings</span>
-                    </div>
-                    <div 
-                        onClick={handleLogout}
-                        className="flex items-center gap-3 px-2 py-2 cursor-pointer text-slate-600 hover:text-slate-900 transition-colors">
-                        <LogOut size={18} /> <span className="text-[13px] font-bold">Logout</span>
-                    </div>
-                </div>
-            </aside>
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col min-w-0 bg-white">
@@ -306,6 +273,11 @@ const ShopPage = () => {
                                                     className="w-10 h-10 bg-[#1b5e20] hover:bg-green-900 text-white rounded-[8px] flex items-center justify-center transition-colors shadow-md"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
+                                                        if (!isLoggedin) {
+                                                            toast.error('Please log in to purchase items.');
+                                                            navigate('/login');
+                                                            return;
+                                                        }
                                                         toast.success(`Added ${product.name} to cart`);
                                                     }}
                                                 >
