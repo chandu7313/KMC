@@ -16,7 +16,8 @@ export default (sequelize) => {
   
   }, {
     tableName: 'blogs',
-    timestamps: true
+    timestamps: true,
+    underscored: true
   });
 
   return Blog;
