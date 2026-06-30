@@ -34,7 +34,7 @@ const CartPage = () => {
                 // Then fetch product list to cross-reference
                 const prodRes = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
                 if (prodRes.data.success) {
-                    const productsList = prodRes.data.products || prodRes.data.data?.products || [];
+                    const productsList = Array.isArray(prodRes.data.products) ? prodRes.data.products : (Array.isArray(prodRes.data.data?.products?.products) ? prodRes.data.data.products.products : (Array.isArray(prodRes.data.data?.products) ? prodRes.data.data.products : []));
                     setProductsData(productsList);
                 }
             }

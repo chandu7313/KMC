@@ -117,6 +117,10 @@ const useExpertConsultation = () => {
 
   // ─── Fetch consultation history ───────
   const refetchHistory = useCallback(async () => {
+    if (!userData) {
+      setConsultations([]);
+      return;
+    }
     setHistoryLoading(true);
     try {
       const response = await expertApi.getMyConsultations({
@@ -129,13 +133,17 @@ const useExpertConsultation = () => {
     } finally {
       setHistoryLoading(false);
     }
-  }, []);
+  }, [userData]);
 
   useEffect(() => {
     refetchHistory();
   }, [refetchHistory]);
 
   const loadDetectedIssue = async () => {
+    if (!userData) {
+      setIssueLoading(false);
+      return;
+    }
     try {
       setIssueLoading(true);
 

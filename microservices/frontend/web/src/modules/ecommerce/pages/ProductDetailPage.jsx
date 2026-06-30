@@ -98,7 +98,7 @@ const ProductDetail = () => {
         try {
             const { data } = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
             if (data.success) {
-                const productsList = data.products || data.data?.products || [];
+                const productsList = Array.isArray(data.products) ? data.products : (Array.isArray(data.data?.products?.products) ? data.data.products.products : (Array.isArray(data.data?.products) ? data.data.products : []));
                 const related = productsList
                     .filter(p => p.category === category && p.id !== currentId)
                     .slice(0, 4);

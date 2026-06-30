@@ -219,7 +219,7 @@ const SupportDashboardPage = () => {
             <span className="text-xs text-slate-400">Last 7 Days</span>
           </div>
           <div className="h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <BarChart data={ticketVolume} barGap={2} barSize={20}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="day" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={{ stroke: '#475569' }} />
@@ -244,7 +244,7 @@ const SupportDashboardPage = () => {
           </div>
           <div className="flex items-center gap-6">
             <div className="relative h-[210px] w-[210px] shrink-0">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                 <PieChart>
                   <Pie
                     data={categoryBreakdown}

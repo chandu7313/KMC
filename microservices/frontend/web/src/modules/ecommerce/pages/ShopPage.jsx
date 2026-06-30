@@ -58,7 +58,7 @@ const ShopPage = () => {
             setLoading(true);
             const { data } = await axios.get(`${backendUrl}${API.PRODUCT}/list`);
             if (data.success) {
-                setProducts(data.products || data.data?.products || []);
+                setProducts(Array.isArray(data.products) ? data.products : (Array.isArray(data.data?.products?.products) ? data.data.products.products : (Array.isArray(data.data?.products) ? data.data.products : [])));
             } else {
                 toast.error(data.message);
             }

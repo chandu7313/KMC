@@ -139,7 +139,7 @@ const AdminDashboardPage = () => {
             </button>
           </div>
           <div className="flex-1 min-h-[300px] w-full bg-slate-50/50 rounded-lg border border-slate-100 p-4 relative">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <LineChart data={revenueData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
@@ -173,7 +173,7 @@ const AdminDashboardPage = () => {
             <h3 className="text-sm font-bold text-slate-800 mb-2">Platform Activity</h3>
             <div className="flex-1 flex flex-col items-center justify-center relative">
                <div className="w-40 h-40 relative flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                     <PieChart>
                       <Pie
                         data={activityData}
