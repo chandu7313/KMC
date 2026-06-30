@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import Navbar from '@/app/layouts/Navbar';
 import { BookOpen, Calendar, User, ArrowRight, Search, Hash } from 'lucide-react';
 import { useGlobalStore } from '@/app/store/globalStore';
 import API from '@/core/api/api.config';
 
-const Blogs = () => {
+const BlogsPage = () => {
     const { backendUrl } = useGlobalStore();
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,92 +37,100 @@ const Blogs = () => {
     );
 
     return (
-        <div className="bg-white min-h-screen">
-            <Navbar />
-            
-            <section className="pt-32 pb-24 px-6">
-                {/* Heading */}
-                <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
-                    <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 font-black text-[10px] uppercase tracking-[0.3em] px-4 py-1.5 rounded-full mb-2">
-                        <BookOpen size={14} /> Knowledge Hub
-                    </div>
-                    <h2 className="text-6xl font-serif font-bold text-[#1f2d1f] tracking-tight leading-tight">
-                        Insights for the <br/><span className="text-emerald-700 italic underline decoration-emerald-200">Modern Farmer.</span>
-                    </h2>
-                    <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
-                        Expert opinions, technical guides, and the latest updates from the world of sustainable agriculture.
-                    </p>
-
-                    <div className="pt-8 flex justify-center">
-                        <div className="relative w-full max-w-lg">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                            <input 
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-100 rounded-[32px] py-5 pl-16 pr-8 outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-bold text-slate-900 shadow-sm" 
-                                placeholder="Search articles, pests, or crops..." 
-                            />
+        <div className="bg-[#f9faf9] font-sans -m-4 lg:-m-8 pb-20">
+            {/* Hero Section */}
+            <section className="relative h-[400px] md:h-[450px] flex flex-col justify-center overflow-hidden">
+                <div 
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url('https://images.unsplash.com/photo-1574943320219-553eb213f72d?q=80&w=2000&auto=format&fit=crop')` }} 
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent" />
+                <div className="relative max-w-7xl mx-auto px-6 sm:px-10 w-full">
+                    <div className="max-w-2xl">
+                        <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 font-black text-[10px] uppercase tracking-[0.3em] px-4 py-1.5 rounded-full mb-4 border border-emerald-500/30">
+                            <BookOpen size={14} /> Knowledge Hub
                         </div>
+                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6 tracking-tight">
+                            Insights for the <br />
+                            <span className="text-emerald-400 italic">Modern Farmer.</span>
+                        </h1>
+                        <p className="text-lg md:text-xl text-slate-300 max-w-xl font-medium leading-relaxed mb-10">
+                            Expert opinions, technical guides, and the latest updates from the world of sustainable agriculture.
+                        </p>
                     </div>
                 </div>
+            </section>
+            
+            <section className="px-6 sm:px-10 -mt-10 relative z-10 max-w-7xl mx-auto mb-16">
+                <div className="bg-white rounded-2xl shadow-xl p-4 flex items-center gap-4 max-w-2xl border border-slate-100">
+                    <Search className="text-slate-400 ml-2" size={24} />
+                    <input 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-transparent border-none outline-none text-slate-900 font-medium text-lg placeholder-slate-400" 
+                        placeholder="Search articles, pests, or crops..." 
+                    />
+                </div>
+            </section>
 
+            <section className="px-6 sm:px-10">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-32 space-y-4">
-                        <div className="w-12 h-12 border-4 border-slate-50 border-t-emerald-700 rounded-full animate-spin"></div>
+                    <div className="flex flex-col items-center justify-center py-32 space-y-4 bg-white rounded-3xl shadow-xl max-w-7xl mx-auto border border-slate-100">
+                        <div className="w-12 h-12 border-4 border-slate-100 border-t-emerald-700 rounded-full animate-spin"></div>
                         <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Opening Archives...</p>
                     </div>
                 ) : filteredBlogs.length === 0 ? (
-                    <div className="text-center py-32 space-y-4">
+                    <div className="text-center py-32 space-y-4 bg-white rounded-3xl border border-slate-200 shadow-sm max-w-7xl mx-auto">
                         <div className="text-slate-200 text-6xl font-black">404</div>
                         <p className="text-slate-400 font-bold">No articles found matching your criteria.</p>
                         <button onClick={() => setSearchTerm('')} className="text-emerald-700 font-black hover:underline uppercase tracking-widest text-[10px]">View all articles</button>
                     </div>
                 ) : (
-                    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                         {filteredBlogs.map((blog) => (
                             <div
                                 key={blog.id}
-                                className="group cursor-pointer"
+                                className="group cursor-pointer bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
                                 onClick={() => navigate(`/blog/${blog.slug}`)}
                             >
-                                <div className="space-y-6">
-                                    <div className="aspect-[16/10] rounded-[48px] overflow-hidden bg-slate-50 border border-slate-100 relative">
-                                        <img
-                                            src={blog.featured_image}
-                                            alt={blog.title}
-                                            className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="h-60 relative overflow-hidden bg-slate-50 border-b border-slate-100">
+                                    <img
+                                        src={blog.featured_image}
+                                        alt={blog.title}
+                                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                                    
+                                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white text-xs">
+                                        <div className="flex items-center gap-1.5 font-bold uppercase tracking-widest">
+                                            <Calendar size={12}/> {new Date(blog.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </div>
+                                        <div className="flex items-center gap-1.5 font-bold uppercase tracking-widest">
+                                            <User size={12}/> {blog.author || 'AgriTeam'}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-8 flex-1 flex flex-col space-y-4">
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                        {blog.tags?.slice(0, 2).map((tag, idx) => (
+                                            <span key={idx} className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">
+                                                {tag}
+                                            </span>
+                                        ))}
                                     </div>
 
-                                    <div className="px-4 space-y-4">
-                                        <div className="flex items-center gap-6">
-                                            <div className="flex items-center gap-2 text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                                                <Calendar size={12} className="text-emerald-600"/> {new Date(blog.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                            </div>
-                                            <div className="flex items-center gap-2 text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                                                <User size={12} className="text-emerald-600"/> {blog.author || 'AgriTeam'}
-                                            </div>
-                                        </div>
+                                    <h3 className="text-2xl font-black text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors">
+                                        {blog.title}
+                                    </h3>
 
-                                        <h3 className="text-2xl font-black text-[#1f2d1f] leading-snug group-hover:text-emerald-700 transition-colors">
-                                            {blog.title}
-                                        </h3>
+                                    <p className="text-slate-600 font-medium line-clamp-3 leading-relaxed flex-1 text-sm">
+                                        {blog.excerpt}
+                                    </p>
 
-                                        <p className="text-slate-500 font-medium line-clamp-2 leading-relaxed">
-                                            {blog.excerpt}
-                                        </p>
-
-                                        <div className="flex flex-wrap gap-2">
-                                            {blog.tags?.slice(0, 3).map((tag, idx) => (
-                                                <span key={idx} className="text-[10px] font-black text-slate-400 flex items-center gap-1">
-                                                    <Hash size={10} className="text-emerald-400"/> {tag}
-                                                </span>
-                                            ))}
-                                        </div>
-
-                                        <div className="pt-2 flex items-center gap-3 text-emerald-700 font-black text-xs uppercase tracking-[0.2em]">
-                                            Continue Reading <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform"/>
+                                    <div className="pt-6 mt-4 border-t border-slate-100 flex items-center justify-between">
+                                        <div className="text-emerald-700 font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 group-hover:gap-3 transition-all">
+                                            Read Article <ArrowRight size={14} />
                                         </div>
                                     </div>
                                 </div>
@@ -136,4 +143,4 @@ const Blogs = () => {
     );
 };
 
-export default Blogs;
+export default BlogsPage;
