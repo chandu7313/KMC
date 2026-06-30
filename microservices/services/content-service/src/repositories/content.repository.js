@@ -5,9 +5,8 @@ const { Blog, SuccessStory, Scheme } = models;
 
 class ContentRepository {
   // ── Blog Posts ──
-  async findAllBlogs({ page = 1, limit = 10, tag, search, isPublished = true } = {}) {
-    const where = {};
-    if (isPublished) where.is_published = true;
+  async findAllBlogs({ page = 1, limit = 10, tag, search } = {}) {
+    const where = { status: 'published' };
     if (tag) where.tags = { [Op.contains]: [tag] };
     if (search) where.title = { [Op.iLike]: `%${search}%` };
 
@@ -15,7 +14,7 @@ class ContentRepository {
 
     const { rows, count } = await Blog.findAndCountAll({
       where,
-      attributes: ['id', 'title', 'slug', 'author', 'tags', 'featured_image', 'created_at', 'is_published'],
+      attributes: ['id', 'title', 'slug', 'author', 'tags', 'featured_image', 'excerpt', 'status', 'views', 'created_at'],
       order: [['created_at', 'DESC']],
       limit,
       offset,
@@ -52,15 +51,14 @@ class ContentRepository {
   }
 
   // ── Success Stories ──
-  async findAllStories({ page = 1, limit = 10, isPublished = true } = {}) {
-    const where = {};
-    if (isPublished) where.is_published = true;
+  async findAllStories({ page = 1, limit = 10 } = {}) {
+    const where = { status: 'published' };
 
     const offset = (page - 1) * limit;
 
     const { rows, count } = await SuccessStory.findAndCountAll({
       where,
-      attributes: ['id', 'farmer_name', 'crop', 'district', 'title', 'headline', 'image_url', 'created_at', 'is_published'],
+      attributes: ['id', 'farmer_name', 'crop', 'district', 'before_yield', 'after_yield', 'description', 'image', 'status', 'created_at'],
       order: [['created_at', 'DESC']],
       limit,
       offset,
