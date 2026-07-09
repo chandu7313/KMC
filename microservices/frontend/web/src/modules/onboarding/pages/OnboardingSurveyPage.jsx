@@ -20,7 +20,7 @@ const TOTAL_STEPS = 7;
 
 const FarmerOnboardingSurvey = () => {
     const navigate = useNavigate();
-    const { backendUrl, getUserData, setUserData } = useGlobalStore();
+    const { backendUrl, getUserData, setUserData, userData } = useGlobalStore();
     const [currentStep, setCurrentStep] = useState(1);
     const [submitting, setSubmitting] = useState(false);
     const [slideDirection, setSlideDirection] = useState('next');
@@ -39,6 +39,22 @@ const FarmerOnboardingSurvey = () => {
         waterSource: '',
         primaryCrops: [],
     });
+
+    useEffect(() => {
+        if (userData?.survey) {
+            setSurveyData({
+                language: userData.survey.language || 'te',
+                farmName: userData.survey.farm_name || '',
+                farmSize: userData.survey.farm_size || '',
+                farmSizeUnit: userData.survey.farm_size_unit || 'acres',
+                farmingExperience: userData.survey.farming_experience || '',
+                landOwnership: userData.survey.land_ownership || '',
+                soilType: userData.survey.soil_type || '',
+                waterSource: userData.survey.water_source || '',
+                primaryCrops: userData.survey.primary_crops || [],
+            });
+        }
+    }, [userData]);
 
     const progressPercent = Math.round((currentStep / TOTAL_STEPS) * 100);
 
@@ -100,7 +116,7 @@ const FarmerOnboardingSurvey = () => {
             const payload = {
                 ...surveyData
             };
-            const { data } = await axios.post(backendUrl + `${API.SURVEY}/submit`, { surveyData: payload });
+            const { data } = await axios.post(backendUrl + `${API.SURVEY}/submit`, { surveyData: payload }, { withCredentials: true });
             if (data.success) {
                 toast.success('🎉 Profile setup complete! Welcome to KMC.');
                 await getUserData();
@@ -935,29 +951,39 @@ const FarmerOnboardingSurvey = () => {
                 @keyframes spin { to { transform: rotate(360deg); } }
 
                 /* ─── DESKTOP CENTERING ───────────── */
-                @media (min-width: 520px) {
+                @media (min-width: 768px) {
                     .survey-root {
                         background: #e8ebe9;
                     }
                     .survey-header {
-                        max-width: 480px; margin: 0 auto;
+                        max-width: 800px; margin: 0 auto;
                         border-left: 1px solid #e8ebe9;
                         border-right: 1px solid #e8ebe9;
+                        border-radius: 0 0 16px 16px;
                     }
                     .survey-progress-section {
-                        max-width: 480px; margin: 0 auto;
+                        max-width: 800px; margin: 0 auto;
                         border-left: 1px solid #e8ebe9;
                         border-right: 1px solid #e8ebe9;
                     }
                     .survey-content {
-                        max-width: 480px; margin: 0 auto;
+                        max-width: 800px; margin: 0 auto;
                         background: #f7f8fa;
                         border-left: 1px solid #e8ebe9;
                         border-right: 1px solid #e8ebe9;
                     }
                     .survey-footer {
+                        max-width: 800px; margin: 0 auto;
                         border-left: 1px solid #e8ebe9;
                         border-right: 1px solid #e8ebe9;
+                    }
+
+                    /* Adjust grids for wider layout */
+                    .survey-chip-grid {
+                        grid-template-columns: repeat(4, 1fr);
+                    }
+                    .survey-soil-grid {
+                        grid-template-columns: repeat(4, 1fr);
                     }
                 }
             `}</style>

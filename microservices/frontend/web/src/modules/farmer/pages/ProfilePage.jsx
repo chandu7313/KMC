@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGlobalStore } from '@/app/store/globalStore';
 import { 
   MapPin, 
@@ -27,6 +27,7 @@ import { useNavigate } from 'react-router-dom';
 
 const FarmerProfile = () => {
     const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState('profile');
     const { userData } = useGlobalStore();
     const userName = userData?.name || 'Farmer';
     const userEmail = userData?.email || '';
@@ -148,10 +149,16 @@ const FarmerProfile = () => {
                         
                         {/* Tabs */}
                         <div className="flex flex-wrap items-center border-b border-slate-200 px-6">
-                            <button className="flex items-center gap-2 px-5 py-4 text-sm font-bold text-[#166534] border-b-2 border-[#166534]">
+                            <button 
+                                onClick={() => setActiveTab('profile')}
+                                className={`flex items-center gap-2 px-5 py-4 text-sm font-bold transition-colors ${activeTab === 'profile' ? 'text-[#166534] border-b-2 border-[#166534]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            >
                                 <User size={16} /> My Profile
                             </button>
-                            <button className="flex items-center gap-2 px-5 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors">
+                            <button 
+                                onClick={() => setActiveTab('farm')}
+                                className={`flex items-center gap-2 px-5 py-4 text-sm font-bold transition-colors ${activeTab === 'farm' ? 'text-[#166534] border-b-2 border-[#166534]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                            >
                                 <Tractor size={16} /> Farm Details
                             </button>
                             <button className="flex items-center gap-2 px-5 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors">
@@ -163,8 +170,10 @@ const FarmerProfile = () => {
                             </button>
                         </div>
 
-                        {/* Tab Content: Personal Information */}
+                        {/* Tab Content */}
                         <div className="p-8">
+                            {activeTab === 'profile' && (
+                                <>
                             <div className="flex items-center justify-between mb-8 gap-4">
                                 <div>
                                     <h2 className="text-xl font-bold text-slate-900">Personal Information</h2>
@@ -273,7 +282,72 @@ const FarmerProfile = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+                            </>
+                            )}
+
+                            {activeTab === 'farm' && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-8 gap-4">
+                                        <div>
+                                            <h2 className="text-xl font-bold text-slate-900">Farm Details</h2>
+                                            <p className="text-sm text-slate-500 mt-1">Review your farm setup and crop information.</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => navigate('/onboarding/survey')}
+                                            className="bg-[#f0fdf4] text-[#166534] border border-[#a7d5b6] hover:bg-[#e6f4ea] px-5 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
+                                        >
+                                            <Edit2 size={16} /> Edit Survey Details
+                                        </button>
+                                    </div>
+
+                                    {userData?.survey ? (
+                                        <div className="grid grid-cols-2 gap-y-8 gap-x-8">
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Farm Size</p>
+                                                <p className="text-base font-bold text-slate-900">
+                                                    {userData.survey.farm_size === 'under_1' ? 'Under 1 acre' : 
+                                                     userData.survey.farm_size === '1_to_3' ? '1-3 acres' : 
+                                                     userData.survey.farm_size === '3_to_5' ? '3-5 acres' : 
+                                                     userData.survey.farm_size === '5_to_10' ? '5-10 acres' : 
+                                                     userData.survey.farm_size === '10_plus' ? '10+ acres' : '—'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Soil Type</p>
+                                                <p className="text-base font-bold text-slate-900 capitalize">{userData.survey.soil_type || '—'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Water Source</p>
+                                                <p className="text-base font-bold text-slate-900 capitalize">{userData.survey.water_source || '—'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Primary Crops</p>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {userData.survey.primary_crops?.length > 0 ? (
+                                                        userData.survey.primary_crops.map((crop, i) => (
+                                                            <span key={i} className="bg-[#f0fdf4] border border-[#a7d5b6] text-[#16a34a] text-xs font-bold px-3 py-1 rounded-md capitalize">
+                                                                {crop}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-base font-bold text-slate-900">—</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-[#f8fafc] border border-slate-200 rounded-xl">
+                                            <p className="text-base text-slate-500 mb-4">You haven't added your farm details yet.</p>
+                                            <button 
+                                                onClick={() => navigate('/onboarding/survey')}
+                                                className="text-[#166534] font-bold underline hover:text-[#14532d]"
+                                            >
+                                                Complete Survey Now
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
