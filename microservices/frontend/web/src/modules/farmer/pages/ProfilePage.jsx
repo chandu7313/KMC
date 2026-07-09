@@ -1,4 +1,5 @@
 import React from 'react';
+import { useGlobalStore } from '@/app/store/globalStore';
 import { 
   MapPin, 
   Edit2, 
@@ -26,6 +27,14 @@ import { useNavigate } from 'react-router-dom';
 
 const FarmerProfile = () => {
     const navigate = useNavigate();
+    const { userData } = useGlobalStore();
+    const userName = userData?.name || 'Farmer';
+    const userEmail = userData?.email || '';
+    const userPhone = userData?.phone || '';
+    const userDistrict = userData?.district || 'Other';
+    const nameParts = userName.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
 
     return (
         <div className="w-full bg-[#f9fafb] lg:bg-[#f8fafc] min-h-screen relative font-sans">
@@ -47,7 +56,7 @@ const FarmerProfile = () => {
                             <div className="absolute -top-12 w-24 h-24 rounded-2xl border-4 border-white overflow-hidden shadow-sm bg-white">
                                 <img 
                                     src="https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?auto=format&fit=crop&q=80&w=400" 
-                                    alt="Rajesh Kumar" 
+                                    alt={userName} 
                                     className="w-full h-full object-cover"
                                 />
                                 {/* Verified Badge */}
@@ -56,10 +65,10 @@ const FarmerProfile = () => {
                                 </div>
                             </div>
 
-                            <h2 className="text-xl font-bold text-slate-900 mt-2">Rajesh Kumar</h2>
+                            <h2 className="text-xl font-bold text-slate-900 mt-2">{userName}</h2>
                             <div className="flex items-center gap-1.5 text-slate-500 text-sm mt-1 mb-5">
                                 <MapPin size={14} />
-                                <span>Pune, Maharashtra</span>
+                                <span>{userDistrict}</span>
                             </div>
 
                             {/* Badges */}
@@ -172,7 +181,7 @@ const FarmerProfile = () => {
                                     <label className="block text-xs font-bold text-slate-700 mb-2">First Name</label>
                                     <input 
                                         type="text" 
-                                        defaultValue="Rajesh" 
+                                        defaultValue={firstName} 
                                         className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#166534] focus:ring-1 focus:ring-[#166534]"
                                     />
                                 </div>
@@ -180,7 +189,7 @@ const FarmerProfile = () => {
                                     <label className="block text-xs font-bold text-slate-700 mb-2">Last Name</label>
                                     <input 
                                         type="text" 
-                                        defaultValue="Kumar" 
+                                        defaultValue={lastName} 
                                         className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#166534] focus:ring-1 focus:ring-[#166534]"
                                     />
                                 </div>
@@ -192,7 +201,7 @@ const FarmerProfile = () => {
                                         </span>
                                         <input 
                                             type="text" 
-                                            defaultValue="98765 43210" 
+                                            defaultValue={userPhone} 
                                             className="w-full bg-[#f8fafc] px-4 py-2.5 text-sm text-slate-900 focus:outline-none"
                                         />
                                     </div>
@@ -234,7 +243,7 @@ const FarmerProfile = () => {
                                         <label className="block text-xs font-bold text-slate-700 mb-2">District</label>
                                         <input 
                                             type="text" 
-                                            defaultValue="Pune" 
+                                            defaultValue={userDistrict} 
                                             className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#166534] focus:ring-1 focus:ring-[#166534]"
                                         />
                                     </div>
@@ -287,7 +296,7 @@ const FarmerProfile = () => {
                         <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white shadow-md">
                             <img 
                                 src="https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?auto=format&fit=crop&q=80&w=400" 
-                                alt="Rajesh Kumar" 
+                                alt={userName} 
                                 className="w-full h-full object-cover"
                             />
                         </div>
@@ -296,9 +305,9 @@ const FarmerProfile = () => {
                         </button>
                     </div>
                     <h2 className="text-2xl font-bold flex items-center gap-1.5 tracking-tight">
-                        Rajesh Kumar <BadgeCheck size={18} className="text-[#4ade80]" fill="currentColor" stroke="white" />
+                        {userName} <BadgeCheck size={18} className="text-[#4ade80]" fill="currentColor" stroke="white" />
                     </h2>
-                    <p className="text-green-100/90 text-sm mt-1 font-medium">+91 98765 43210</p>
+                    <p className="text-green-100/90 text-sm mt-1 font-medium">{userPhone ? `+91 ${userPhone}` : userEmail}</p>
                     <p className="text-green-100/80 text-xs flex items-center gap-1 mt-1 font-medium">
                         <MapPin size={12} /> Shrirampur Village
                     </p>
@@ -328,30 +337,55 @@ const FarmerProfile = () => {
 
                 {/* My Farm Details */}
                 <div className="mx-4 bg-white rounded-xl shadow-sm border border-slate-100 p-5 mb-6">
-                    <h3 className="flex items-center gap-2 font-bold text-slate-800 mb-4 pb-3 border-b border-slate-100 text-sm">
-                        <Tractor size={18} className="text-[#16a34a]" /> My Farm Details
-                    </h3>
-                    <div className="grid grid-cols-2 gap-y-5 gap-x-4">
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Farm Size</p>
-                            <p className="text-sm font-bold text-slate-900">4.5 Acres</p>
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Soil Type</p>
-                            <p className="text-sm font-bold text-slate-900">Black Cotton</p>
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Water Source</p>
-                            <p className="text-sm font-bold text-slate-900">Borewell & Canal</p>
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Primary Crops</p>
-                            <div className="flex flex-wrap gap-1.5 mt-1">
-                                <span className="bg-[#f0fdf4] text-[#16a34a] text-[9px] font-bold px-2 py-0.5 rounded-md leading-tight">Cotton</span>
-                                <span className="bg-[#f0fdf4] text-[#16a34a] text-[9px] font-bold px-2 py-0.5 rounded-md leading-tight">Soybean</span>
+                    <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                        <h3 className="flex items-center gap-2 font-bold text-slate-800 text-sm">
+                            <Tractor size={18} className="text-[#16a34a]" /> My Farm Details
+                        </h3>
+                        <button onClick={() => navigate('/onboarding/survey')} className="text-[#166534] text-xs font-bold px-3 py-1.5 bg-[#f0fdf4] rounded-lg border border-[#a7d5b6] active:scale-95 transition-transform">
+                            Edit
+                        </button>
+                    </div>
+                    {userData?.survey ? (
+                        <div className="grid grid-cols-2 gap-y-5 gap-x-4">
+                            <div>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Farm Size</p>
+                                <p className="text-sm font-bold text-slate-900">
+                                    {userData.survey.farm_size === 'under_1' ? 'Under 1 acre' : 
+                                     userData.survey.farm_size === '1_to_3' ? '1-3 acres' : 
+                                     userData.survey.farm_size === '3_to_5' ? '3-5 acres' : 
+                                     userData.survey.farm_size === '5_to_10' ? '5-10 acres' : 
+                                     userData.survey.farm_size === '10_plus' ? '10+ acres' : '—'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Soil Type</p>
+                                <p className="text-sm font-bold text-slate-900 capitalize">{userData.survey.soil_type || '—'}</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Water Source</p>
+                                <p className="text-sm font-bold text-slate-900 capitalize">{userData.survey.water_source || '—'}</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Primary Crops</p>
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {userData.survey.primary_crops?.length > 0 ? (
+                                        userData.survey.primary_crops.map((crop, i) => (
+                                            <span key={i} className="bg-[#f0fdf4] text-[#16a34a] text-[9px] font-bold px-2 py-0.5 rounded-md leading-tight capitalize">
+                                                {crop}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className="text-sm font-bold text-slate-900">—</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="text-center py-4">
+                            <p className="text-sm text-slate-500 mb-3">Farm details not added yet.</p>
+                            <button onClick={() => navigate('/onboarding/survey')} className="text-[#16a34a] text-sm font-bold border-b border-[#16a34a]">Complete Survey Now</button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Language Preference */}

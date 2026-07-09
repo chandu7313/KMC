@@ -58,7 +58,7 @@ const FarmerOnboardingSurvey = () => {
     const canProceed = () => {
         switch (currentStep) {
             case 1: return !!surveyData.language;
-            case 2: return !!surveyData.farmName && !!surveyData.farmSize && !!surveyData.farmingExperience;
+            case 2: return !!surveyData.farmSize;
             case 3: return !!surveyData.landOwnership;
             case 4: return !!surveyData.soilType;
             case 5: return !!surveyData.waterSource;
@@ -98,8 +98,7 @@ const FarmerOnboardingSurvey = () => {
         setSubmitting(true);
         try {
             const payload = {
-                ...surveyData,
-                farmSize: Number(surveyData.farmSize),
+                ...surveyData
             };
             const { data } = await axios.post(backendUrl + `${API.SURVEY}/submit`, { surveyData: payload });
             if (data.success) {
@@ -176,63 +175,32 @@ const FarmerOnboardingSurvey = () => {
     const renderStep2 = () => (
         <div className="survey-step-content">
             <div className="survey-step-body">
-                <h2 className="survey-question-title">Tell us about your farm</h2>
-                <p className="survey-question-sub">Help us personalize your experience</p>
+                <h2 className="survey-question-title">How much land do you farm?</h2>
+                <p className="survey-question-sub">Tap the size closest to your farm</p>
 
-                <div className="survey-form-group">
-                    <label className="survey-form-label">Farm Name</label>
-                    <input
-                        type="text"
-                        className="survey-form-input"
-                        placeholder="e.g., Green Valley Farm"
-                        value={surveyData.farmName}
-                        onChange={e => updateField('farmName', e.target.value)}
-                    />
-                </div>
-
-                <div className="survey-form-row">
-                    <div className="survey-form-group" style={{ flex: 2 }}>
-                        <label className="survey-form-label">Farm Size</label>
-                        <input
-                            type="number"
-                            className="survey-form-input"
-                            placeholder="e.g., 12.5"
-                            value={surveyData.farmSize}
-                            onChange={e => updateField('farmSize', e.target.value)}
-                        />
-                    </div>
-                    <div className="survey-form-group" style={{ flex: 1 }}>
-                        <label className="survey-form-label">Unit</label>
-                        <select
-                            className="survey-form-input"
-                            value={surveyData.farmSizeUnit}
-                            onChange={e => updateField('farmSizeUnit', e.target.value)}
+                <div className="survey-options-list" style={{ marginTop: '24px' }}>
+                    {[
+                        { value: 'under_1', label: 'Under 1 acre', sub: 'Small plot or home garden', img: 'https://images.unsplash.com/photo-1599839619722-39751411ea63?auto=format&fit=crop&q=80&w=200' },
+                        { value: '1_to_3', label: '1–3 acres', sub: 'Small commercial farming', img: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=200' },
+                        { value: '3_to_5', label: '3–5 acres', sub: 'Medium-scale production', img: 'https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&q=80&w=200' },
+                        { value: '5_to_10', label: '5–10 acres', sub: 'Professional large-scale farm', img: 'https://images.unsplash.com/photo-1605000794699-95ce032064dc?auto=format&fit=crop&q=80&w=200' },
+                        { value: '10_plus', label: '10+ acres', sub: 'Estate or commercial enterprise', img: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&q=80&w=200' },
+                    ].map(opt => (
+                        <button
+                            key={opt.value}
+                            className={`survey-option-card ${surveyData.farmSize === opt.value ? 'selected' : ''}`}
+                            onClick={() => updateField('farmSize', opt.value)}
                         >
-                            <option value="acres">Acres</option>
-                            <option value="hectares">Hectares</option>
-                            <option value="guntas">Guntas</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="survey-form-group">
-                    <label className="survey-form-label">Farming Experience</label>
-                    <div className="survey-chip-grid">
-                        {[
-                            { value: '0-2', label: '0-2 Years', emoji: '🌱' },
-                            { value: '3-5', label: '3-5 Years', emoji: '🌿' },
-                            { value: '5-10', label: '5-10 Years', emoji: '🌾' },
-                            { value: '10+', label: '10+ Years', emoji: '🏆' },
-                        ].map(exp => (
-                            <button
-                                key={exp.value}
-                                className={`survey-chip ${surveyData.farmingExperience === exp.value ? 'selected' : ''}`}
-                                onClick={() => updateField('farmingExperience', exp.value)}
-                            >
-                                <span>{exp.emoji}</span> {exp.label}
-                            </button>
-                        ))}
-                    </div>
+                            <img src={opt.img} alt={opt.label} style={{ width: '56px', height: '56px', borderRadius: '12px', objectFit: 'cover' }} />
+                            <div className="survey-option-text" style={{ marginLeft: '4px' }}>
+                                <span className="survey-option-label">{opt.label}</span>
+                                <span className="survey-option-sub">{opt.sub}</span>
+                            </div>
+                            <div className={`survey-radio ${surveyData.farmSize === opt.value ? 'active' : ''}`}>
+                                {surveyData.farmSize === opt.value && <Check size={12} strokeWidth={3} />}
+                            </div>
+                        </button>
+                    ))}
                 </div>
 
                 {/* Insight */}
@@ -434,11 +402,17 @@ const FarmerOnboardingSurvey = () => {
     };
 
     const renderStep7 = () => {
+        const sizeLabels = {
+            under_1: 'Under 1 acre',
+            '1_to_3': '1-3 acres',
+            '3_to_5': '3-5 acres',
+            '5_to_10': '5-10 acres',
+            '10_plus': '10+ acres'
+        };
+
         const summaryItems = [
             { label: 'Language', value: surveyData.language === 'te' ? 'Telugu' : surveyData.language === 'hi' ? 'Hindi' : 'English', icon: '🌐' },
-            { label: 'Farm Name', value: surveyData.farmName || '—', icon: '🏡' },
-            { label: 'Farm Size', value: surveyData.farmSize ? `${surveyData.farmSize} ${surveyData.farmSizeUnit}` : '—', icon: '📐' },
-            { label: 'Experience', value: surveyData.farmingExperience ? `${surveyData.farmingExperience} years` : '—', icon: '⏳' },
+            { label: 'Farm Size', value: surveyData.farmSize ? sizeLabels[surveyData.farmSize] : '—', icon: '📐' },
             { label: 'Land Type', value: surveyData.landOwnership ? surveyData.landOwnership.charAt(0).toUpperCase() + surveyData.landOwnership.slice(1) : '—', icon: '📋' },
             { label: 'Soil Type', value: surveyData.soilType ? surveyData.soilType.charAt(0).toUpperCase() + surveyData.soilType.slice(1) + ' Soil' : '—', icon: '🌍' },
             { label: 'Water Source', value: surveyData.waterSource ? surveyData.waterSource.charAt(0).toUpperCase() + surveyData.waterSource.slice(1) : '—', icon: '💧' },

@@ -10,7 +10,7 @@ class UserService {
   async getUserData(userId, tokenUser) {
     try {
       let user = await userRepository.findById(userId,
-        'id, name, email, phone, role, isAccountVerified, language, preferredLanguage, hasCompletedTour, hasCompletedSurvey, simpleMode, district, crops'
+        'id, name, email, phone, role, is_account_verified, language, preferred_language, has_completed_tour, has_completed_survey, simple_mode, district, crops'
       );
 
       let isAdmin = false;
@@ -24,11 +24,16 @@ class UserService {
 
       // Fetch addresses (only for regular users)
       let addresses = [];
+      let survey = null;
       if (!isAdmin) {
         try {
           addresses = await addressRepository.findByUserId(userId);
-        } catch (addrErr) {
-          logger.warn('Failed to fetch addresses, returning empty', { userId, error: addrErr.message });
+          
+          const { default: surveyService } = await import('./survey.service.js');
+          const surveyResult = await surveyService.getSurveyStatus(userId);
+          survey = surveyResult.surveyData;
+        } catch (err) {
+          logger.warn('Failed to fetch user auxiliary data', { userId, error: err.message });
         }
       }
 
@@ -38,17 +43,19 @@ class UserService {
         email: user.email,
         phone: user.phone,
         role: user.role,
-        isAccountVerified: user.isAccountVerified || false,
+        isAccountVerified: user.is_account_verified || user.isAccountVerified || false,
         language: user.language || 'en',
-        preferredLanguage: user.preferredLanguage || 'en',
-        hasCompletedTour: user.hasCompletedTour || false,
-        hasCompletedSurvey: user.hasCompletedSurvey || false,
-        simpleMode: user.simpleMode || false,
+        preferredLanguage: user.preferred_language || user.preferredLanguage || 'en',
+        hasCompletedTour: user.has_completed_tour || user.hasCompletedTour || false,
+        hasCompletedSurvey: user.has_completed_survey || user.hasCompletedSurvey || false,
+        simpleMode: user.simple_mode || user.simpleMode || false,
         district: user.district,
         crops: user.crops || [],
         addresses,
+        survey,
         isAdminUser: isAdmin,
       };
+
     } catch (err) {
       // ── Fallback: return mock profile from JWT token data when DB is down ──
       logger.warn(`getUserData DB failed (${err.message}), returning mock profile from token`, { userId });

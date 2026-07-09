@@ -75,7 +75,7 @@ const Login = () => {
                 // Check if farmer needs to complete onboarding survey
                 try {
                     const surveyRes = await axios.get(backendUrl + `${API.SURVEY}/status`)
-                    if (surveyRes.data.success && !surveyRes.data.hasCompletedSurvey) {
+                    if (surveyRes.data.success && !surveyRes.data.data?.hasCompletedSurvey) {
                         navigate("/onboarding-survey")
                         return
                     }
@@ -101,12 +101,24 @@ const Login = () => {
                 const { data } = await axios.post(backendUrl + `${API.AUTH}/register`, { name, email, password })
                 if (data.success) {
                     setIsLoggedin(true)
-                    await getUserData()
+                    
+                    // Fetch the newly created user's data from DB
+                    try {
+                        await getUserData()
+                    } catch (err) {
+                        // If getUserData fails, set user data from registration response
+                        console.warn('getUserData after registration failed, using response data', err);
+                        if (data.data?.user) {
+                            useGlobalStore.setState({ userData: data.data.user, loading: false });
+                        }
+                    }
+                    
                     syncPreferencesToBackend().catch(err => console.warn('Preferences sync skipped', err));
                     
+                    // Check if farmer needs to complete onboarding survey
                     try {
                         const surveyRes = await axios.get(backendUrl + `${API.SURVEY}/status`)
-                        if (surveyRes.data.success && !surveyRes.data.hasCompletedSurvey) {
+                        if (surveyRes.data.success && !surveyRes.data.data?.hasCompletedSurvey) {
                             navigate("/onboarding-survey")
                             return
                         }
@@ -125,7 +137,7 @@ const Login = () => {
                     
                     try {
                         const surveyRes = await axios.get(backendUrl + `${API.SURVEY}/status`)
-                        if (surveyRes.data.success && !surveyRes.data.hasCompletedSurvey) {
+                        if (surveyRes.data.success && !surveyRes.data.data?.hasCompletedSurvey) {
                             navigate("/onboarding-survey")
                             return
                         }
@@ -140,11 +152,12 @@ const Login = () => {
                 }
             }
         } catch (error) {
-            toast.error(error.message)
+            toast.error(error.response?.data?.message || error.message)
         } finally {
             setLoading(false)
         }
     }
+
 
     const navigateBasedOnRole = (role) => {
         const route = getDefaultRoute(role);

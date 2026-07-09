@@ -8,6 +8,7 @@ import { createLogger, requestId, metrics } from '@kissan/shared';
 import userRoutes from './routes/user.routes.js';
 import adminUserRoutes from './routes/admin-user.routes.js';
 import addressRoutes from './routes/address.routes.js';
+import surveyRoutes from './routes/survey.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -43,6 +44,7 @@ app.get('/metrics', metrics.metricsRoute);
 app.use('/profile', userRoutes);
 app.use('/admin', adminUserRoutes);
 app.use('/addresses', addressRoutes);
+app.use('/survey', surveyRoutes);
 
 // ── 404 ──
 app.use((req, res) => {

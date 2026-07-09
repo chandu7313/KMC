@@ -10,6 +10,7 @@ import AdminLayout from '@/app/layouts/AdminLayout';
 import FarmerLayout from '@/app/layouts/FarmerLayout';
 import SupportLayout from '@/app/layouts/SupportLayout';
 import SuperAdminLayout from '@/app/layouts/SuperAdminLayout';
+import ProtectedRoute from '@/modules/auth/guards/ProtectedRoute';
 
 // ─── Admin Pages ───────────────────────
 import AdminDashboardPage from '@/modules/admin/pages/AdminDashboardPage';
@@ -88,7 +89,7 @@ export const AppRouter = () => {
         {/* Exception Pages without Sidebar */}
         <Route path="/customer-care" element={<CustomerCarePage />} />
         <Route path="/whether-insights" element={<WeatherInsightsPage />} />
-        <Route path="/my-orders" element={<OrdersPage />} />
+        <Route path="/my-orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
         <Route path="/government-schemes" element={<GovernmentSchemesPage />} />
 
         {/* ─── Pages with Sidebar (FarmerLayout) ───── */}
@@ -104,9 +105,9 @@ export const AppRouter = () => {
           <Route path="/market-prices" element={<MarketPage />} />
           
           {/* Dashboard & Profile */}
-          <Route path="/farmer/dashboard" element={<DashboardPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/farmer/support" element={<ExpertSupportPage />} />
+          <Route path="/farmer/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/farmer/support" element={<ProtectedRoute><ExpertSupportPage /></ProtectedRoute>} />
           
           {/* Tools & Services */}
           <Route path="/soil-crop-analysis" element={<SoilTestingPage />} />
@@ -116,7 +117,7 @@ export const AppRouter = () => {
           <Route path="/orchard-planning" element={<OrchardPlanningPage />} />
           <Route path="/orchard-planning/plan" element={<PlanEstateFormPage />} />
           <Route path="/book-farm-visit" element={<BookFarmVisitPage />} />
-          <Route path="/onboarding-survey" element={<OnboardingSurveyPage />} />
+          <Route path="/onboarding-survey" element={<ProtectedRoute><OnboardingSurveyPage /></ProtectedRoute>} />
         </Route>
 
         {/* ─── Additional Marketplace Routes ─────────── */}

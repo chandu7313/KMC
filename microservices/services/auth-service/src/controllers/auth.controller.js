@@ -18,7 +18,15 @@ export const register = async (req, res, next) => {
     tokenService.setTokenCookie(res, accessToken);
     await tokenService.storeSession(user.id, accessToken);
 
-    return successResponse(res, { userId: user.id }, 'Registration successful', 201);
+    return successResponse(res, {
+      userId: user.id,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role || 'user',
+      },
+    }, 'Registration successful', 201);
   } catch (error) {
     next(error);
   }

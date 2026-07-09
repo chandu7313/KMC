@@ -26,6 +26,8 @@ class AuthService {
       name,
       email,
       password: hashedPassword,
+      role: 'user',
+      isAccountVerified: false,
     });
 
     logger.info(`User registered: ${user.id}`, { email });
@@ -35,10 +37,12 @@ class AuthService {
       userId: user.id,
       email: user.email,
       name: user.name,
+      role: user.role,
     });
 
     return user;
   }
+
 
   // ── Email/Password Login ──
 

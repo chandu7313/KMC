@@ -138,23 +138,13 @@ const FarmerLayout = () => {
                             <h2 className="text-base lg:text-lg xl:text-xl font-black text-[#1f2d1f] truncate">
                                 Good Morning, {userData ? userData.name.split(' ')[0] : 'Farmer'} 🌾
                             </h2>
-                            <div className="pl-3 hidden xl:flex items-center gap-1.5 text-sm text-slate-600 font-medium shrink-0 whitespace-nowrap">
-                                <Sun size={16} className="text-amber-500 shrink-0" />
-                                28°C • {userData?.district || 'Ludhiana'}, Punjab
-                            </div>
+
                         </div>
                     </div>
 
                     {/* Right: Search, Notifications, Profile */}
                     <div className="flex items-center gap-2 lg:gap-4 shrink-0">
-                        <div className="relative hidden md:block">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input 
-                                type="text" 
-                                placeholder="Search..." 
-                                className="pl-9 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm font-medium focus:ring-2 focus:ring-[#186036]/20 outline-none w-32 lg:w-48 xl:w-64 transition-all"
-                            />
-                        </div>
+
 
                         {/* Language Selector */}
                         <div className="relative group hidden lg:block z-50">

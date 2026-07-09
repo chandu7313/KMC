@@ -7,7 +7,7 @@ export default (sequelize) => {
     userId: { type: DataTypes.UUID, allowNull: false, unique: true, field: 'user_id' },
     language: { type: DataTypes.STRING },
     farm_name: { type: DataTypes.STRING },
-    farm_size: { type: DataTypes.DECIMAL },
+    farm_size: { type: DataTypes.STRING },
     farm_size_unit: { type: DataTypes.STRING, defaultValue: 'acres' },
     land_ownership: { type: DataTypes.STRING },
     soil_type: { type: DataTypes.STRING },
