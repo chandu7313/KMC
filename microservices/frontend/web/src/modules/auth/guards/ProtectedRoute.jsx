@@ -24,6 +24,12 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
   }
 
+  const { userData } = useGlobalStore.getState();
+  
+  if (userData && !userData.isAdminUser && !userData.hasCompletedSurvey && location.pathname !== ROUTES.ONBOARDING_SURVEY) {
+    return <Navigate to={ROUTES.ONBOARDING_SURVEY} replace />;
+  }
+
   return children;
 };
 
