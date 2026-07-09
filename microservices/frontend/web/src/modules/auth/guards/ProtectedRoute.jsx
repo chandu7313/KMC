@@ -4,8 +4,8 @@
  */
 import React, {} from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import Spinner from '../../../shared/components/ui/Spinner';
-import ROUTES from '../../../core/router/routeConfig';
+import Spinner from '@/shared/ui/Spinner';
+import ROUTES from '@/core/router/routeConfig';
 import { useGlobalStore } from '@/app/store/globalStore';
 
 const ProtectedRoute = ({ children }) => {
