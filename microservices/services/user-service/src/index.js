@@ -9,6 +9,7 @@ import userRoutes from './routes/user.routes.js';
 import adminUserRoutes from './routes/admin-user.routes.js';
 import addressRoutes from './routes/address.routes.js';
 import surveyRoutes from './routes/survey.routes.js';
+import dashboardRoutes from './routes/dashboard.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -45,6 +46,7 @@ app.use('/profile', userRoutes);
 app.use('/admin', adminUserRoutes);
 app.use('/addresses', addressRoutes);
 app.use('/survey', surveyRoutes);
+app.use('/farmer', dashboardRoutes);
 
 // ── 404 ──
 app.use((req, res) => {

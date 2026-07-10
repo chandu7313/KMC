@@ -17,11 +17,71 @@ import {
     Users,
     FileText,
     TrendingUp,
-    Sprout
+    Sprout,
+    AlertCircle,
+    RotateCw,
+    Bug,
+    CloudRain
 } from 'lucide-react';
+import { useFarmerDashboard } from '../../features/farmer-dashboard/hooks/useFarmerDashboard';
 
 const FarmerDashboard = () => {
     const navigate = useNavigate();
+    const { dashboard, marketPrices, isLoading, isError, error, refetch, markAlertRead, markAllRead } = useFarmerDashboard();
+
+    if (isLoading) {
+        return (
+            <div className="bg-[#f9fafb] min-h-screen pb-24 md:pb-8 font-sans w-full max-w-2xl mx-auto xl:max-w-7xl animate-pulse">
+                <div className="px-4 pt-4 md:px-8 md:pt-8 space-y-6">
+                    <div className="bg-slate-300 rounded-2xl h-40 w-full"></div>
+                    <div className="space-y-3">
+                        <div className="h-6 bg-slate-300 rounded w-1/4"></div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                            {[...Array(6)].map((_, i) => <div key={i} className="h-28 bg-slate-300 rounded-xl"></div>)}
+                        </div>
+                    </div>
+                    <div className="h-16 bg-slate-300 rounded-xl w-full"></div>
+                    <div className="space-y-3">
+                        <div className="h-6 bg-slate-300 rounded w-1/3"></div>
+                        <div className="flex gap-4">
+                            {[...Array(3)].map((_, i) => <div key={i} className="h-28 w-[140px] bg-slate-300 rounded-xl shrink-0"></div>)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="bg-[#f9fafb] min-h-screen font-sans w-full max-w-2xl mx-auto flex flex-col items-center justify-center p-8">
+                <AlertCircle size={48} className="text-rose-500 mb-4" />
+                <h2 className="text-xl font-bold text-slate-800 mb-2">Dashboard Unavailable</h2>
+                <p className="text-sm text-slate-500 text-center mb-6">{error?.message || 'Failed to load dashboard data.'}</p>
+                <button onClick={refetch} className="flex items-center gap-2 bg-[#16a34a] text-white px-6 py-2 rounded-lg font-bold">
+                    <RotateCw size={18} /> Retry
+                </button>
+            </div>
+        );
+    }
+
+    const d = dashboard || {};
+    const farmer = d.farmer || {};
+    const greeting = d.greeting || {};
+    const weather = d.weather || null;
+    const season = d.activeSeason;
+    const status = d.farmStatus;
+    const alerts = d.alerts?.items || [];
+    const schemes = d.schemes || [];
+
+    const getAlertIcon = (type) => {
+        switch(type) {
+            case 'pest': return <Bug size={18} />;
+            case 'weather': return <CloudRain size={18} />;
+            case 'order': return <Truck size={18} />;
+            default: return <Activity size={18} />;
+        }
+    };
 
     return (
         <div className="bg-[#f9fafb] min-h-screen pb-24 md:pb-8 font-sans w-full max-w-2xl mx-auto xl:max-w-7xl">
@@ -31,23 +91,34 @@ const FarmerDashboard = () => {
                 <div className="bg-[#185824] rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-4">
-                            <h2 className="text-xl md:text-2xl font-bold">Good Morning, Rajesh ji</h2>
+                            <h2 className="text-xl md:text-2xl font-bold">Good {greeting.timeOfDay}, {farmer.name?.split(' ')[0] || 'Farmer'} ji</h2>
                             <Sprout size={20} className="text-yellow-400" />
                         </div>
 
                         {/* Weather Card */}
-                        <div className="bg-[#246b32] rounded-xl p-4 mb-4 flex items-center gap-4 border border-white/10 shadow-inner">
-                            <Sun size={32} className="text-yellow-400" />
-                            <div>
-                                <div className="text-2xl font-bold leading-none mb-1">28°C</div>
-                                <div className="text-xs text-white/80 font-medium">Sunny • 65% Humidity</div>
+                        {weather ? (
+                            <div className="bg-[#246b32] rounded-xl p-4 mb-4 flex items-center gap-4 border border-white/10 shadow-inner">
+                                {weather.icon && <img src={`http://openweathermap.org/img/wn/${weather.icon}@2x.png`} alt="weather" className="w-12 h-12" />}
+                                {!weather.icon && <Sun size={32} className="text-yellow-400" />}
+                                <div>
+                                    <div className="text-2xl font-bold leading-none mb-1">{weather.temperature}°C</div>
+                                    <div className="text-xs text-white/80 font-medium capitalize">{weather.condition} • {weather.humidity}% Humidity</div>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="bg-[#246b32] rounded-xl p-4 mb-4 flex items-center gap-4 border border-white/10 shadow-inner">
+                                <CloudSun size={32} className="text-white/50" />
+                                <div>
+                                    <div className="text-sm font-bold leading-none mb-1">Weather Unavailable</div>
+                                    <div className="text-xs text-white/80 font-medium">Please check connection</div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Tip of the day */}
                         <div className="border-l-2 border-white pl-3 py-1">
                             <p className="text-xs md:text-sm text-white/90 font-medium italic">
-                                <span className="font-bold not-italic">Tip of the day:</span> Light irrigation recommended for tomato crop this evening.
+                                <span className="font-bold not-italic">Tip of the day:</span> {greeting.dailyTip || greeting.message}
                             </p>
                         </div>
                     </div>
@@ -130,20 +201,22 @@ const FarmerDashboard = () => {
                 </div>
 
                 {/* ─── GOVT SUBSIDY BANNER ──────────────────────── */}
-                <div className="bg-[#fbbf24] rounded-xl p-4 flex items-center justify-between shadow-sm cursor-pointer active:scale-95 transition-transform">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-amber-600 text-amber-50 rounded-xl flex items-center justify-center shrink-0 shadow-inner">
-                            <Megaphone size={20} />
+                {schemes.length > 0 && (
+                    <div className="bg-[#fbbf24] rounded-xl p-4 flex items-center justify-between shadow-sm cursor-pointer active:scale-95 transition-transform">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-amber-600 text-amber-50 rounded-xl flex items-center justify-center shrink-0 shadow-inner">
+                                <Megaphone size={20} />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-[#78350f] text-sm md:text-base">{schemes[0].name}</h4>
+                                <p className="text-[11px] md:text-xs text-[#92400e] font-medium leading-tight mt-0.5">
+                                    {schemes[0].daysLeft !== null ? `Next installment in ${schemes[0].daysLeft} days.` : 'Enrollment active.'}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 className="font-bold text-[#78350f] text-sm md:text-base">New Govt Subsidy</h4>
-                            <p className="text-[11px] md:text-xs text-[#92400e] font-medium leading-tight mt-0.5">
-                                Apply for drip irrigation scheme today. Ends soon.
-                            </p>
-                        </div>
+                        <ChevronRight className="text-[#92400e] shrink-0 ml-2" size={20} />
                     </div>
-                    <ChevronRight className="text-[#92400e] shrink-0 ml-2" size={20} />
-                </div>
+                )}
 
                 {/* ─── TODAY'S MANDI RATES ──────────────────────── */}
                 <div className="space-y-3">
@@ -151,35 +224,23 @@ const FarmerDashboard = () => {
                         <h3 className="font-bold text-slate-800">Today's Mandi Rates</h3>
                         <span onClick={() => navigate('/market-prices')} className="text-xs font-bold text-[#16a34a] cursor-pointer">View All</span>
                     </div>
-                    <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-                        
-                        {/* Tomato */}
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-rose-500 p-4 min-w-[140px] shrink-0">
-                            <p className="text-xs font-medium text-slate-500 mb-1">Tomato</p>
-                            <p className="text-xl font-bold text-slate-900 mb-1">₹24<span className="text-[10px] text-slate-400 font-medium">/kg</span></p>
-                            <p className="text-[10px] font-bold text-rose-500 flex items-center gap-1">
-                                ↓ 2.5%
-                            </p>
+                    {marketPrices && marketPrices.length > 0 ? (
+                        <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                            {marketPrices.map(price => (
+                                <div key={price.id} className={`bg-white rounded-xl shadow-sm border border-slate-100 border-l-4 p-4 min-w-[140px] shrink-0 ${price.change < 0 ? 'border-l-rose-500' : price.change > 0 ? 'border-l-[#16a34a]' : 'border-l-amber-400'}`}>
+                                    <p className="text-xs font-medium text-slate-500 mb-1">{price.crop_name}</p>
+                                    <p className="text-xl font-bold text-slate-900 mb-1">₹{price.modal_price}<span className="text-[10px] text-slate-400 font-medium">/q</span></p>
+                                    <p className={`text-[10px] font-bold flex items-center gap-1 ${price.change < 0 ? 'text-rose-500' : price.change > 0 ? 'text-[#16a34a]' : 'text-slate-400'}`}>
+                                        {price.change < 0 ? '↓' : price.change > 0 ? '↑' : '—'} {Math.abs(price.change)}
+                                    </p>
+                                </div>
+                            ))}
                         </div>
-
-                        {/* Rice */}
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-[#16a34a] p-4 min-w-[140px] shrink-0">
-                            <p className="text-xs font-medium text-slate-500 mb-1">Rice (Paddy)</p>
-                            <p className="text-xl font-bold text-slate-900 mb-1">₹2,183<span className="text-[10px] text-slate-400 font-medium">/q</span></p>
-                            <p className="text-[10px] font-bold text-[#16a34a] flex items-center gap-1">
-                                ↑ 1.2%
-                            </p>
+                    ) : (
+                        <div className="bg-white rounded-xl p-4 text-center border border-slate-100">
+                            <p className="text-sm text-slate-500">No market prices available for your region.</p>
                         </div>
-
-                        {/* Onion */}
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-amber-400 p-4 min-w-[140px] shrink-0">
-                            <p className="text-xs font-medium text-slate-500 mb-1">Onion</p>
-                            <p className="text-xl font-bold text-slate-900 mb-1">₹45<span className="text-[10px] text-slate-400 font-medium">/kg</span></p>
-                            <p className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                                — 0.0%
-                            </p>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* ─── MY FARM STATUS ─────────────────────────── */}
@@ -189,63 +250,75 @@ const FarmerDashboard = () => {
                         <h3 className="font-bold text-slate-800 text-sm">My Farm Status</h3>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">TOTAL AREA</p>
-                            <p className="font-bold text-slate-900 text-sm">3.5 Acres</p>
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">ACTIVE CROP</p>
-                            <p className="font-bold text-slate-900 text-sm">Tomato</p>
-                        </div>
-                    </div>
+                    {season ? (
+                        <>
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">TOTAL AREA</p>
+                                    <p className="font-bold text-slate-900 text-sm">{season.area} {season.areaUnit}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">ACTIVE CROP</p>
+                                    <p className="font-bold text-slate-900 text-sm">{season.cropName}</p>
+                                </div>
+                            </div>
 
-                    <div>
-                        <div className="flex justify-between items-end mb-2">
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">SOIL HEALTH</p>
-                            <p className="text-[11px] font-bold text-[#16a34a]">72/100 (Good)</p>
+                            {status ? (
+                                <div>
+                                    <div className="flex justify-between items-end mb-2">
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">CROP HEALTH</p>
+                                        <p className={`text-[11px] font-bold ${status.cropHealthScore >= 70 ? 'text-[#16a34a]' : status.cropHealthScore >= 40 ? 'text-amber-500' : 'text-rose-500'}`}>
+                                            {status.cropHealthScore}/100 ({status.cropHealthStatus})
+                                        </p>
+                                    </div>
+                                    <div className="w-full bg-slate-200 rounded-full h-2">
+                                        <div className={`h-2 rounded-full ${status.cropHealthScore >= 70 ? 'bg-[#166534]' : status.cropHealthScore >= 40 ? 'bg-amber-500' : 'bg-rose-500'}`} style={{ width: `${status.cropHealthScore}%` }}></div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center p-3 bg-slate-50 rounded-lg">
+                                    <p className="text-xs text-slate-500">No health readings yet.</p>
+                                    <button className="text-xs font-bold text-[#16a34a] mt-1">Add Reading</button>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <div className="text-center p-4">
+                            <p className="text-sm text-slate-500 mb-2">You don't have an active crop season.</p>
+                            <button className="bg-[#16a34a] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">Add Crop</button>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                            <div className="bg-[#166534] h-2 rounded-full w-[72%]"></div>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* ─── RECENT ACTIVITY ──────────────────────────── */}
                 <div className="space-y-3">
-                    <h3 className="font-bold text-slate-800 px-1">Recent Activity</h3>
+                    <div className="flex justify-between items-center px-1">
+                        <h3 className="font-bold text-slate-800">Recent Activity</h3>
+                        {d.alerts?.unreadCount > 0 && (
+                            <span onClick={() => markAllRead()} className="text-xs font-bold text-[#16a34a] cursor-pointer">Mark all read</span>
+                        )}
+                    </div>
                     
-                    {/* Activity 1 */}
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4 flex gap-4">
-                        <div className="w-10 h-10 bg-rose-100 text-rose-500 rounded-xl flex items-center justify-center shrink-0">
-                            <Activity size={18} strokeWidth={2.5} />
-                        </div>
-                        <div className="flex-1">
-                            <div className="flex justify-between items-start mb-1">
-                                <h4 className="font-bold text-slate-900 text-sm">Disease Scan Completed</h4>
-                                <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap ml-2">2h ago</span>
+                    {alerts.length > 0 ? alerts.map(alert => (
+                        <div key={alert.id} onClick={() => !alert.is_read && markAlertRead(alert.id)} className={`bg-white rounded-xl shadow-sm border ${alert.is_read ? 'border-slate-100 opacity-70' : 'border-[#16a34a]'} p-4 flex gap-4 cursor-pointer transition-opacity`}>
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${alert.priority === 'urgent' ? 'bg-rose-100 text-rose-500' : alert.priority === 'high' ? 'bg-amber-100 text-amber-500' : 'bg-green-100 text-green-500'}`}>
+                                {getAlertIcon(alert.alert_type)}
                             </div>
-                            <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                                Early Blight detected. Prescription ready.
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Activity 2 */}
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4 flex gap-4">
-                        <div className="w-10 h-10 bg-green-100 text-green-500 rounded-xl flex items-center justify-center shrink-0">
-                            <Truck size={18} strokeWidth={2.5} />
-                        </div>
-                        <div className="flex-1">
-                            <div className="flex justify-between items-start mb-1">
-                                <h4 className="font-bold text-slate-900 text-sm">Order Delivered</h4>
-                                <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap ml-2">Yesterday</span>
+                            <div className="flex-1">
+                                <div className="flex justify-between items-start mb-1">
+                                    <h4 className="font-bold text-slate-900 text-sm">{alert.title}</h4>
+                                </div>
+                                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                                    {alert.message}
+                                </p>
                             </div>
-                            <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                                NPK Fertilizer 50kg bag.
-                            </p>
                         </div>
-                    </div>
+                    )) : (
+                        <div className="bg-white rounded-xl p-6 text-center border border-slate-100 shadow-sm">
+                            <Activity className="mx-auto text-slate-300 mb-2" size={32} />
+                            <p className="text-sm text-slate-500 font-medium">No recent activity</p>
+                        </div>
+                    )}
                 </div>
 
             </div>

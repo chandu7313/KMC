@@ -15,6 +15,16 @@ class MarketService {
     return prices;
   }
 
+  async getDashboardPrices(state, limit = 5) {
+    const key = `dashboard_prices:${state || 'all'}:${limit}`;
+    const cached = cache.get(key);
+    if (cached) return cached;
+    
+    const prices = await marketRepo.findDashboardPrices(state, limit);
+    cache.set(key, prices);
+    return prices;
+  }
+
   async addPrice(data) {
     const price = await marketRepo.create({
       cropName: data.cropName, variety: data.variety, district: data.district,

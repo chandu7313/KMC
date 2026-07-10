@@ -5,6 +5,9 @@ import datagovService from '../services/datagov.service.js';
 export const getPrices = async (req, res, next) => {
   try { return successResponse(res, { prices: await marketService.getPrices(req.query) }); } catch (e) { next(e); }
 };
+export const getDashboardPrices = async (req, res, next) => {
+  try { return successResponse(res, { prices: await marketService.getDashboardPrices(req.query.state, req.query.limit) }); } catch (e) { next(e); }
+};
 export const addPrice = async (req, res, next) => {
   try { return successResponse(res, { price: await marketService.addPrice(req.body) }, 'Market price added', 201); } catch (e) { next(e); }
 };

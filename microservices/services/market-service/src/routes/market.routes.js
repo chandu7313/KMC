@@ -5,6 +5,7 @@ import * as mCtrl from '../controllers/market.controller.js';
 const router = express.Router();
 
 // Public
+router.get('/dashboard-prices', mCtrl.getDashboardPrices);
 router.get('/prices', mCtrl.getPrices);
 router.get('/realtime', mCtrl.getRealTimePrice);
 router.get('/trend', mCtrl.getTrend);

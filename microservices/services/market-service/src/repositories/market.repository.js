@@ -72,6 +72,18 @@ class MarketPriceRepository {
       raw: true
     });
   }
+
+  async findDashboardPrices(state, limit = 5) {
+    const where = {};
+    if (state) where.state = { [Op.iLike]: `%${state}%` };
+    
+    return MarketPrice.findAll({
+      where,
+      order: [['arrivalDate', 'DESC']],
+      limit: parseInt(limit, 10),
+      raw: true
+    });
+  }
 }
 
 export default new MarketPriceRepository();
