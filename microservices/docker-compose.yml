@@ -52,8 +52,9 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
       - ./nginx/logs:/var/log/nginx
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     depends_on:
       - auth-service
       - user-service
@@ -136,12 +137,12 @@ services:
     build:
       context: .
       dockerfile: ./services/auth-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-auth
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3001
       - SERVICE_NAME=auth-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -155,11 +156,6 @@ services:
       - FAST2SMS_API_KEY=${FAST2SMS_API_KEY}
       - ENABLE_SMS=${ENABLE_SMS}
       - BCRYPT_ROUNDS=12
-    volumes:
-      - ./services/auth-service/src:/app/services/auth-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/auth-service:/app/logs
     depends_on:
       redis:
         condition: service_started
@@ -177,12 +173,12 @@ services:
     build:
       context: .
       dockerfile: ./services/user-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-user
     ports:
       - "3002:3002"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3002
       - SERVICE_NAME=user-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -193,11 +189,6 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    volumes:
-      - ./services/user-service/src:/app/services/user-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/user-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -215,12 +206,12 @@ services:
     build:
       context: .
       dockerfile: ./services/ai-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-ai
     ports:
       - "3003:3003"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3003
       - SERVICE_NAME=ai-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -233,11 +224,6 @@ services:
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - PLANT_ID_API_KEY=${PLANT_ID_API_KEY}
-    volumes:
-      - ./services/ai-service/src:/app/services/ai-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/ai-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -255,12 +241,12 @@ services:
     build:
       context: .
       dockerfile: ./services/disease-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-disease
     ports:
       - "3004:3004"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3004
       - SERVICE_NAME=disease-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -275,11 +261,6 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - AI_SERVICE_URL=http://ai-service:3003
-    volumes:
-      - ./services/disease-service/src:/app/services/disease-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/disease-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -297,12 +278,12 @@ services:
     build:
       context: .
       dockerfile: ./services/soil-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-soil
     ports:
       - "3005:3005"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3005
       - SERVICE_NAME=soil-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -317,11 +298,6 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - AI_SERVICE_URL=http://ai-service:3003
-    volumes:
-      - ./services/soil-service/src:/app/services/soil-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/soil-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -339,12 +315,12 @@ services:
     build:
       context: .
       dockerfile: ./services/market-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-market
     ports:
       - "3006:3006"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3006
       - SERVICE_NAME=market-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -356,11 +332,6 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - DATA_GOV_API_KEY=${DATA_GOV_API_KEY}
-    volumes:
-      - ./services/market-service/src:/app/services/market-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/market-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -378,12 +349,12 @@ services:
     build:
       context: .
       dockerfile: ./services/ecommerce-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-ecommerce
     ports:
       - "3007:3007"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3007
       - SERVICE_NAME=ecommerce-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -397,11 +368,6 @@ services:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-    volumes:
-      - ./services/ecommerce-service/src:/app/services/ecommerce-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/ecommerce-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -419,12 +385,12 @@ services:
     build:
       context: .
       dockerfile: ./services/order-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-order
     ports:
       - "3008:3008"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3008
       - SERVICE_NAME=order-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -435,11 +401,6 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    volumes:
-      - ./services/order-service/src:/app/services/order-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/order-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -457,12 +418,12 @@ services:
     build:
       context: .
       dockerfile: ./services/payment-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-payment
     ports:
       - "3009:3009"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3009
       - SERVICE_NAME=payment-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -475,11 +436,6 @@ services:
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
       - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
-    volumes:
-      - ./services/payment-service/src:/app/services/payment-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/payment-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -497,12 +453,12 @@ services:
     build:
       context: .
       dockerfile: ./services/notification-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-notification
     ports:
       - "3010:3010"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3010
       - SERVICE_NAME=notification-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -521,11 +477,6 @@ services:
       - EMAIL_PASS=${EMAIL_PASS}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PHONE=${ADMIN_PHONE}
-    volumes:
-      - ./services/notification-service/src:/app/services/notification-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/notification-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -543,12 +494,12 @@ services:
     build:
       context: .
       dockerfile: ./services/support-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-support
     ports:
       - "3011:3011"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3011
       - SERVICE_NAME=support-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -559,11 +510,6 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    volumes:
-      - ./services/support-service/src:/app/services/support-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/support-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -581,12 +527,12 @@ services:
     build:
       context: .
       dockerfile: ./services/expert-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-expert
     ports:
       - "3012:3012"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3012
       - SERVICE_NAME=expert-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -597,11 +543,6 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    volumes:
-      - ./services/expert-service/src:/app/services/expert-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/expert-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -619,12 +560,12 @@ services:
     build:
       context: .
       dockerfile: ./services/content-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-content
     ports:
       - "3013:3013"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3013
       - SERVICE_NAME=content-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -638,11 +579,6 @@ services:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-    volumes:
-      - ./services/content-service/src:/app/services/content-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/content-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -660,12 +596,12 @@ services:
     build:
       context: .
       dockerfile: ./services/analytics-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-analytics
     ports:
       - "3014:3014"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3014
       - SERVICE_NAME=analytics-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -676,11 +612,6 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    volumes:
-      - ./services/analytics-service/src:/app/services/analytics-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/analytics-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -698,12 +629,12 @@ services:
     build:
       context: .
       dockerfile: ./services/field-service/Dockerfile
-      target: development
+      target: production
     container_name: kmc-field
     ports:
       - "3015:3015"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3015
       - SERVICE_NAME=field-service
       - SUPABASE_URL=${SUPABASE_URL}
@@ -714,11 +645,6 @@ services:
       - RABBITMQ_URL=${RABBITMQ_URL}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    volumes:
-      - ./services/field-service/src:/app/services/field-service/src
-      - /app/node_modules
-      - ./packages:/app/packages
-      - ./logs/field-service:/app/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -732,22 +658,33 @@ services:
       start_period: 40s
 
   # ──────────────────────────────────────
-  # FRONTEND SERVICE
+  # FRONTEND SERVICE (Production Build)
   # ──────────────────────────────────────
   frontend:
     build:
       context: ./frontend/web
-      target: development
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - REACT_APP_API_URL=https://kissanmithar.com
+        - REACT_APP_ENV=production
     container_name: kmc-frontend
     ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://localhost
-      - REACT_APP_SHOW_DEV_LOGIN=true
-      - REACT_APP_ENV=development
+      - "3000:80"
+    restart: unless-stopped
+    networks:
+      - kissan-network
+
+  # ──────────────────────────────────────
+  # CERTBOT SERVICE
+  # ──────────────────────────────────────
+  certbot:
+    image: certbot/certbot
+    container_name: kmc-certbot
     volumes:
-      - ./frontend/web:/app
-      - /app/node_modules
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     restart: unless-stopped
     networks:
       - kissan-network

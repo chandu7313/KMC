@@ -1,0 +1,30 @@
+name: KMC Production Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy to AWS EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USER }}
+          key: ${{ secrets.AWS_PRIVATE_KEY }}
+          script: |
+            cd ~/kissan
+            git pull origin main
+            
+            # Setup deployment scripts permissions
+            chmod +x scripts/deploy.sh
+            
+            # Execute deployment script
+            ./scripts/deploy.sh
