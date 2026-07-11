@@ -248,7 +248,7 @@ const Login = () => {
                         </p>
                     </div>
 
-                    {!showOtpInput && state === 'Login' && (
+                    {!showOtpInput && state === 'Login' && import.meta.env.MODE === 'development' && (
                         <div className="mb-6">
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center mb-3">Quick Developer Login</p>
                             <div className="flex flex-wrap gap-2 justify-center max-h-[160px] overflow-y-auto p-4 border border-slate-100 rounded-2xl bg-white shadow-inner scrollbar-thin">
