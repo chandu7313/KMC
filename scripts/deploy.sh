@@ -10,10 +10,10 @@ git pull origin main
 
 echo "[2/5] Building Docker images..."
 cd microservices
-docker-compose build
+docker compose build
 
 echo "[3/5] Starting containers..."
-docker-compose up -d
+docker compose up -d
 
 echo "[4/5] Waiting for services to initialize..."
 sleep 15

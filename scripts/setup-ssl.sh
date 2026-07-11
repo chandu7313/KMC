@@ -17,10 +17,10 @@ mkdir -p "$DATA_PATH/www"
 echo "[2/4] Starting Nginx to serve ACME challenge..."
 # Start only Nginx so it can respond to Let's Encrypt
 cd microservices
-docker-compose up -d nginx
+docker compose up -d nginx
 
 echo "[3/4] Requesting SSL Certificate from Let's Encrypt..."
-docker-compose run --rm --entrypoint "\
+docker compose run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
     -d $DOMAIN -d www.$DOMAIN \
     --email $EMAIL \
@@ -29,6 +29,6 @@ docker-compose run --rm --entrypoint "\
     --force-renewal" certbot
 
 echo "[4/4] Restarting Nginx to load the new certificates..."
-docker-compose restart nginx
+docker compose restart nginx
 
 echo "✅ SSL Setup complete! HTTPS should now be active."
