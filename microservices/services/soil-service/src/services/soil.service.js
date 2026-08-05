@@ -17,13 +17,6 @@ cloudinary.config({
  * Soil management service — handles PDF upload, NPK calculations, AI analysis, and reminder scheduling.
  */
 class SoilService {
-  /**
-   * Process new soil report submission: upload file to Cloudinary and auto-analyze if NPK values provided.
-   * @param {string} userId - Farmer UUID
-   * @param {object} body - Report metrics (ph, nitrogen, phosphorus, potassium, organicMatter)
-   * @param {object} [file] - Multer file object
-   * @returns {Promise<object>} Created soil report record
-   */
   async uploadReport(userId, body, file) {
     let reportFileUrl = null;
     if (file) {
@@ -70,30 +63,14 @@ class SoilService {
     return report;
   }
 
-  /**
-   * Fetch all past soil test reports for a farmer.
-   * @param {string} farmerId - User UUID
-   * @returns {Promise<Array>} List of reports
-   */
   async getHistory(farmerId) {
     return soilRepository.findByFarmer(farmerId);
   }
 
-  /**
-   * Admin: List all soil reports across all farmers.
-   * @returns {Promise<Array>} List of all reports
-   */
   async adminGetAllReports() {
     return soilRepository.findAll();
   }
 
-  /**
-   * Admin / Agronomist: Analyze an existing pending report with lab metrics.
-   * @param {string} id - Soil report UUID
-   * @param {object} body - Lab measurements
-   * @returns {Promise<object>} Updated soil report
-   * @throws {HttpError} If report not found
-   */
   async adminAnalyzeReport(id, body) {
     const report = await soilRepository.findById(id);
     if (!report) throw HttpError.notFound('Report not found');
@@ -123,12 +100,6 @@ class SoilService {
     return updated;
   }
 
-  /**
-   * Admin: Directly create a completed soil report for a farmer.
-   * @param {object} body - Full report parameters
-   * @returns {Promise<object>} Created report
-   * @throws {HttpError} If missing required fields
-   */
   async adminCreateReport(body) {
     const { farmerId, ph, nitrogen, phosphorus, potassium, organicMatter } = body;
     if (!farmerId || !ph || !nitrogen || !phosphorus || !potassium || !organicMatter) {
@@ -152,11 +123,6 @@ class SoilService {
     return report;
   }
 
-  /**
-   * Run standalone soil algorithmic assessment without saving to database.
-   * @param {object} body - Soil parameters
-   * @returns {object} Rule-based recommendation output
-   */
   async analyzeStandalone(body) {
     const { ph, nitrogen, phosphorus, potassium, organicMatter } = body;
     if (ph === undefined || nitrogen === undefined || phosphorus === undefined || potassium === undefined) {
@@ -165,11 +131,6 @@ class SoilService {
     return analyzeSoil(parseFloat(ph), parseFloat(nitrogen), parseFloat(phosphorus), parseFloat(potassium), parseFloat(organicMatter || 0));
   }
 
-  /**
-   * Run Gemini LLM analysis on soil metrics with localized language support.
-   * @param {object} body - Soil metrics and target language
-   * @returns {Promise<object>} AI recommendations object
-   */
   async analyzeWithAI(body) {
     const { ph, nitrogen, phosphorus, potassium, organicMatter, language } = body;
     if (ph === undefined || nitrogen === undefined || phosphorus === undefined || potassium === undefined) {
@@ -191,11 +152,6 @@ Use ${lang}. Be specific to Indian farming. Mention Indian brand fertilizers wit
     return data?.data?.result || data?.result;
   }
 
-  /**
-   * Retrieve farmer report history.
-   * @param {string} farmerId - User UUID
-   * @returns {Promise<Array>} Reports
-   */
   async getFarmerHistory(farmerId) {
     return soilRepository.findByFarmer(farmerId);
   }
