@@ -70,32 +70,36 @@ const createLogger = (serviceName, options = {}) => {
   );
 
   // File transports — production only
-  if (isProduction) {
-    transports.push(
-      new DailyRotateFile({
-        level: 'info',
-        dirname: logDir,
-        filename: `${serviceName}-%DATE%.log`,
-        datePattern: 'YYYY-MM-DD',
-        maxSize: '20m',
-        maxFiles: '14d',
-        format: jsonFormat,
-        zippedArchive: true,
-      })
-    );
+  if (isProduction && process.env.ENABLE_FILE_LOGS !== 'false') {
+    try {
+      transports.push(
+        new DailyRotateFile({
+          level: 'info',
+          dirname: logDir,
+          filename: `${serviceName}-%DATE%.log`,
+          datePattern: 'YYYY-MM-DD',
+          maxSize: '20m',
+          maxFiles: '14d',
+          format: jsonFormat,
+          zippedArchive: true,
+        })
+      );
 
-    transports.push(
-      new DailyRotateFile({
-        level: 'error',
-        dirname: logDir,
-        filename: `${serviceName}-error-%DATE%.log`,
-        datePattern: 'YYYY-MM-DD',
-        maxSize: '20m',
-        maxFiles: '30d',
-        format: jsonFormat,
-        zippedArchive: true,
-      })
-    );
+      transports.push(
+        new DailyRotateFile({
+          level: 'error',
+          dirname: logDir,
+          filename: `${serviceName}-error-%DATE%.log`,
+          datePattern: 'YYYY-MM-DD',
+          maxSize: '20m',
+          maxFiles: '30d',
+          format: jsonFormat,
+          zippedArchive: true,
+        })
+      );
+    } catch (err) {
+      console.warn(`[${serviceName}] File logging disabled: ${err.message}`);
+    }
   }
 
   const logger = winston.createLogger({
