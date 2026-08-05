@@ -67,12 +67,12 @@ RUN adduser -S nodeuser -u 1001
 RUN apk add --no-cache curl
 
 # Copy only production node_modules
-COPY --from=dependencies /tmp/prod_modules ./node_modules
-COPY --from=dependencies /app/packages ./packages
-COPY --from=builder /app/services/market-service ./services/market-service
+COPY --from=dependencies --chown=nodeuser:nodejs /tmp/prod_modules ./node_modules
+COPY --from=dependencies --chown=nodeuser:nodejs /app/packages ./packages
+COPY --from=builder --chown=nodeuser:nodejs /app/services/market-service ./services/market-service
 
 # Create logs dir with correct permissions
-RUN mkdir -p logs && chown -R nodeuser:nodejs logs
+RUN mkdir -p /app/services/market-service/logs /app/logs && chown -R nodeuser:nodejs /app
 
 # Switch to non-root
 USER nodeuser
