@@ -48,19 +48,7 @@ Return ONLY a valid JSON object with NO markdown, NO extra text:
 If the crop appears healthy return isHealthy: true with empty treatment and relevant prevention tips.
 Be specific to Indian farming conditions. Give Indian brand names and prices in INR.`;
 
-/**
- * Service for running plant pathology diagnosis pipelines, saving records, and querying history.
- */
 class DiseaseService {
-  /**
-   * Execute end-to-end crop diagnosis: Cloudinary upload, Plant.id verification, Gemini vision analysis, and DB persistence.
-   * @param {string} userId - Requesting user UUID
-   * @param {string} filePath - Local disk path of uploaded file
-   * @param {string} mimeType - Media mime type
-   * @param {object} [body={}] - Additional metadata (cropName, fieldName)
-   * @returns {Promise<{diagnosis: object, geminiResult: object}>}
-   * @throws {HttpError} If image is not a plant or AI inference fails
-   */
   async diagnose(userId, filePath, mimeType, body = {}) {
     // 1. Upload to Cloudinary
     const cloudResult = await cloudinary.uploader.upload(filePath, { folder: 'kmc/crop-doctor', resource_type: 'image' });
@@ -151,12 +139,6 @@ class DiseaseService {
     return { diagnosis, geminiResult };
   }
 
-  /**
-   * Get paginated history of past diagnoses for a farmer.
-   * @param {string} farmerId - User UUID
-   * @param {object} [query={}] - Pagination query parameters
-   * @returns {Promise<Array>} List of diagnosis records
-   */
   async getHistory(farmerId, query = {}) {
     return diagnosisRepository.findByFarmer(farmerId, {
       limit: parseInt(query.limit || '20', 10),
@@ -164,13 +146,6 @@ class DiseaseService {
     });
   }
 
-  /**
-   * Fetch single diagnosis record and parse stored JSON attributes.
-   * @param {string} farmerId - User UUID
-   * @param {string} id - Diagnosis UUID
-   * @returns {Promise<object>} Parsed diagnosis record
-   * @throws {HttpError} If record not found or not owned by farmer
-   */
   async getDetail(farmerId, id) {
     const diagnosis = await diagnosisRepository.findById(id);
     if (!diagnosis || diagnosis.farmerId !== farmerId) {
@@ -187,11 +162,6 @@ class DiseaseService {
     };
   }
 
-  /**
-   * Remove temporary local upload file.
-   * @param {string} filePath - Disk file path
-   * @private
-   */
   _cleanup(filePath) {
     try { fs.unlinkSync(filePath); } catch (_) {}
   }
