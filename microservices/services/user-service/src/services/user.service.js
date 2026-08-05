@@ -10,13 +10,6 @@ const logger = createLogger('user-service');
 class UserService {
   // ── Get Profile ──
 
-  /**
-   * Fetch full user profile including preferences, addresses, and survey data.
-   * Falls back gracefully to token claims if database is temporarily unavailable.
-   * @param {string} userId - User UUID
-   * @param {object} [tokenUser] - Decoded JWT claims for fallback
-   * @returns {Promise<object>} Combined profile object
-   */
   async getUserData(userId, tokenUser) {
     try {
       let user = await userRepository.findById(userId,
@@ -117,13 +110,6 @@ class UserService {
 
   // ── Update Profile ──
 
-  /**
-   * Update allowed fields of user profile.
-   * @param {string} userId - User UUID
-   * @param {object} updates - Fields to update
-   * @returns {Promise<object>} Updated user record
-   * @throws {HttpError} If no valid fields provided
-   */
   async updateProfile(userId, updates) {
     const allowedFields = ['name', 'phone', 'district', 'crops', 'avatar'];
     const filteredUpdates = {};
@@ -146,13 +132,6 @@ class UserService {
 
   // ── Language ──
 
-  /**
-   * Update user UI language preference (en, hi, te).
-   * @param {string} userId - User UUID
-   * @param {string} language - Two-letter language code
-   * @returns {Promise<object>} Result
-   * @throws {HttpError} If unsupported language
-   */
   async updateLanguage(userId, language) {
     if (!['en', 'hi', 'te'].includes(language)) {
       throw HttpError.badRequest('Invalid language. Supported: en, hi, te');
@@ -167,12 +146,6 @@ class UserService {
 
   // ── Preferences ──
 
-  /**
-   * Update user preference flags like tour completion or simple mode.
-   * @param {string} userId - User UUID
-   * @param {object} prefs - Preference key/value pairs
-   * @returns {Promise<object>} Updated preferences
-   */
   async updatePreferences(userId, prefs) {
     const updateData = {};
     if (prefs.preferredLanguage !== undefined) updateData.preferredLanguage = prefs.preferredLanguage;
@@ -195,11 +168,6 @@ class UserService {
 
   // ── List Users (Admin) ──
 
-  /**
-   * Paginated list of registered users.
-   * @param {object} filters - Search, district, role, verification filters
-   * @returns {Promise<{users: Array, pagination: object}>} Paginated results
-   */
   async listUsers(filters) {
     try {
       return await userRepository.findAll(filters);
@@ -211,10 +179,6 @@ class UserService {
 
   // ── Get Distinct Districts ──
 
-  /**
-   * Retrieve list of unique districts for filtering.
-   * @returns {Promise<string[]>} Sorted district names
-   */
   async getDistricts() {
     try {
       return await userRepository.getDistinctDistricts();
@@ -226,11 +190,6 @@ class UserService {
 
   // ── Deactivate Account ──
 
-  /**
-   * Set user account status to deactivated.
-   * @param {string} userId - User UUID
-   * @returns {Promise<object>} Updated user
-   */
   async deactivateAccount(userId) {
     const user = await userRepository.update(userId, { status: 'deactivated' });
     return user;
@@ -238,13 +197,6 @@ class UserService {
 
   // ── Change Role (Admin only) ──
 
-  /**
-   * Change user access role (user or field-officer).
-   * @param {string} userId - User UUID
-   * @param {string} newRole - Target role
-   * @returns {Promise<object>} Updated user
-   * @throws {HttpError} If invalid role
-   */
   async changeUserRole(userId, newRole) {
     const validRoles = ['user', 'field-officer'];
     if (!validRoles.includes(newRole)) {
