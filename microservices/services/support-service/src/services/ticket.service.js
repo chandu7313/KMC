@@ -17,8 +17,15 @@ const CATEGORY_COLORS = {
   disease_scan: '#00838F', soil_test: '#4E342E', refund: '#E65100',
 };
 
+/**
+ * Core Support Ticket Service — handles lifecycle events, SLA calculation, activity auditing, and messaging.
+ */
 class TicketService {
-  // ── Dashboard ──
+  /**
+   * Aggregate support analytics dashboard metrics.
+   * @param {string} [period='today'] - Time window
+   * @returns {Promise<object>} Dashboard metrics, SLA breaches, category breakdown
+   */
   async getDashboardStats(period = 'today') {
     const todayStart = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
 
@@ -89,7 +96,11 @@ class TicketService {
     };
   }
 
-  // ── CRUD ──
+  /**
+   * Create a new ticket with SLA due date calculation and initial activity logs.
+   * @param {object} data - Ticket payload
+   * @returns {Promise<object>} Created ticket record
+   */
   async createTicket(data) {
     // Auto-generate ticket ref
     const ticketRef = await ticketRepo.getNextTicketRef();
@@ -149,10 +160,21 @@ class TicketService {
     return ticket;
   }
 
+  /**
+   * Query filtered tickets list.
+   * @param {object} filters - Search criteria
+   * @returns {Promise<{ tickets: Array, pagination: object }>}
+   */
   async getTickets(filters) {
     return ticketRepo.findTickets(filters);
   }
 
+  /**
+   * Get ticket by ID with SLA, messages, and activity audit log.
+   * @param {string} id - Ticket UUID
+   * @returns {Promise<{ ticket: object, sla: object, messages: Array, activities: Array }>}
+   * @throws {HttpError} If ticket not found
+   */
   async getTicketById(id) {
     const ticket = await ticketRepo.findTicketById(id);
     if (!ticket) throw HttpError.notFound('Ticket not found');
@@ -164,6 +186,14 @@ class TicketService {
     return { ticket, sla, messages, activities };
   }
 
+  /**
+   * Update ticket fields and record audit activities.
+   * @param {string} id - Ticket UUID
+   * @param {object} updates - Updates
+   * @param {object} [agent={}] - Requesting agent info
+   * @returns {Promise<object>} Updated ticket
+   * @throws {HttpError} If ticket not found
+   */
   async updateTicket(id, updates, agent = {}) {
     const ticket = await ticketRepo.findTicketById(id);
     if (!ticket) throw HttpError.notFound('Ticket not found');
@@ -201,12 +231,25 @@ class TicketService {
     return updated;
   }
 
+  /**
+   * Delete ticket record.
+   * @param {string} id - Ticket UUID
+   * @throws {HttpError} If ticket not found
+   */
   async deleteTicket(id) {
     const ticket = await ticketRepo.findTicketById(id);
     if (!ticket) throw HttpError.notFound('Ticket not found');
     await ticketRepo.deleteTicket(id);
   }
 
+  /**
+   * Assign ticket to an agent and update status to in_progress if open.
+   * @param {string} ticketId - Ticket UUID
+   * @param {string} agentId - Support agent UUID
+   * @param {object} [requestingAgent={}] - Agent making assignment
+   * @returns {Promise<object>} Updated ticket
+   * @throws {HttpError} If ticket or agent not found
+   */
   async assignTicket(ticketId, agentId, requestingAgent = {}) {
     const ticket = await ticketRepo.findTicketById(ticketId);
     if (!ticket) throw HttpError.notFound('Ticket not found');
@@ -236,6 +279,13 @@ class TicketService {
     return updated;
   }
 
+  /**
+   * Escalate ticket to higher severity level.
+   * @param {string} ticketId - Ticket UUID
+   * @param {object} [agent={}] - Requesting agent info
+   * @returns {Promise<object>} Updated ticket
+   * @throws {HttpError} If ticket not found
+   */
   async escalateTicket(ticketId, agent = {}) {
     const ticket = await ticketRepo.findTicketById(ticketId);
     if (!ticket) throw HttpError.notFound('Ticket not found');
@@ -262,6 +312,14 @@ class TicketService {
     return updated;
   }
 
+  /**
+   * Resolve ticket with optional resolution comment.
+   * @param {string} ticketId - Ticket UUID
+   * @param {object} [agent={}] - Agent resolving ticket
+   * @param {string} [resolution=''] - Resolution notes
+   * @returns {Promise<object>} Updated ticket
+   * @throws {HttpError} If ticket not found
+   */
   async resolveTicket(ticketId, agent = {}, resolution = '') {
     const ticket = await ticketRepo.findTicketById(ticketId);
     if (!ticket) throw HttpError.notFound('Ticket not found');
@@ -290,6 +348,13 @@ class TicketService {
     return updated;
   }
 
+  /**
+   * Close resolved support ticket.
+   * @param {string} ticketId - Ticket UUID
+   * @param {object} [agent={}] - Agent closing ticket
+   * @returns {Promise<object>} Updated ticket
+   * @throws {HttpError} If ticket not found
+   */
   async closeTicket(ticketId, agent = {}) {
     const ticket = await ticketRepo.findTicketById(ticketId);
     if (!ticket) throw HttpError.notFound('Ticket not found');
@@ -312,10 +377,23 @@ class TicketService {
   }
 
   // ── Messages ──
+  /**
+   * Fetch discussion messages for a ticket.
+   * @param {string} ticketId - Ticket UUID
+   * @returns {Promise<Array>} List of messages
+   */
   async getMessages(ticketId) {
     return ticketRepo.findMessages(ticketId);
   }
 
+  /**
+   * Send response message on ticket thread.
+   * @param {string} ticketId - Ticket UUID
+   * @param {string} userId - Sender user UUID
+   * @param {object} body - Payload with message, senderType, senderName, attachments
+   * @returns {Promise<object>} Created message
+   * @throws {HttpError} If ticket not found
+   */
   async sendReply(ticketId, userId, body) {
     const ticket = await ticketRepo.findTicketById(ticketId);
     if (!ticket) throw HttpError.notFound('Ticket not found');
@@ -352,6 +430,14 @@ class TicketService {
     return msg;
   }
 
+  /**
+   * Add internal staff note to ticket conversation.
+   * @param {string} ticketId - Ticket UUID
+   * @param {string} userId - Agent user UUID
+   * @param {object|string} body - Note payload
+   * @returns {Promise<object>} Created internal note
+   * @throws {HttpError} If ticket not found
+   */
   async addInternalNote(ticketId, userId, body) {
     const ticket = await ticketRepo.findTicketById(ticketId);
     if (!ticket) throw HttpError.notFound('Ticket not found');
@@ -377,6 +463,11 @@ class TicketService {
   }
 
   // ── Activity ──
+  /**
+   * Retrieve ticket audit history.
+   * @param {string} ticketId - Ticket UUID
+   * @returns {Promise<Array>} Activity log entries
+   */
   async getActivity(ticketId) {
     return ticketRepo.findActivity(ticketId);
   }
