@@ -1,0 +1,525 @@
+{
+	"info": {
+		"_postman_id": "kmc-microservices-v1",
+		"name": "Kissan Mithar Consultancy (KMC) API Suite",
+		"description": "Complete Postman collection for all 15 KMC microservices through the Nginx API Gateway.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "01. Auth Service (:3001)",
+			"item": [
+				{
+					"name": "Dev Auto-Login (Farmer)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"user\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/auto-login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "auto-login"]
+						}
+					}
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Ramesh Kumar\",\n  \"email\": \"ramesh@example.com\",\n  \"phone\": \"+919876543210\",\n  \"password\": \"FarmerPass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"ramesh@example.com\",\n  \"password\": \"FarmerPass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Check Auth Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/is-auth",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "is-auth"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "02. User Service (:3002)",
+			"item": [
+				{
+					"name": "Get Profile Data",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/profile/data",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "profile", "data"]
+						}
+					}
+				},
+				{
+					"name": "Get Farmer Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/farmer/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "farmer", "dashboard"]
+						}
+					}
+				},
+				{
+					"name": "List Addresses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/addresses/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "addresses", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "03. Disease Service (:3004)",
+			"item": [
+				{
+					"name": "Get Diagnosis History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/disease/history",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "disease", "history"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "04. Soil Service (:3005)",
+			"item": [
+				{
+					"name": "Get Soil Report History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/soil/history",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "soil", "history"]
+						}
+					}
+				},
+				{
+					"name": "Standalone Soil Analysis",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nitrogen\": 140,\n  \"phosphorus\": 45,\n  \"potassium\": 180,\n  \"ph\": 6.5,\n  \"crop\": \"Rice\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/soil/analyze",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "soil", "analyze"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "05. Market Service (:3006)",
+			"item": [
+				{
+					"name": "Get Dashboard Prices",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/market/dashboard-prices",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "market", "dashboard-prices"]
+						}
+					}
+				},
+				{
+					"name": "Get Realtime Mandi Prices",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/market/prices?limit=20&page=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "market", "prices"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "06. E-Commerce Service (:3007)",
+			"item": [
+				{
+					"name": "List Products",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/products/list",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "products", "list"]
+						}
+					}
+				},
+				{
+					"name": "Get Cart",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/cart/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "cart", ""]
+						}
+					}
+				},
+				{
+					"name": "List Fertilizers",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/fertilizer/list",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "fertilizer", "list"]
+						}
+					}
+				},
+				{
+					"name": "List Equipment",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/equipment/list",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "equipment", "list"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "07. Order Service (:3008)",
+			"item": [
+				{
+					"name": "Get User Orders",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/orders/userorders",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "orders", "userorders"]
+						}
+					}
+				},
+				{
+					"name": "Get Fertilizer Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/orders/fertilizer/user-orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "orders", "fertilizer", "user-orders"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "08. Payment Service (:3009)",
+			"item": [
+				{
+					"name": "Create Razorpay Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 500,\n  \"currency\": \"INR\",\n  \"receipt\": \"order_rcpt_001\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payments/create-order",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payments", "create-order"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "09. Support Service (:3011)",
+			"item": [
+				{
+					"name": "List User Tickets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/support/tickets/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "support", "tickets", ""]
+						}
+					}
+				},
+				{
+					"name": "Create Support Ticket",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"subject\": \"Issue with fertilizer delivery\",\n  \"category\": \"order\",\n  \"priority\": \"high\",\n  \"description\": \"I ordered Urea 3 days ago but haven't received tracking details.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/support/tickets/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "support", "tickets", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "10. Expert Service (:3012)",
+			"item": [
+				{
+					"name": "List All Experts",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/experts/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "experts", ""]
+						}
+					}
+				},
+				{
+					"name": "My Consultations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/experts/consultations/my",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "experts", "consultations", "my"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "11. Content Service (:3013)",
+			"item": [
+				{
+					"name": "List All Blogs",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/content/blog/all",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "content", "blog", "all"]
+						}
+					}
+				},
+				{
+					"name": "List Success Stories",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/content/success/all",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "content", "success", "all"]
+						}
+					}
+				},
+				{
+					"name": "List Government Schemes",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/content/scheme/all",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "content", "scheme", "all"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
