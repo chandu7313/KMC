@@ -8,11 +8,6 @@ const logger = createLogger('ecommerce-service');
  * Fertilizer Management Service — handles catalog operations for organic and chemical fertilizers.
  */
 class FertilizerService {
-  /**
-   * List fertilizers matching query filters.
-   * @param {object} filters - Filter criteria
-   * @returns {Promise<Array>} List of fertilizers
-   */
   async listFertilizers(filters) {
     try {
       return await fertilizerRepo.findAll(filters);
@@ -22,23 +17,12 @@ class FertilizerService {
     }
   }
 
-  /**
-   * Get fertilizer by ID.
-   * @param {string} id - Fertilizer UUID
-   * @returns {Promise<object>} Fertilizer record
-   * @throws {HttpError} If not found
-   */
   async getFertilizer(id) {
     const fertilizer = await fertilizerRepo.findById(id);
     if (!fertilizer) throw HttpError.notFound('Fertilizer not found');
     return fertilizer;
   }
 
-  /**
-   * Add a new fertilizer to catalog and publish event.
-   * @param {object} data - Fertilizer properties
-   * @returns {Promise<object>} Created fertilizer record
-   */
   async addFertilizer(data) {
     const fertilizer = await fertilizerRepo.create({
       name: data.name,
@@ -54,13 +38,6 @@ class FertilizerService {
     return fertilizer;
   }
 
-  /**
-   * Update existing fertilizer attributes.
-   * @param {string} id - Fertilizer UUID
-   * @param {object} data - Updates
-   * @returns {Promise<object>} Updated record
-   * @throws {HttpError} If not found
-   */
   async updateFertilizer(id, data) {
     const existing = await fertilizerRepo.findById(id);
     if (!existing) throw HttpError.notFound('Fertilizer not found');
@@ -76,12 +53,6 @@ class FertilizerService {
     return fertilizerRepo.update(id, updates);
   }
 
-  /**
-   * Delete fertilizer by ID.
-   * @param {string} id - Fertilizer UUID
-   * @returns {Promise<boolean>} True if deleted
-   * @throws {HttpError} If not found
-   */
   async removeFertilizer(id) {
     const existing = await fertilizerRepo.findById(id);
     if (!existing) throw HttpError.notFound('Fertilizer not found');
