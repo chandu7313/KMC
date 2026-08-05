@@ -5,6 +5,15 @@ import userService from '../services/user.service.js';
  * User profile controller — thin HTTP layer.
  */
 
+/**
+ * Retrieve current user profile, preferences, and associated address records.
+ * @route GET /api/users/profile
+ * @route POST /api/users/profile
+ * @param {import('express').Request} req - Authenticated express request
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON response with user data
+ */
 export const getUserData = async (req, res, next) => {
   try {
     const userId = req.user?.id || req.body.userId;
@@ -15,6 +24,14 @@ export const getUserData = async (req, res, next) => {
   }
 };
 
+/**
+ * Update user profile information such as name, phone, district, and crops.
+ * @route PUT /api/users/profile
+ * @param {import('express').Request} req - Express request with updated profile attributes
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON response with updated user
+ */
 export const updateProfile = async (req, res, next) => {
   try {
     const userId = req.user?.id || req.body.userId;
@@ -25,6 +42,14 @@ export const updateProfile = async (req, res, next) => {
   }
 };
 
+/**
+ * Update user's preferred UI language.
+ * @route PUT /api/users/language
+ * @param {import('express').Request} req - Express request with language code
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON success response
+ */
 export const updateLanguage = async (req, res, next) => {
   try {
     const userId = req.user?.id || req.body.userId;
@@ -35,6 +60,14 @@ export const updateLanguage = async (req, res, next) => {
   }
 };
 
+/**
+ * Update user UI preferences such as tour completion and simple mode.
+ * @route PUT /api/users/preferences
+ * @param {import('express').Request} req - Express request with preference flags
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON success response
+ */
 export const updatePreferences = async (req, res, next) => {
   try {
     const userId = req.user?.id || req.body.userId;
@@ -45,6 +78,14 @@ export const updatePreferences = async (req, res, next) => {
   }
 };
 
+/**
+ * Paginated list of users with search and filtering by district, role, and verification status.
+ * @route GET /api/users
+ * @param {import('express').Request} req - Express request with query params
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON paginated user list
+ */
 export const listUsers = async (req, res, next) => {
   try {
     const { page, limit, role, search, district, isVerified } = req.query;
@@ -60,6 +101,14 @@ export const listUsers = async (req, res, next) => {
   }
 };
 
+/**
+ * Get distinct district names where users are registered.
+ * @route GET /api/users/districts
+ * @param {import('express').Request} req - Express request
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON list of distinct districts
+ */
 export const getDistricts = async (req, res, next) => {
   try {
     const districts = await userService.getDistricts();
@@ -69,6 +118,14 @@ export const getDistricts = async (req, res, next) => {
   }
 };
 
+/**
+ * Update a user's system role (Admin only).
+ * @route PUT /api/users/:id/role
+ * @param {import('express').Request} req - Express request with user ID param and new role
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON response with updated user
+ */
 export const changeUserRole = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -80,6 +137,14 @@ export const changeUserRole = async (req, res, next) => {
   }
 };
 
+/**
+ * Deactivate a user account (Admin only).
+ * @route DELETE /api/users/:id
+ * @param {import('express').Request} req - Express request with user ID param
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON success response
+ */
 export const deactivateAccount = async (req, res, next) => {
   try {
     const { id } = req.params;
