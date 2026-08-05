@@ -7,12 +7,6 @@ const logger = createLogger('notification-service');
  * Ready for Flutter mobile app integration.
  */
 
-/**
- * Send a push notification.
- * @param {string} userId - Target user ID
- * @param {object} notification - { title, body, data }
- * @returns {Promise<{success: boolean}>}
- */
 const sendPushNotification = async (userId, notification) => {
   try {
     // TODO: Integrate Firebase Cloud Messaging (FCM)
@@ -30,12 +24,6 @@ const sendPushNotification = async (userId, notification) => {
   }
 };
 
-/**
- * Send push notification to multiple users concurrently.
- * @param {Array<string>} userIds - List of target user UUIDs
- * @param {object} notification - Payload with title and body
- * @returns {Promise<{ total: number, succeeded: number, failed: number }>} Delivery summary
- */
 const sendBulkPush = async (userIds, notification) => {
   const results = await Promise.allSettled(
     userIds.map((id) => sendPushNotification(id, notification))

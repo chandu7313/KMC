@@ -26,15 +26,6 @@ const getTransporter = () => {
   return transporter;
 };
 
-/**
- * Send an email.
- * @param {object} options
- * @param {string} options.to - Recipient email
- * @param {string} options.subject - Email subject
- * @param {string} options.html - HTML body
- * @param {string} [options.text] - Plain text fallback
- * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
- */
 const sendEmail = async ({ to, subject, html, text }) => {
   try {
     const mail = getTransporter();
@@ -56,12 +47,6 @@ const sendEmail = async ({ to, subject, html, text }) => {
 
 // ── Pre-built Email Methods ──
 
-/**
- * Send email verification OTP with HTML branded template.
- * @param {string} email - Recipient email
- * @param {string|number} otp - 6-digit OTP code
- * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
- */
 const sendEmailVerificationOtp = async (email, otp) => {
   return sendEmail({
     to: email,
@@ -70,12 +55,6 @@ const sendEmailVerificationOtp = async (email, otp) => {
   });
 };
 
-/**
- * Send password reset OTP email.
- * @param {string} email - Recipient email
- * @param {string|number} otp - 6-digit OTP code
- * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
- */
 const sendPasswordResetOtp = async (email, otp) => {
   return sendEmail({
     to: email,
@@ -84,11 +63,6 @@ const sendPasswordResetOtp = async (email, otp) => {
   });
 };
 
-/**
- * Send password changed confirmation alert.
- * @param {string} email - Recipient email
- * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
- */
 const sendPasswordChangedNotification = async (email) => {
   return sendEmail({
     to: email,
@@ -97,17 +71,6 @@ const sendPasswordChangedNotification = async (email) => {
   });
 };
 
-/**
- * Send order confirmation invoice email.
- * @param {object} params
- * @param {string} params.email - Recipient email
- * @param {string} params.name - Customer name
- * @param {string} params.orderId - Order UUID
- * @param {string} params.address - Shipping address
- * @param {number} params.amount - Total amount
- * @param {string} params.paymentMethod - Payment mode
- * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
- */
 const sendOrderConfirmation = async ({ email, name, orderId, address, amount, paymentMethod }) => {
   return sendEmail({
     to: email,
@@ -116,14 +79,6 @@ const sendOrderConfirmation = async ({ email, name, orderId, address, amount, pa
   });
 };
 
-/**
- * Send expert consultation booking confirmation email.
- * @param {object} params
- * @param {string} params.email - Recipient email
- * @param {string} params.name - Customer name
- * @param {object} params.bookingDetails - Booking schedule and expert metadata
- * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
- */
 const sendBookingConfirmation = async ({ email, name, bookingDetails }) => {
   return sendEmail({
     to: email,
@@ -132,12 +87,6 @@ const sendBookingConfirmation = async ({ email, name, bookingDetails }) => {
   });
 };
 
-/**
- * Send critical admin system alert email.
- * @param {string} subject - Alert subject
- * @param {string} message - Alert body
- * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
- */
 const sendAdminAlert = async (subject, message) => {
   return sendEmail({
     to: env.adminEmail,

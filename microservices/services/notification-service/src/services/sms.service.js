@@ -4,14 +4,6 @@ import env from '../config/env.js';
 
 const logger = createLogger('notification-service');
 
-/**
- * Send SMS via Fast2SMS Quick SMS route.
- * Matches existing monolith config/fast2sms.js behavior.
- *
- * @param {string} phone - 10-digit Indian mobile number
- * @param {string} message - Message to send
- * @returns {Promise<{success: boolean, error?: string}>}
- */
 const sendSms = async (phone, message) => {
   if (!env.enableSms) {
     logger.info(`[DEV] SMS to ${phone}: ${message}`);
@@ -50,23 +42,10 @@ const sendSms = async (phone, message) => {
   }
 };
 
-/**
- * Send OTP SMS notification to Indian mobile number.
- * @param {string} phone - 10-digit mobile number
- * @param {string|number} otp - 6-digit verification code
- * @returns {Promise<{success: boolean, error?: string}>}
- */
 const sendOtpSms = async (phone, otp) => {
   return sendSms(phone, `Your Kissan Mithar OTP is ${otp}. Valid for 5 minutes.`);
 };
 
-/**
- * Send order status update SMS to customer.
- * @param {string} phone - 10-digit mobile number
- * @param {string} orderId - Order UUID
- * @param {string} status - Fulfillment status ('confirmed'|'shipped'|'delivered'|'cancelled')
- * @returns {Promise<{success: boolean, error?: string}>}
- */
 const sendOrderStatusSms = async (phone, orderId, status) => {
   const statusMessages = {
     confirmed: `Your order #${orderId} is confirmed! We're preparing it for delivery.`,

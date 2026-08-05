@@ -5,14 +5,6 @@ import * as pushService from '../services/push.service.js';
 
 const logger = createLogger('notification-service');
 
-/**
- * Send a notification via API (for internal service-to-service calls).
- * @route POST /api/notifications/send
- * @param {import('express').Request} req - Express request with channel ('email'|'sms'|'push'), to, subject, and message
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Error handler
- * @returns {Promise<import('express').Response>}
- */
 export const sendNotification = async (req, res, next) => {
   try {
     const { channel, to, subject, message, html, userId, data: payloadData } = req.body;
@@ -47,14 +39,6 @@ export const sendNotification = async (req, res, next) => {
   }
 };
 
-/**
- * Get notification history for a user (admin endpoint).
- * @route GET /api/notifications/history/:userId
- * @param {import('express').Request} req - Express request
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Error handler
- * @returns {Promise<import('express').Response>}
- */
 export const getNotificationHistory = async (req, res, next) => {
   try {
     const { userId } = req.params;
@@ -66,14 +50,6 @@ export const getNotificationHistory = async (req, res, next) => {
   }
 };
 
-/**
- * Send a test notification (dev/admin only).
- * @route POST /api/notifications/test
- * @param {import('express').Request} req - Express request with recipient email
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Error handler
- * @returns {Promise<import('express').Response>}
- */
 export const sendTestNotification = async (req, res, next) => {
   try {
     const { email } = req.body;
