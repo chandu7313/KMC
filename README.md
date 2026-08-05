@@ -1,81 +1,153 @@
-# Kissan Mithar Consultancy (KMC)
+# 🌿 Kissan Mithar Consultancy (KMC)
 
-## Project Overview
-Kissan Mithar Consultancy (KMC) is a comprehensive agricultural technology platform designed to support farmers and agricultural stakeholders. The project is structured as a robust microservices architecture comprising 15 specialized backend services, an API Gateway (Nginx), a React web frontend, and a Flutter/Dart mobile application.
+> AI-powered agriculture platform helping Indian farmers with crop disease detection, market intelligence, expert consultations, and agri e-commerce.
 
-## Problem Statement
-Farmers often lack centralized access to critical agricultural data such as weather forecasts, soil reports, crop disease diagnosis, expert consultations, and direct marketplace access. KMC aims to solve this fragmentation by providing an all-in-one platform where users can seamlessly access AI-driven diagnoses, expert advice, and e-commerce functionalities through a single ecosystem.
+## What is this project?
 
-## Features
-- **AI-Powered Disease Diagnosis**: Users can upload images of crops for AI-driven disease detection (integrated with Plant.id and Gemini).
-- **Expert Consultations**: Booking engine for consulting with agricultural experts.
-- **E-Commerce & Orders**: Complete marketplace for buying and selling fertilizers, equipment, and crops.
-- **Soil Analysis & Reminders**: Managing soil health reports and automated reminders.
-- **Market Prices & History**: Integration with data.gov.in for real-time Mandi market prices.
-- **Notifications**: Automated SMS (Fast2SMS) and Email notifications.
+Kissan Mithar is a full-stack agriculture technology platform built as **15 microservices**. It provides:
 
-## Technology Stack
-- **Backend Architecture**: Node.js microservices (15+ services).
-- **Databases**: 
-  - PostgreSQL (via Supabase) using Sequelize ORM for structured relational data.
-  - MongoDB for flexible/document data.
-  - Redis for caching.
-- **Message Broker**: RabbitMQ for asynchronous event-driven communication between microservices.
-- **Frontend**: React (Web) and Flutter (Mobile).
-- **Infrastructure**: Docker & Docker Compose, Nginx (API Gateway).
-- **CI/CD**: Jenkins pipeline deploying to AWS EC2.
+- 🔬 **AI-Powered Crop Disease Detection** — Upload a photo, get instant diagnosis via Google Gemini + Plant.id
+- 📊 **Real-Time Mandi Prices** — Live market prices from data.gov.in with trend analysis
+- 👨‍🌾 **Expert Consultations** — Book and consult with agriculture experts online
+- 🛒 **Agri E-Commerce** — Buy fertilizers, equipment, and farm products with Razorpay payments
+- 🌍 **Soil Analysis** — Upload soil reports for AI-powered analysis and recommendations
+- 🎫 **Farmer Support System** — Ticket-based support with SLA management
+- 📱 **Multi-Language Support** — Telugu, Hindi, and English (mobile-first design)
 
-## Architecture Overview
-The application follows an Event-Driven Microservices pattern. All services share common logic through a `@kissan/shared` and `@kissan/events` private package system. Nginx acts as the API Gateway, routing incoming `/api/*` requests to the respective microservice. Asynchronous tasks (like sending emails after an order) are published to RabbitMQ to decouple services.
+## Quick Start (New Developer)
 
-## Database Design Summary
-The primary source of truth is PostgreSQL using Sequelize models (approx. 40 tables). The schema heavily uses UUID primary keys and JSONB fields for dynamic data (like cart data). Constraints such as `allowNull: false` and `unique: true` are enforced at the database level. MongoDB is also connected for specific services requiring schema-less document storage.
-
-## Installation Instructions
-
-### Prerequisites
-- Node.js (v20+)
-- Docker & Docker Compose
-- Git
-
-### Environment Variables
-Create a `.env` file in the `microservices` directory using the provided `.env.example`. Key variables required:
-- `SUPABASE_URL`, `SUPABASE_REST_URL`, `SUPABASE_SERVICE_ROLE_KEY`
-- `MONGODB_URI`
-- `RABBITMQ_USER`, `RABBITMQ_PASS`
-- `JWT_SECRET`, `JWT_REFRESH_SECRET`
-- API Keys: `GEMINI_API_KEY`, `PLANT_ID_API_KEY`, `RAZORPAY_KEY_ID`, `DATA_GOV_API_KEY`
-
-### Local Development Setup
-1. Clone the repository: `git clone <repo_url>`
-2. Navigate to the microservices folder: `cd microservices`
-3. Install shared dependencies: `npm install` (this will install `@kissan/shared` across workspaces)
-4. Start the infrastructure (Redis, RabbitMQ) and services: `docker compose up -d`
-5. The API Gateway will be available at `http://localhost:80`.
-
-### Build and Deployment Instructions
-The project utilizes a `Jenkinsfile` for automated CI/CD. 
-1. Merging to the `main` branch triggers the Jenkins pipeline.
-2. The pipeline SSHs into the target AWS EC2 instance (`65.1.198.122`).
-3. It pulls the latest code, copies the `.env` file, and executes `docker compose -f docker-compose.prod.yml up -d --build`.
-
-### Testing Instructions
-To run tests across all workspaces:
 ```bash
-cd microservices
-npm test --workspaces --if-present
+# 1. Clone the repository
+git clone https://github.com/your-org/kissan-mithar.git
+cd kissan-mithar/microservices
+
+# 2. Copy environment variables
+cp .env.example .env
+# Fill in REQUIRED values (see .env.example comments)
+
+# 3. Start everything with Docker
+make up
+# This starts all 15 services + Nginx + Redis + RabbitMQ + PostgreSQL
+
+# 4. Seed test data (optional)
+make seed
+
+# 5. Open in browser
+# Frontend:      http://localhost:3000
+# API Gateway:   http://localhost:80
+# RabbitMQ UI:   http://localhost:15672
+# Grafana:       http://localhost:3100
 ```
 
-### CSV Import Workflow
-**Missing Requirement**: There is currently no evidence of a CSV ingestion or parsing workflow in the repository (e.g., using `csv-parser` or `fast-csv`). To implement this, a dedicated route in the relevant microservice (e.g., `market-service` or `ecommerce-service`) needs to be created to parse uploaded files, validate data streams, and bulk insert records.
+> **First time?** Read the full [Developer Setup Guide](./microservices/DEVELOPER_GUIDE.md) for step-by-step instructions.
 
-## Assumptions
-- It is assumed that the `mongodb` connection is used alongside Supabase, meaning the system is in a transitional polyglot persistence phase.
-- It is assumed the frontend connects directly to `localhost:80` for local dev based on the Nginx configuration.
+## Project Structure
 
-## AI Tools Used During Development
-Evidence suggests the use of AI tools (like GitHub Copilot, Cursor, or ChatGPT) for scaffolding the 15 microservices rapidly and generating the comprehensive Docker/Jenkins configurations.
+```
+kissan-mithar/
+├── microservices/
+│   ├── services/              ← 15 backend microservices
+│   │   ├── auth-service/      ← Authentication & OTP
+│   │   ├── user-service/      ← User profiles & dashboard
+│   │   ├── ai-service/        ← Gemini + Plant.id (internal)
+│   │   ├── disease-service/   ← Crop disease detection
+│   │   ├── soil-service/      ← Soil report analysis
+│   │   ├── market-service/    ← Mandi prices & trends
+│   │   ├── ecommerce-service/ ← Products, cart, catalog
+│   │   ├── order-service/     ← Order lifecycle
+│   │   ├── payment-service/   ← Razorpay integration
+│   │   ├── notification-service/ ← Email + SMS
+│   │   ├── support-service/   ← Support tickets & SLA
+│   │   ├── expert-service/    ← Expert consultations
+│   │   ├── content-service/   ← Blogs, stories, schemes
+│   │   ├── analytics-service/ ← Event tracking
+│   │   └── field-service/     ← Field agent operations
+│   ├── packages/              ← Shared code used by all services
+│   │   ├── shared/            ← @kissan/shared (auth, DB, middleware, models)
+│   │   ├── events/            ← @kissan/events (RabbitMQ event types)
+│   │   └── database/          ← Legacy database scripts
+│   ├── frontend/
+│   │   ├── web/               ← React.js web application
+│   │   └── mobile/            ← Flutter/Dart mobile app
+│   ├── nginx/                 ← API gateway configuration
+│   ├── monitoring/            ← Prometheus + Grafana + AlertManager
+│   ├── rabbitmq/              ← RabbitMQ config & definitions
+│   ├── scripts/               ← Helper scripts (seed, diagnose)
+│   ├── docker-compose.yml     ← Development orchestration
+│   ├── docker-compose.prod.yml ← Production orchestration
+│   ├── Makefile               ← All developer commands
+│   └── .env.example           ← Environment variable template
+└── README.md                  ← You are here
+```
 
-## Known Limitations
-- The application relies heavily on 3rd-party APIs (Plant.id, Gemini). Rate limiting on these free tiers could break functionality.
-- CSV bulk import is currently unsupported.
+## Our 15 Services at a Glance
+
+| # | Service | Port | What it does |
+|---|---------|------|-------------|
+| 1 | **auth-service** | 3001 | Login, registration, OTP, JWT tokens, password reset |
+| 2 | **user-service** | 3002 | Farmer profiles, addresses, surveys, admin users, dashboard |
+| 3 | **ai-service** | 3003 | Google Gemini + Plant.id AI (internal only, blocked by Nginx) |
+| 4 | **disease-service** | 3004 | Crop disease detection via image upload |
+| 5 | **soil-service** | 3005 | Soil report upload, AI analysis, reminders |
+| 6 | **market-service** | 3006 | Mandi prices from data.gov.in, trends, alerts |
+| 7 | **ecommerce-service** | 3007 | Products, fertilizers, equipment, cart |
+| 8 | **order-service** | 3008 | Marketplace/fertilizer/equipment order lifecycle |
+| 9 | **payment-service** | 3009 | Razorpay order creation, verification, refunds |
+| 10 | **notification-service** | 3010 | Email (Brevo SMTP) + SMS (Fast2SMS) + push |
+| 11 | **support-service** | 3011 | Support tickets, SLA monitoring, agent management |
+| 12 | **expert-service** | 3012 | Expert profiles, slot booking, consultations |
+| 13 | **content-service** | 3013 | Blog posts, success stories, government schemes |
+| 14 | **analytics-service** | 3014 | Event tracking, dashboard reports |
+| 15 | **field-service** | 3015 | Field agent visits, farmer assignments |
+
+## Tech Stack
+
+| Layer | Technology | Why we use it |
+|-------|-----------|---------------|
+| **Frontend** | React.js + Vite | Fast, component-based SPA |
+| **Mobile** | Flutter / Dart | Cross-platform mobile app |
+| **Backend** | Node.js + Express | JavaScript everywhere, fast I/O |
+| **ORM** | Sequelize | Type-safe models, migrations, associations |
+| **Primary DB** | PostgreSQL (via Supabase) | Managed relational database |
+| **Secondary DB** | MongoDB | Flexible document storage |
+| **Cache** | Redis 7 | Sessions, OTP storage, rate limiting |
+| **Message Broker** | RabbitMQ | Async event-driven communication |
+| **API Gateway** | Nginx | Routing, rate limiting, CORS, SSL |
+| **Auth** | JWT (access + refresh tokens) | Stateless authentication |
+| **AI** | Google Gemini + Plant.id | Disease detection, soil analysis |
+| **Payments** | Razorpay | Indian payment gateway |
+| **File Storage** | Cloudinary | Image and file uploads |
+| **Email** | Brevo (Nodemailer) | Transactional emails |
+| **SMS** | Fast2SMS | OTP delivery to farmers |
+| **Logging** | Winston | Structured JSON logging |
+| **Monitoring** | Prometheus + Grafana | Metrics, dashboards, alerting |
+| **CI/CD** | Jenkins → AWS EC2 | Automated deployment pipeline |
+| **Containers** | Docker + Docker Compose | Consistent dev/prod environments |
+
+## Documentation Index
+
+| Document | What's Inside |
+|----------|--------------|
+| [Architecture Guide](./microservices/ARCHITECTURE.md) | How services connect, request flows, data ownership |
+| [Developer Setup Guide](./microservices/DEVELOPER_GUIDE.md) | Day 1 setup, daily workflow, coding patterns |
+| [Contributing Guide](./microservices/CONTRIBUTING.md) | Branch names, commit format, PR checklist |
+| [API Reference](./microservices/docs/API_REFERENCE.md) | Every endpoint from all 15 services |
+| [Database Schema](./microservices/docs/DATABASE.md) | All 39 Sequelize models explained |
+| [Deployment Guide](./microservices/docs/DEPLOYMENT.md) | Docker, Jenkins CI/CD, SSL setup |
+| [Troubleshooting](./microservices/docs/TROUBLESHOOTING.md) | Common errors and how to fix them |
+
+Each service also has its own README inside `services/<service-name>/README.md`.
+
+## Key Contacts
+
+| Topic | Ask |
+|-------|-----|
+| Architecture & backend | _[Tech Lead]_ |
+| Frontend & UI | _[Frontend Lead]_ |
+| Database & schema | _[Backend Lead]_ |
+| Deployment & DevOps | _[DevOps Lead]_ |
+| Farming domain | _[Agriculture Expert]_ |
+
+---
+
+_Built with ❤️ for Indian farmers_
