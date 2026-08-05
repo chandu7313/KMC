@@ -3,12 +3,6 @@ import { createLogger } from '@kissan/shared';
 
 const logger = createLogger('ai-service');
 
-/**
- * Detect plant health condition and crop disease identification via Plant.id API v3.
- * Matches monolith services/plantIdService.js behavior.
- * @param {string} base64Image - Base64 encoded crop photograph
- * @returns {Promise<{success: boolean, isPlant?: boolean, isHealthy?: boolean, diseaseName?: string, confidence?: number, message?: string}>}
- */
 export const detectDiseaseWithPlantId = async (base64Image) => {
   const apiKey = process.env.PLANT_API_KEY;
   const apiUrl = process.env.PLANT_ID_API_URL || 'https://plant.id/api/v3/health_assessment';

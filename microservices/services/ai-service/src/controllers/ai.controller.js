@@ -8,14 +8,6 @@ const logger = createLogger('ai-service');
  * AI Service Controller — Handles routing for LLM text analysis, vision reasoning, and crop disease detection.
  */
 
-/**
- * Execute text-based prompt inference using Google Gemini with fallback model chain.
- * @route POST /api/ai/analyze/text
- * @param {import('express').Request} req - Express request containing { prompt: string, json?: boolean }
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Error handler
- * @returns {Promise<import('express').Response>} JSON response with generated text/object
- */
 export const analyzeText = async (req, res, next) => {
   try {
     const { prompt, json } = req.body;
@@ -28,14 +20,6 @@ export const analyzeText = async (req, res, next) => {
   }
 };
 
-/**
- * Execute multimodal vision prompt inference on image data (base64).
- * @route POST /api/ai/analyze/image
- * @param {import('express').Request} req - Express request containing { prompt: string, image: string, mimeType?: string, json?: boolean }
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Error handler
- * @returns {Promise<import('express').Response>} JSON response with vision analysis
- */
 export const analyzeImage = async (req, res, next) => {
   try {
     const { prompt, image, mimeType, json } = req.body;
@@ -48,14 +32,6 @@ export const analyzeImage = async (req, res, next) => {
   }
 };
 
-/**
- * Perform specialized plant and disease identification using Plant.id API.
- * @route POST /api/ai/detect/plant
- * @param {import('express').Request} req - Express request containing { image: string } (base64)
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Error handler
- * @returns {Promise<import('express').Response>} JSON response with diagnosis results
- */
 export const detectPlantDisease = async (req, res, next) => {
   try {
     const { image } = req.body;
