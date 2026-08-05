@@ -15,14 +15,6 @@ const getRazorpay = () => new Razorpay({
  * Razorpay Payment Service — handles payment intents, signature validations, refunds, and event broadcasting.
  */
 class PaymentService {
-  /**
-   * Create Razorpay payment order and persist record.
-   * @param {string} userId - User UUID
-   * @param {string} orderId - Marketplace order UUID
-   * @param {number} amount - Amount in currency
-   * @param {string} [currency='INR'] - Currency code
-   * @returns {Promise<{ razorpayOrder: object, paymentId: string }>}
-   */
   async createOrder(userId, orderId, amount, currency = 'INR') {
     const rzp = getRazorpay();
     const rzpOrder = await rzp.orders.create({
@@ -43,12 +35,6 @@ class PaymentService {
     return { razorpayOrder: rzpOrder, paymentId: payment.id };
   }
 
-  /**
-   * Verify Razorpay payment HMAC signature and complete payment status.
-   * @param {object} body - Payload with order ID, payment ID, signature, and paymentId
-   * @returns {Promise<object>} Updated payment record
-   * @throws {HttpError} If signature is invalid
-   */
   async verifyPayment(body) {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentId } = body;
 
@@ -80,13 +66,6 @@ class PaymentService {
     return payment;
   }
 
-  /**
-   * Initiate Razorpay refund for a completed transaction.
-   * @param {string} paymentId - Payment record UUID
-   * @param {number} [amount] - Optional partial refund amount
-   * @returns {Promise<object>} Razorpay refund details
-   * @throws {HttpError} If payment record is missing or lacks razorpay payment ID
-   */
   async refund(paymentId, amount) {
     const payment = await paymentRepo.findById(paymentId);
     if (!payment) throw HttpError.notFound('Payment not found');
@@ -110,18 +89,8 @@ class PaymentService {
     return refund;
   }
 
-  /**
-   * Get payments by user ID.
-   * @param {string} userId - User UUID
-   * @returns {Promise<Array>} List of payments
-   */
   async getPaymentsByUser(userId) { return paymentRepo.findByUser(userId); }
 
-  /**
-   * Get payments by order ID.
-   * @param {string} orderId - Order UUID
-   * @returns {Promise<Array>} List of payments
-   */
   async getPaymentsByOrder(orderId) { return paymentRepo.findByOrder(orderId); }
 }
 
