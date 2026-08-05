@@ -51,14 +51,21 @@ const sendSms = async (phone, message) => {
 };
 
 /**
- * Send OTP SMS.
+ * Send OTP SMS notification to Indian mobile number.
+ * @param {string} phone - 10-digit mobile number
+ * @param {string|number} otp - 6-digit verification code
+ * @returns {Promise<{success: boolean, error?: string}>}
  */
 const sendOtpSms = async (phone, otp) => {
   return sendSms(phone, `Your Kissan Mithar OTP is ${otp}. Valid for 5 minutes.`);
 };
 
 /**
- * Send order status SMS.
+ * Send order status update SMS to customer.
+ * @param {string} phone - 10-digit mobile number
+ * @param {string} orderId - Order UUID
+ * @param {string} status - Fulfillment status ('confirmed'|'shipped'|'delivered'|'cancelled')
+ * @returns {Promise<{success: boolean, error?: string}>}
  */
 const sendOrderStatusSms = async (phone, orderId, status) => {
   const statusMessages = {

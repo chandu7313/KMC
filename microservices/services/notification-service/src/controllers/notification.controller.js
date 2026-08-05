@@ -7,6 +7,11 @@ const logger = createLogger('notification-service');
 
 /**
  * Send a notification via API (for internal service-to-service calls).
+ * @route POST /api/notifications/send
+ * @param {import('express').Request} req - Express request with channel ('email'|'sms'|'push'), to, subject, and message
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>}
  */
 export const sendNotification = async (req, res, next) => {
   try {
@@ -44,6 +49,11 @@ export const sendNotification = async (req, res, next) => {
 
 /**
  * Get notification history for a user (admin endpoint).
+ * @route GET /api/notifications/history/:userId
+ * @param {import('express').Request} req - Express request
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>}
  */
 export const getNotificationHistory = async (req, res, next) => {
   try {
@@ -58,6 +68,11 @@ export const getNotificationHistory = async (req, res, next) => {
 
 /**
  * Send a test notification (dev/admin only).
+ * @route POST /api/notifications/test
+ * @param {import('express').Request} req - Express request with recipient email
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>}
  */
 export const sendTestNotification = async (req, res, next) => {
   try {
@@ -66,7 +81,7 @@ export const sendTestNotification = async (req, res, next) => {
 
     const result = await emailService.sendEmail({
       to: email,
-      subject: 'Test Notification — Kissan Mithar',
+      subject: 'Test Notification — Kissan Mithar Consultancy',
       text: 'This is a test notification from the notification service. If you received this, email delivery is working correctly!',
     });
 

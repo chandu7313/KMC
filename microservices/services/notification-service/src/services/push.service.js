@@ -31,7 +31,10 @@ const sendPushNotification = async (userId, notification) => {
 };
 
 /**
- * Send push notification to multiple users.
+ * Send push notification to multiple users concurrently.
+ * @param {Array<string>} userIds - List of target user UUIDs
+ * @param {object} notification - Payload with title and body
+ * @returns {Promise<{ total: number, succeeded: number, failed: number }>} Delivery summary
  */
 const sendBulkPush = async (userIds, notification) => {
   const results = await Promise.allSettled(
