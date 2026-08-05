@@ -9,13 +9,6 @@ const logger = createLogger('order-service');
  * Order processing service — handles cart checkout, stock reservation, event publication, and payment confirmation.
  */
 class OrderService {
-  /**
-   * Place a new order (Cash on Delivery or general flow), clear user cart, and broadcast event.
-   * @param {string} userId - Customer UUID
-   * @param {object} body - Order payload (items, amount, address, paymentMethod)
-   * @returns {Promise<object>} Created order record
-   * @throws {HttpError} If missing items, amount, or address
-   */
   async placeOrder(userId, body) {
     const { items, amount, address, paymentMethod } = body;
     if (!items?.length || !amount || !address) throw HttpError.badRequest('items, amount, and address required');
@@ -44,26 +37,10 @@ class OrderService {
     return order;
   }
 
-  /**
-   * Fetch all orders placed by a specific user.
-   * @param {string} userId - Customer UUID
-   * @returns {Promise<Array>} List of orders with items
-   */
   async userOrders(userId) { return orderRepo.findByUser(userId); }
 
-  /**
-   * Admin: List all orders across all customers.
-   * @returns {Promise<Array>} List of all orders
-   */
   async allOrders() { return orderRepo.findAll(); }
 
-  /**
-   * Admin: Update fulfillment status of an order and notify user.
-   * @param {string} orderId - Order UUID
-   * @param {string} status - New order status
-   * @returns {Promise<object>} Updated order
-   * @throws {HttpError} If order not found
-   */
   async updateStatus(orderId, status) {
     const order = await orderRepo.findById(orderId);
     if (!order) throw HttpError.notFound('Order not found');
@@ -72,14 +49,6 @@ class OrderService {
     return updated;
   }
 
-  /**
-   * Customer: Cancel a pending order with a reason.
-   * @param {string} userId - Customer UUID
-   * @param {string} orderId - Order UUID
-   * @param {string} [reason] - Cancellation explanation
-   * @returns {Promise<object>} Updated cancelled order
-   * @throws {HttpError} If unauthorized or order not in pending status
-   */
   async cancelOrder(userId, orderId, reason) {
     const order = await orderRepo.findById(orderId);
     if (!order || order.userId !== userId) throw HttpError.notFound('Order not found or unauthorized');
@@ -89,12 +58,6 @@ class OrderService {
     return updated;
   }
 
-  /**
-   * Save Razorpay order record in DB awaiting payment completion.
-   * @param {string} userId - Customer UUID
-   * @param {object} body - Items and amount
-   * @returns {Promise<object>} Created order record
-   */
   async saveRazorpayOrder(userId, body) {
     const { items, amount, address } = body;
     const order = await orderRepo.createOrder({
@@ -106,13 +69,6 @@ class OrderService {
     return order;
   }
 
-  /**
-   * Confirm successful payment on Razorpay order and clear user's cart.
-   * @param {string} orderId - Order UUID
-   * @param {object} paymentDetails - Razorpay transaction signatures
-   * @returns {Promise<object>} Updated order
-   * @throws {HttpError} If order not found
-   */
   async confirmPayment(orderId, paymentDetails) {
     const order = await orderRepo.findById(orderId);
     if (!order) throw HttpError.notFound('Order not found');
