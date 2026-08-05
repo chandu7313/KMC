@@ -15,15 +15,6 @@ const logger = createLogger('auth-service');
 class AuthService {
   // ── Email/Password Registration ──
 
-  /**
-   * Register a new user with email and password, hashing the password and publishing an event.
-   * @param {object} params
-   * @param {string} params.name - Full name of the user
-   * @param {string} params.email - Unique email address
-   * @param {string} params.password - Plaintext password to hash
-   * @returns {Promise<object>} Created user record
-   * @throws {HttpError} If email already exists
-   */
   async register({ name, email, password }) {
     const existing = await userRepository.findByEmail(email);
     if (existing) {
@@ -54,14 +45,6 @@ class AuthService {
 
   // ── Email/Password Login ──
 
-  /**
-   * Authenticate user with email and password.
-   * @param {object} params
-   * @param {string} params.email - User email
-   * @param {string} params.password - Plaintext password
-   * @returns {Promise<object>} Authenticated user record
-   * @throws {HttpError} If credentials do not match
-   */
   async login({ email, password }) {
     const user = await userRepository.findByEmail(email);
     if (!user) {
@@ -85,12 +68,6 @@ class AuthService {
 
   // ── Mobile OTP: Send ──
 
-  /**
-   * Send a 6-digit one-time password via SMS to a phone number.
-   * @param {string} phone - 10-digit mobile number
-   * @returns {Promise<{isNewUser: boolean}>} Result indicating whether user account was newly created
-   * @throws {HttpError} If SMS gateway delivery fails
-   */
   async sendOtp(phone) {
     const otp = otpService.generateOtp();
     const otpExpireAt = Date.now() + 5 * 60 * 1000; // 5 minutes
@@ -130,15 +107,6 @@ class AuthService {
 
   // ── Mobile OTP: Verify ──
 
-  /**
-   * Verify mobile OTP, update user profile name if provided, and mark account verified.
-   * @param {object} params
-   * @param {string} params.phone - 10-digit phone number
-   * @param {string} params.otp - 6-digit OTP string
-   * @param {string} [params.name] - Optional display name
-   * @returns {Promise<object>} Verified user record
-   * @throws {HttpError} If user not found or OTP is invalid/expired
-   */
   async verifyOtp({ phone, otp, name }) {
     const user = await userRepository.findByPhone(phone);
     if (!user) {
@@ -174,12 +142,6 @@ class AuthService {
 
   // ── Email Verification: Send OTP ──
 
-  /**
-   * Generate and dispatch email verification OTP via RabbitMQ event.
-   * @param {string} userId - User identifier
-   * @returns {Promise<{email: string}>} User's email
-   * @throws {HttpError} If user not found or already verified
-   */
   async sendVerifyOtp(userId) {
     const user = await userRepository.findById(userId);
     if (!user) throw HttpError.notFound('User not found');
@@ -205,14 +167,6 @@ class AuthService {
 
   // ── Email Verification: Verify ──
 
-  /**
-   * Validate email verification OTP and mark account as verified.
-   * @param {object} params
-   * @param {string} params.userId - User identifier
-   * @param {string} params.otp - 6-digit verification OTP
-   * @returns {Promise<object>} Updated user record
-   * @throws {HttpError} If user not found or OTP is invalid
-   */
   async verifyEmail({ userId, otp }) {
     const user = await userRepository.findById(userId);
     if (!user) throw HttpError.notFound('User not found');
@@ -233,12 +187,6 @@ class AuthService {
 
   // ── Password Reset: Send OTP ──
 
-  /**
-   * Send password reset OTP to user email and broadcast event.
-   * @param {string} email - Registered user email
-   * @returns {Promise<{email: string}>} User's email
-   * @throws {HttpError} If user account does not exist
-   */
   async sendResetOtp(email) {
     const user = await userRepository.findByEmail(email);
     if (!user) {
@@ -267,15 +215,6 @@ class AuthService {
 
   // ── Password Reset: Verify & Change ──
 
-  /**
-   * Validate password reset OTP and hash new password.
-   * @param {object} params
-   * @param {string} params.email - User email
-   * @param {string} params.otp - Reset OTP
-   * @param {string} params.newPassword - New plaintext password
-   * @returns {Promise<object>} Updated user record
-   * @throws {HttpError} If user not found or OTP invalid
-   */
   async resetPassword({ email, otp, newPassword }) {
     const user = await userRepository.findByEmail(email);
     if (!user) throw HttpError.notFound('User not found');
@@ -303,12 +242,6 @@ class AuthService {
 
   // ── Auto-Login (Dev mode) ──
 
-  /**
-   * Development shortcut to authenticate as any system role.
-   * @param {string} role - Target role (e.g. 'farmer', 'super_admin', 'agri_expert', etc.)
-   * @returns {Promise<object>} Dev user object
-   * @throws {HttpError} If role unknown or dev account not found
-   */
   async autoLogin(role) {
     // All admin roles that live in admin_users table
     const adminRoles = [

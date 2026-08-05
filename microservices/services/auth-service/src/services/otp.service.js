@@ -4,20 +4,10 @@ import env from '../config/env.js';
  * OTP service — generates, sends, and verifies OTPs via SMS.
  */
 class OtpService {
-  /**
-   * Generate a 6-digit OTP.
-   * @returns {string}
-   */
   generateOtp() {
     return String(Math.floor(100000 + Math.random() * 900000));
   }
 
-  /**
-   * Send OTP via Fast2SMS.
-   * @param {string} phone - 10-digit phone number
-   * @param {string} otp - 6-digit OTP
-   * @returns {Promise<{success: boolean, error?: string}>}
-   */
   async sendSmsOtp(phone, otp) {
     if (!env.enableSms) {
       console.log(`[DEV] OTP for ${phone}: ${otp}`);
@@ -46,13 +36,6 @@ class OtpService {
     }
   }
 
-  /**
-   * Validate an OTP against stored values.
-   * @param {string} storedOtp
-   * @param {string} inputOtp
-   * @param {number} expireAt - Timestamp when OTP expires
-   * @returns {{valid: boolean, message?: string}}
-   */
   validateOtp(storedOtp, inputOtp, expireAt) {
     if (!storedOtp || storedOtp === '' || storedOtp !== inputOtp) {
       return { valid: false, message: 'Invalid OTP' };

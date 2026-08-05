@@ -11,14 +11,6 @@ const logger = createLogger('auth-service');
 
 // ── Email/Password ──
 
-/**
- * Register a new user with name, email, and password.
- * @route POST /api/auth/register
- * @param {import('express').Request} req - Express request object containing registration body
- * @param {import('express').Response} res - Express response object
- * @param {import('express').NextFunction} next - Express next middleware function
- * @returns {Promise<import('express').Response>} JSON response with registered user payload
- */
 export const register = async (req, res, next) => {
   try {
     const user = await authService.register(req.body);
@@ -40,14 +32,6 @@ export const register = async (req, res, next) => {
   }
 };
 
-/**
- * Authenticate user credentials and establish session.
- * @route POST /api/auth/login
- * @param {import('express').Request} req - Express request with email and password
- * @param {import('express').Response} res - Express response setting auth cookie
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON success response
- */
 export const login = async (req, res, next) => {
   try {
     const user = await authService.login(req.body);
@@ -61,14 +45,6 @@ export const login = async (req, res, next) => {
   }
 };
 
-/**
- * Terminate user session and clear authentication cookie.
- * @route POST /api/auth/logout
- * @param {import('express').Request} req - Express request with authenticated user
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON success response
- */
 export const logout = async (req, res, next) => {
   try {
     if (req.user?.id) {
@@ -83,14 +59,6 @@ export const logout = async (req, res, next) => {
 
 // ── Mobile OTP ──
 
-/**
- * Generate and send SMS OTP to a mobile phone number.
- * @route POST /api/auth/otp/send
- * @param {import('express').Request} req - Express request with phone number
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON success response
- */
 export const sendOtp = async (req, res, next) => {
   try {
     const result = await authService.sendOtp(req.body.phone);
@@ -100,14 +68,6 @@ export const sendOtp = async (req, res, next) => {
   }
 };
 
-/**
- * Verify SMS OTP and establish user session.
- * @route POST /api/auth/otp/verify
- * @param {import('express').Request} req - Express request with phone and OTP
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON success response
- */
 export const verifyOtp = async (req, res, next) => {
   try {
     const user = await authService.verifyOtp(req.body);
@@ -123,14 +83,6 @@ export const verifyOtp = async (req, res, next) => {
 
 // ── Email Verification ──
 
-/**
- * Send email verification OTP to user's registered email.
- * @route POST /api/auth/verify-email/send
- * @param {import('express').Request} req - Express request with userId
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON success response
- */
 export const sendVerifyOtp = async (req, res, next) => {
   try {
     const result = await authService.sendVerifyOtp(req.body.userId);
@@ -140,14 +92,6 @@ export const sendVerifyOtp = async (req, res, next) => {
   }
 };
 
-/**
- * Verify email using confirmation OTP.
- * @route POST /api/auth/verify-email/confirm
- * @param {import('express').Request} req - Express request with userId and OTP
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON success response
- */
 export const verifyEmail = async (req, res, next) => {
   try {
     await authService.verifyEmail(req.body);
@@ -159,14 +103,6 @@ export const verifyEmail = async (req, res, next) => {
 
 // ── Password Reset ──
 
-/**
- * Send password reset OTP to user email.
- * @route POST /api/auth/password-reset/send
- * @param {import('express').Request} req - Express request with user email
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON success response
- */
 export const sendResetOtp = async (req, res, next) => {
   try {
     await authService.sendResetOtp(req.body.email);
@@ -176,14 +112,6 @@ export const sendResetOtp = async (req, res, next) => {
   }
 };
 
-/**
- * Reset user password after validating OTP.
- * @route POST /api/auth/password-reset/confirm
- * @param {import('express').Request} req - Express request with email, OTP, and newPassword
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON success response
- */
 export const resetPassword = async (req, res, next) => {
   try {
     await authService.resetPassword(req.body);
@@ -195,14 +123,6 @@ export const resetPassword = async (req, res, next) => {
 
 // ── Auth Check ──
 
-/**
- * Verify current session authentication state.
- * @route GET /api/auth/check
- * @param {import('express').Request} req - Authenticated express request
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON response with authenticated user identity
- */
 export const isAuthenticated = async (req, res, next) => {
   try {
     return successResponse(res, { userId: req.user.id, role: req.user.role }, 'Authenticated');
@@ -213,14 +133,6 @@ export const isAuthenticated = async (req, res, next) => {
 
 // ── Auto-Login (Dev Mode Only) ──
 
-/**
- * Development-only bypass authentication for testing specific roles and dashboards.
- * @route POST /api/auth/auto-login
- * @param {import('express').Request} req - Express request with requested role
- * @param {import('express').Response} res - Express response
- * @param {import('express').NextFunction} next - Express error handler
- * @returns {Promise<import('express').Response>} JSON response with user session and target dashboard
- */
 export const autoLogin = async (req, res, next) => {
   try {
     const user = await authService.autoLogin(req.body.role);

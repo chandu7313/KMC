@@ -6,11 +6,6 @@ import sessionRepository from '../repositories/session.repository.js';
  * Token service — handles JWT creation and cookie management.
  */
 class TokenService {
-  /**
-   * Generate access + refresh tokens for a user.
-   * @param {object} user - User object with id and role
-   * @returns {{accessToken: string, refreshToken: string}}
-   */
   generateTokens(user) {
     const payload = { id: user.id, role: user.role || 'user' };
     const accessToken = signAccessToken(payload);
@@ -18,11 +13,6 @@ class TokenService {
     return { accessToken, refreshToken };
   }
 
-  /**
-   * Set the token cookie on the response.
-   * @param {object} res - Express response
-   * @param {string} token - JWT token
-   */
   setTokenCookie(res, token) {
     res.cookie('token', token, {
       httpOnly: true,
@@ -32,10 +22,6 @@ class TokenService {
     });
   }
 
-  /**
-   * Clear the token cookie.
-   * @param {object} res - Express response
-   */
   clearTokenCookie(res) {
     res.clearCookie('token', {
       httpOnly: true,
@@ -44,19 +30,10 @@ class TokenService {
     });
   }
 
-  /**
-   * Store session in Redis.
-   * @param {string} userId
-   * @param {string} token
-   */
   async storeSession(userId, token) {
     await sessionRepository.createSession(userId, token);
   }
 
-  /**
-   * Invalidate a session.
-   * @param {string} userId
-   */
   async invalidateSession(userId) {
     await sessionRepository.deleteSession(userId);
   }
