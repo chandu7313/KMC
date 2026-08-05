@@ -6,7 +6,14 @@ const logger = createLogger('ai-service');
 const MODELS_TO_TRY = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
 
 /**
- * Run Gemini text prompt with model fallback chain.
+ * Run Gemini text prompt with automatic fallback across multiple models.
+ * @param {string} prompt - Instruction or query for Gemini LLM
+ * @param {object} [options={}] - Execution options
+ * @param {boolean} [options.json=false] - Whether to return parsed JSON
+ * @param {string[]} [options.models] - Custom array of models to try in sequence
+ * @param {object} [options.generationConfig] - Additional Gemini generation parameters
+ * @returns {Promise<string|object>} Model response text or parsed JSON object
+ * @throws {Error} If all candidate models in chain fail
  */
 export const generateFromText = async (prompt, options = {}) => {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -47,7 +54,15 @@ export const generateFromText = async (prompt, options = {}) => {
 };
 
 /**
- * Run Gemini vision prompt (image + text) with model fallback chain.
+ * Run Gemini vision prompt with base64 image data and fallback across multiple models.
+ * @param {string} prompt - Vision reasoning prompt / prompt instructions
+ * @param {string} imageBase64 - Raw base64 encoded image string
+ * @param {string} [mimeType='image/jpeg'] - Media type (e.g. image/jpeg, image/png)
+ * @param {object} [options={}] - Execution options
+ * @param {boolean} [options.json=false] - Whether to return parsed JSON
+ * @param {string[]} [options.models] - Sequence of vision-capable models to try
+ * @returns {Promise<string|object>} Multimodal generation output
+ * @throws {Error} If all candidate vision models fail
  */
 export const generateFromImage = async (prompt, imageBase64, mimeType = 'image/jpeg', options = {}) => {
   const apiKey = process.env.GEMINI_API_KEY;

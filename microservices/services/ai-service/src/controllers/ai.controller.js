@@ -5,7 +5,16 @@ import * as plantIdService from '../services/plantid.service.js';
 const logger = createLogger('ai-service');
 
 /**
- * POST /analyze/text — Run text-only Gemini prompt.
+ * AI Service Controller — Handles routing for LLM text analysis, vision reasoning, and crop disease detection.
+ */
+
+/**
+ * Execute text-based prompt inference using Google Gemini with fallback model chain.
+ * @route POST /api/ai/analyze/text
+ * @param {import('express').Request} req - Express request containing { prompt: string, json?: boolean }
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON response with generated text/object
  */
 export const analyzeText = async (req, res, next) => {
   try {
@@ -20,7 +29,12 @@ export const analyzeText = async (req, res, next) => {
 };
 
 /**
- * POST /analyze/image — Run vision Gemini prompt (base64 image).
+ * Execute multimodal vision prompt inference on image data (base64).
+ * @route POST /api/ai/analyze/image
+ * @param {import('express').Request} req - Express request containing { prompt: string, image: string, mimeType?: string, json?: boolean }
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON response with vision analysis
  */
 export const analyzeImage = async (req, res, next) => {
   try {
@@ -35,7 +49,12 @@ export const analyzeImage = async (req, res, next) => {
 };
 
 /**
- * POST /detect/plant — Plant.id disease detection.
+ * Perform specialized plant and disease identification using Plant.id API.
+ * @route POST /api/ai/detect/plant
+ * @param {import('express').Request} req - Express request containing { image: string } (base64)
+ * @param {import('express').Response} res - Express response
+ * @param {import('express').NextFunction} next - Error handler
+ * @returns {Promise<import('express').Response>} JSON response with diagnosis results
  */
 export const detectPlantDisease = async (req, res, next) => {
   try {
